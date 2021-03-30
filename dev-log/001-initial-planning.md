@@ -1,5 +1,9 @@
 # 001 Initial Planning
 
+**Note**: This document is not currently fully up to date with my plans. They have developed beyond what is described here.
+A more full picture can be found [here](001-initial-planning2.md), though that document is also not up to snuff. Eventually
+these documents will be merged here.
+
 At the risk of getting ahead of myself, I've started to think about the concrete differences I'd like to see between my own build and the SAP-1, which is Ben Eater's initial build. Of course, there is a lot I don't know, so this list is likely not all-inclusive, and also might be ill-formed due to misconceptions of core ideas. However, here are the core components I expect to see in my build.
 
 ## Components
@@ -40,23 +44,20 @@ The stack will reside as the first RAM page.
 
 The memory map looks like this:
 
-| Addr | Note                                         |
-| ---- | -------------------------------------------- |
-| 0000 | ROM Begins, Page 0                           |
-| 00FF | Page 0 ends                                  |
-| 0100 | Page 1 begins                                |
-| 01FF | Page 1 ends                                  |
-| 0200 | Page 2 begins                                |
-| .... |                                              |
-| .... |                                              |
-| .... |                                              |
-| 7FFF | Page 127 ends, ROM ends                      |
-| 8000 | Page 128 begins, RAM begins, Start of Stack  |
-| 80FF | Page 128 ends, End of Stack                  |
-| .... |                                              |
-| .... |                                              |
-| .... |                                              |
-| FFFF | Page 255 ends, RAM ends                      | 
+| Addr  | Page | Note                                         |
+| ----- | ---- | -------------------------------------------- |
+| Start of ROM                                                |
+| $0000 | $00  | Page $00 Begins                              |
+| $0100 | $01  | Page $01 begins                              |
+| ....  | .... |                                              |
+| ....  | .... |                                              |
+| ....  | .... |                                              |
+| Start of RAM                                                |
+| $8000 | $80  | RAM begins, Start of Stack (1 page)          |
+| $8100 | $81  | Reserved for ISR 1 (1 page)                  |
+| $8200 | $82  | Reserved for ISR 2 (1 page)                  |
+| $8300 | $83  | Reserved for ISR 3 (1 page)                  |
+| $FFFF | $FF  | End of addressable memory for Bank $00       | 
 
 The CPU will also contain an 8 bit bank register, which may be used to refer to a 65 KiB bank of memory that may not be directly installed on the computer. This may be useful for peripherals which contain their own software. The bank register accomodates 256 possible banks of memory, which each may be 16 bit addressable via MAR H/L. In total, the system will accomodate 2<sup>16</sup> * 2<sup>8</sup> = 16 MiB of memory, 65 KiB of which are mapped as shown above, of course.
 
