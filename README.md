@@ -1,6 +1,6 @@
 # Apple Pie
 
-An 8-bit processor and peripherials from the fundamentals.
+An 8-bit processor and peripherials from first principles.
 
     If you wish to make apple pie from scratch, you must first create the universe.
                                                     -- Carl Sagan
@@ -14,3 +14,5 @@ My project is inspired by Ben Eater's [8 bit breadboard computer](https://eater.
 I'll be updating a dev log with the source files found in `dev-log/`. Here are the most recent posts:
 
 - [001 Initial Planning](dev-log/001-initial-planning.md)
+- [002 Memory Map Planning](dev-log/002-memory-map-planning.md)
+- [003 VGA Planning](dev-log/003-vga-planning.md)

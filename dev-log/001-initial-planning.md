@@ -1,70 +1,70 @@
 # 001 Initial Planning
 
-**Note**: This document is not currently fully up to date with my plans. They have developed beyond what is described here.
-A more full picture can be found [here](001-initial-planning2.md), though that document is also not up to snuff. Eventually
-these documents will be merged here.
+Here is a summary of the specifications I hope to support in the CPU:
 
-At the risk of getting ahead of myself, I've started to think about the concrete differences I'd like to see between my own build and the SAP-1, which is Ben Eater's initial build. Of course, there is a lot I don't know, so this list is likely not all-inclusive, and also might be ill-formed due to misconceptions of core ideas. However, here are the core components I expect to see in my build.
+- 32 KB onboard RAM for program and data use
+- 32 KB onboard RAM for system bootloader and programs
+- 4 8 bit GPRs (A, B, C, D)
+- 2 16 bit ARs (X, Y)
+- 4 8 bit transfer registers (T1, T2)
+- Hardware stack pointer
+- Memory banking to support up to 255 additional banks of 65K memory (up to 16.7M total)
 
-## Components
+Below is a description of the CPU components I currently expect to build, and their control signals.
 
-| Abbr | Name                          | Size   | Notes                                                      |
-| ---- | ----------------------------- | ------ | ---------------------------------------------------------- |
-| CLK  | Clock                         | --     | targeting 2 MHz                                            |
-| BUS  | Data Bus                      | 8 bit  |                                                            |
-| PC   | Program Counter               | 8 bit  | specifies lower 8 bits of next instruction address         |
-| PR   | Page Register                 | 8 bit  | specifies upper 8 bits of next instruction address         |
-| AR   | A Register                    | 8 bit  | ALU input                                                  |
-| BR   | B Register                    | 8 bit  | ALU input                                                  |
-| CR   | C Register                    | 8 bit  | ALU input                                                  |
-| DR   | D Register                    | 8 bit  | ALU input                                                  |
-| XR   | X Register                    | 8 bit  |                                                            |
-| YR   | Y Register                    | 8 bit  |                                                            |
-| ALU  | Arithmetic and Logic Unit     | 8 bit  | support Add/Sub/Mul/Div/AND/XOR                            |    
-| FR   | Flags Register                | 8 bit  | contains ALU flags for conditional jumps, etc              |
-| MARH | Memory Address Register, High | 8 bit  | upper 8 bits of memory address                             |
-| MARL | Memory Address Register, Low  | 8 bit  | lower 8 bits of memory address                             |
-| BR   | Memory Bank Register          | 8 bit  | allows specifying 255 external memory banks of 65K         |
-| RAM  | Random Access Memory          | 32 KiB |                                                            |
-| ROM  | Read-Only Memory              | 32 KiB |                                                            |
-| IR   | Instruction Register          | 8 bit  | op-code to fetch/decode/execute                            |
-| OR   | Operand Register              | 8 bit  | operand to op-code in IR                                   |
-| IC   | Instruction Counter           | 4 bit  |                                                            |
-| CL   | Control Logic                 | --     | EEPROMs for cobinatorial decoding of op-codes to microcode |
+| Abbr      | Name                            | Size   | CF Abbr                                | Control Flags                      | Notes                                                      |
+| -------   | ------------------------------- | ------ | -------------------------------------- | ---------------------------------- | ---------------------------------------------------------- |
+| CLK       | Clock                           | --     | HLT                                    |                                    | targeting 1-3 MHz                                          |
+| DBUS      | Data Bus                        | 8 bit  | --                                     |                                    |                                                            |
+| MBUS      | Memory Address Bus              | 16 bit | --                                     |                                    |                                                            |
+| PC        | Program Counter                 | 8 bit  | CE, J, CO                              | Counter Enable, Jump, Counter Out  | specifies lower 8 bits of next instruction address         |
+| PR        | Page Register                   | 8 bit  | PRO, PRI                               | Register Out/In                    | specifies upper 8 bits of next instruction address         |
+| AR        | A Register                      | 8 bit  | ARO, ARI                               | Register Out/In                    | GPR/ALU input                                              |
+| BR        | B Register                      | 8 bit  | BRO, BRI                               | Register Out/In                    | GPR/ALU input                                              |
+| CR        | C Register                      | 8 bit  | CRO, CRI                               | Register Out/In                    | GPR/ALU input                                              |
+| DR        | D Register                      | 8 bit  | DRO, DRI                               | Register Out/In                    | GPR/ALU input                                              |
+| XR        | X Register                      | 16 bit | XRO, XRI                               | Register Out/In                    |                                                            |
+| YR        | Y Register                      | 16 bit | YRO, YRI                               | Register Out/In                    |                                                            |
+| TR1       | Transfer Register 1             | 16 bit | TR1I, TR1O, TR1LI, TR1LO, TR1HI, TR1HO | TR1 In/Out, TR1 Low/High In/Out    |                                                            |
+| TR2       | Transfer Register 2             | 16 bit | TR2I, TR2O, TR2LI, TR2LO, TR2HI, TR2HO | TR2 In/Out, TR2 Low/High In/Out    |                                                            |
+| ALU       | Arithmetic and Logic Unit       | 8 bit  | EO, SU, XOR, AND                       | ALU Out, Subtract, Logical XOR/AND | support Add/Sub/Mul/Div/AND/XOR                            |
+| FR        | Flags Register                  | 8 bit  | FO                                     | Flags Out                          | contains ALU flags for conditional jumps, etc              |
+| MAR       | Memory Address Register         | 16 bit | MI                                     | MAR In                             | upper 8 bits of memory address                             |
+| IR        | Instruction Register            | 8 bit  | IO, II                                 | IR Out/In                          | op-code to fetch/decode/execute                            |
+| SQ        | Sequencer                       | 4 bit  | --                                     |                                    |                                                            |
+| ID        | Instruction Decoder             | --     | --                                     |                                    | EEPROMs for cobinatorial decoding of op-codes to microcode |
+| Total: 23 |                                 |        | Total: 41                              |                                    |                                                            |
 
-There will be other components, which are not listed here. These include interrupt handling hardware, and potentially additional hardware to support a CPU stack (though, this might just be a renaming of PC/PR). I don't know enough about the required hardware for this functionality to describe as of yet.
+## Instruction Decoding
 
-## Memory Map
+I plan to use 2KB EEPROMs, which have 11 address lines and and 8 data lines, where the address lines serve as inputs and the data lines serve as outputs to some large combinatorial circuit. Because there are 41 control lines, an initial estimate is that 6 EEPROMs will need to be programmed and wired in series to the instruction decoder input. However, as EEPROMS are space and money expensive, some attempts to decrease this value will be made. Because these are discrete control lines, they represent "one-hot" encoded values. This is beneficial, because it means the output of the decoder can be directly used to manage the system control lines. However, at the expense of some additional decoding hardware, some of these control lines can be compacted significantly. One such example of a place where this can be done is with the control lines representing data bus output, as there is no case where multiple componenets will need to output on the data bus in the same instruction cycle. Here are the control signals belonging to this group:
 
-The CPU will use 16 bit addressing via the 8 bit data bus. The upper 8 bits of the address will be specified via the Page Register, and the lower 8 bits of the address will be specified by the Program Counter. The CPU will have 65 KiB onboard to fill this address space. The upper half will be used by the ROM, which will contain the bootloader and other programs. The lower hald will be used by the RAM, which will contain the stack and be usable by running programs and peripherals (ie, it may be used as a frame buffer by a graphics card).
+- PRO
+- CO
+- ARO
+- BRO
+- CRO
+- DRO
+- TR1LO
+- TR1HO
+- TR2LO
+- TR2HO
+- EO
+- FO
+- RO
+- IO
+Total: 14
 
-The memory will be subdivided into 256 pages of 256 bytes each. The page is specified by the PR, and programs can take advantage of this by ensuring that their instructions and data all fall within a single page, so that clock cycles do not need to be used during every instruction to move the PR into the MARH.
+15 values can be represented in binary with 4 bits, where the 15th value represents "all off." This saves 10 output lines, with space for one additional signal. Although additional hardware is required to perform this decoding, it does future proof the CPU. In the event of more control lines being added, using schemes like this help to ensure that fewer control logic EEPROMs will need to be added.
 
-The stack will reside as the first RAM page.
+A similar technique can be used for address bus-outputting flags:
 
-The memory map looks like this:
+- XRO
+- YRO
+- TR1O
+- TR2O
+Total: 4
 
-| Addr  | Page | Note                                         |
-| ----- | ---- | -------------------------------------------- |
-| Start of ROM                                                |
-| $0000 | $00  | Page $00 Begins                              |
-| $0100 | $01  | Page $01 begins                              |
-| ....  | .... |                                              |
-| ....  | .... |                                              |
-| ....  | .... |                                              |
-| Start of RAM                                                |
-| $8000 | $80  | RAM begins, Start of Stack (1 page)          |
-| $8100 | $81  | Reserved for ISR 1 (1 page)                  |
-| $8200 | $82  | Reserved for ISR 2 (1 page)                  |
-| $8300 | $83  | Reserved for ISR 3 (1 page)                  |
-| $FFFF | $FF  | End of addressable memory for Bank $00       | 
+5 values can be represented in binary with 3 bits, where again the 5th value represents "all off." The saves 1 output lines, with space for one additional signal. Other additional patterns are not immediately visible to me. However, after the instruction set and its corresponding microinstruction steps are developed, other mutually exclusive groups of signals can be found. Anyways, with these two reductions alone, 11 data lines are saved, meaning only 30 EEPROM data lines are needed. 4 EEPROMs are needed for this scheme, which saves a significant amount of money and space.
 
-The CPU will also contain an 8 bit bank register, which may be used to refer to a 65 KiB bank of memory that may not be directly installed on the computer. This may be useful for peripherals which contain their own software. The bank register accomodates 256 possible banks of memory, which each may be 16 bit addressable via MAR H/L. In total, the system will accomodate 2<sup>16</sup> * 2<sup>8</sup> = 16 MiB of memory, 65 KiB of which are mapped as shown above, of course.
-
-## Steps Forward
-
-From here, I hope to finish building the SAP-1 digitally via Logisim. From there, I'd like to begin to implement basic support for the 65K of memory described above. After that, I may acquire the Ben Eater 8 bit Breadboard kit, and begin building. At some point after that, I will start to look at the hardware BOM I will need to implement my memory upgrades.
-
-My current Logisim build contains the clock, bus, A and B registers, simplified ALU as designed in the SAP-1, an instruction register, and the beginnings of the initial 16 byte RAM system.
-
-I do look forward to writing some Python for producing the Logisim ROM binaries which will be used in the control logic!
+The bigger issue to resolve is that of the address lines. The op-code, operand, and flags all need to be encoded in 11 bits. Each of these are 8 bit values, so natively we'd need 24 address lines. There are no parallel EEPROMs available with this number of input lines. Individuals on the Ben Eater subreddit have gotten around this by using additional decode logic external to the control word EEPROMS to implement the flages, meaning that the flags are no longer required as EEPROM inputs. This reduces the required number of address lines to 16, which is far more reasonable, but still puts this on the upper end of address line availability for parallel EEPROMs. More work will need to be done to address this in the future.
