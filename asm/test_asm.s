@@ -1,0 +1,6 @@
+LDA #4
+LDA #5
+STA $ffff
+NOP
+NOP
+LDA #8
