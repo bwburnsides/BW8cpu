@@ -1,5 +1,5 @@
-""" This script is used to convert an image with the appropriate graphics mode resolution from square pixels,
-    to 5x4 rectangular pixels in a 640x480 canvas.
+""" This script is used to convert an image with the appropriate graphics mode
+    resolution from square pixels, to 5x4 rectangular pixels in a 640x480 canvas.
 """
 
 from PIL import Image
@@ -8,7 +8,7 @@ resolution = (640, 480)
 final_pixel_size = (5, 4)
 
 final_image = Image.new("RGB", resolution, color=(0, 0, 0))
-finch_image = Image.open("starry_256_128x.png")
+finch_image = Image.open("roof-korean.png")
 
 finch_res = finch_image.size
 
@@ -21,4 +21,4 @@ for j in range(finch_res[1]):  # for every row
             final_image, im, (i * final_pixel_size[0], j * final_pixel_size[1])
         )
 
-final_image.save("starry_256_128x_5x4.png")
+final_image.save("roof-korean_5x4.png")
