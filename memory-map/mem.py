@@ -1,6 +1,6 @@
-mem_groups = [[], [], [], [], []]
-
-sizes = [39.75, 0.25, 8, 8, 8]
+names = ["Fixed ROM", "Banked ROM", "Banked RAM", "Fixed RAM", "IO"]
+sizes = [8, 8, 8, 39, 1]
+mem_groups = [[] for _ in sizes]
 
 curr_group = 0
 for addr in range(2 ** 16):
@@ -8,38 +8,24 @@ for addr in range(2 ** 16):
         curr_group += 1
     mem_groups[curr_group].append(addr)
 
-low_ram, io, bank1, bank2, fixed_rom = mem_groups
+print(
+    "{:<13}   {:<}   {:<}   {:<}               {:<}".format(
+        "Name", "Hex Low", "Hex High", "Bin Low", "Bin High"
+    )
+)
+for name, mem in zip(names, mem_groups):
+    print(
+        "{name:<13}   ${low:04x}     ${high:04x}      #{lowb:016b}     #{highb:016b}".format(
+            name=name, low=mem[0], high=mem[-1], lowb=mem[0], highb=mem[-1]
+        )
+    )
 
-print(bin(low_ram[0]))
-print(bin(low_ram[-1]))
+fbl = int("1000000000000000", base=2)
+fbh = int("1011111111111111", base=2)
+
 print()
-
-print(bin(io[0]))
-print(bin(io[-1]))
-print()
-
-print(bin(bank1[0]))
-print(bin(bank1[-1]))
-print()
-
-print(bin(bank2[0]))
-print(bin(bank2[-1]))
-print()
-
-print(bin(fixed_rom[0]))
-print(bin(fixed_rom[-1]))
-print()
-print()
-
-frame_buffer = []
-for addr in reversed(low_ram):
-    frame_buffer.append(addr)
-    if len(frame_buffer) == (2 ** 14):
-        break
-
-print(len(low_ram) / 1024)
-print(len(frame_buffer) / 1024)
-
-frame_buffer = list(reversed(frame_buffer))
-print(bin(frame_buffer[0]))
-print(bin(frame_buffer[-1]))
+print(
+    "{name:<13}   ${low:04x}     ${high:04x}      #{lowb:016b}     #{highb:016b}".format(
+        name="Frame Buffer", low=fbl, high=fbh, lowb=fbl, highb=fbh
+    )
+)
