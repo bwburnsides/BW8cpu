@@ -16,11 +16,3 @@ Ultimately, the programming model is similar to that of the [Motorola 6809](http
 ## Architecture Overview
 
 ![architecture diagram of cpu](docs/arch_diagram.png)
-
-## Dev Log
-
-I'll be updating a dev log with the source files found in `dev-log/`. Here are the most recent posts:
-
-- [001 Initial Planning](dev-log/001-initial-planning.md)
-- [002 Memory Map Planning](dev-log/002-memory-map-planning.md)
-- [003 VGA Planning](dev-log/003-vga-planning.md)
