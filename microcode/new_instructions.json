@@ -1,0 +1,117 @@
+{
+    "nop": {
+        "desc": "No operation",
+        "modes": {
+            "inherent": {
+                "asm-ex": "nop"
+            }
+        }
+    },
+    "break": {
+        "desc": "Break out of free-run",
+        "modes": {
+            "inherent": {
+                "asm-ex": "break"
+            }
+        }
+    },
+    "ext": {
+        "desc": "Toggle instruction set",
+        "modes": {
+            "inherent": {
+                "asm-ex": "ext"
+            }
+        }
+    },
+    "wai": {
+        "desc": "Wait until interrupt",
+        "modes": {
+            "inherent": {
+                "asm-ex": "wai"
+            }
+        }
+    },
+    "clc": {
+        "desc": "Clear Carry Flag",
+        "modes": {
+            "inherent": {
+                "asm-ex": "clc"
+            }
+        }
+    },
+    "cli": {
+        "desc": "Clear Interrupt Inhibit Flag",
+        "modes": {
+            "inherent": {
+                "asm-ex": "cli"
+            }
+        }
+    },
+    "clv": {
+        "desc": "Clear Overflow Flag",
+        "modes": {
+            "inherent": {
+                "asm-ex": "clv"
+            }
+        }
+    },
+    "sec": {
+        "desc": "Set Carry Flag",
+        "modes": {
+            "inherent": {
+                "asm-ex": "sec"
+            }
+        }
+    },
+    "sei": {
+        "desc": "Set Interrupt Inhibit Flag",
+        "modes": {
+            "inherent": {
+                "asm-ex": "sei"
+            }
+        }
+    },
+    "mov": {
+        "desc": "Move register content to other register",
+        "modes": {
+            "implied8": {
+                "asm-ex": "mov reg8 reg8",
+                "bytes": 1,
+                "operand_ct": 2,
+                "repeat_operands": false,
+                "operands": [["A", "B", "C", "D", "SR", "DP"], ["A", "B", "C", "D", "SR", "DP"]]
+            },
+            "implied16": {
+                "asm-ex": "mov reg16 reg16",
+                "bytes": 1,
+                "operand_ct": 2,
+                "repeat_operands": false,
+                "operands": [["X", "Y", "SP", "PC", "E"], ["X", "Y", "SP", "PC", "E"]]
+            }
+        }
+    },
+    "load": {},
+    "store": {},
+    "push": {},
+    "pop": {},
+    "jmp": {},
+    "jsr": {},
+    "rts": {},
+    "rti": {},
+    "inc": {},
+    "dec": {},
+    "add": {},
+    "adc": {},
+    "sub": {},
+    "sbb": {},
+    "neg": {},
+    "not": {},
+    "and": {},
+    "or": {},
+    "xor": {},
+    "shr": {},
+    "src": {},
+    "asr": {},
+    "cmp": {},
+    "tst": {},
+}
