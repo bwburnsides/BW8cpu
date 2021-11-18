@@ -24,20 +24,15 @@ class Ctrl(IntFlag):
     # DBUS ASSERT ALIASES
     ###################################
     DBUS_ASSERT_MEM = DBUS_ASSERT_00
-    DBUS_ASSERT_A = DBUS_ASSERT_01
-    DBUS_ASSERT_B = DBUS_ASSERT_02
-    DBUS_ASSERT_C = DBUS_ASSERT_03
-    DBUS_ASSERT_D = DBUS_ASSERT_04
-    DBUS_ASSERT_ALU = DBUS_ASSERT_05
+    DBUS_ASSERT_ALU = DBUS_ASSERT_01
+    DBUS_ASSERT_A = DBUS_ASSERT_02
+    DBUS_ASSERT_B = DBUS_ASSERT_03
+    DBUS_ASSERT_C = DBUS_ASSERT_04
+    DBUS_ASSERT_D = DBUS_ASSERT_05
     DBUS_ASSERT_SR = DBUS_ASSERT_06
-    DBUS_ASSERT_SP = DBUS_ASSERT_07
-    DBUS_ASSERT_CONST = DBUS_ASSERT_08
-    DBUS_ASSERT_XL = DBUS_ASSERT_09
-    DBUS_ASSERT_XH = DBUS_ASSERT_10
-    DBUS_ASSERT_YL = DBUS_ASSERT_11
-    DBUS_ASSERT_YH = DBUS_ASSERT_12
-    DBUS_ASSERT_PCL = DBUS_ASSERT_13
-    DBUS_ASSERT_PCH = DBUS_ASSERT_14
+    DBUS_ASSERT_DPH = DBUS_ASSERT_07
+    DBUS_ASSERT_DPL = DBUS_ASSERT_08
+    DBUS_ASSERT_TEMP = DBUS_ASSERT_09
     ###################################
 
     # 4 bits to specify DBUS Loads = 16 devices
@@ -60,17 +55,17 @@ class Ctrl(IntFlag):
 
     # DBUS LOAD ALIASES
     ###############################
-    DBUS_LOAD_NULL = DBUS_LOAD_00
-    DBUS_LOAD_A = DBUS_LOAD_01
-    DBUS_LOAD_B = DBUS_LOAD_02
-    DBUS_LOAD_C = DBUS_LOAD_03
-    DBUS_LOAD_D = DBUS_LOAD_04
-    DBUS_LOAD_SR = DBUS_LOAD_05
-    DBUS_LOAD_MEM = DBUS_LOAD_06
-    DBUS_LOAD_CONST = DBUS_LOAD_07
-    DBUS_LOAD_IR = DBUS_LOAD_08
-    DBUS_LOAD_SP = DBUS_LOAD_09
-    DBUS_LOAD_TEMP = DBUS_LOAD_10
+    DBUS_LOAD_MEM = DBUS_LOAD_00
+    DBUS_LOAD_IR = DBUS_LOAD_01
+    DBUS_LOAD_A = DBUS_LOAD_02
+    DBUS_LOAD_B = DBUS_LOAD_03
+    DBUS_LOAD_C = DBUS_LOAD_04
+    DBUS_LOAD_D = DBUS_LOAD_05
+    DBUS_LOAD_SR = DBUS_LOAD_06
+    DBUS_LOAD_DPH = DBUS_LOAD_07
+    DBUS_LOAD_DPL = DBUS_LOAD_08
+    DBUS_LOAD_TEMP = DBUS_LOAD_09
+    DBUS_LOAD_NULL = DBUS_LOAD_10
     ################################
 
     # 5 bits to specify ALU Operation = 32 operations
@@ -181,27 +176,31 @@ class Ctrl(IntFlag):
     XFER_ASSERT_A_B = XFER_ASSERT_01
     XFER_ASSERT_A_C = XFER_ASSERT_02
     XFER_ASSERT_A_D = XFER_ASSERT_03
-    XFER_ASSERT_A_SPL = XFER_ASSERT_04
-    XFER_ASSERT_A_CONST = XFER_ASSERT_05
+    XFER_ASSERT_A_DPL = XFER_ASSERT_04
+    XFER_ASSERT_A_TEMP = XFER_ASSERT_05
+
     XFER_ASSERT_B_A = XFER_ASSERT_06
     XFER_ASSERT_B_B = XFER_ASSERT_07
     XFER_ASSERT_B_C = XFER_ASSERT_08
     XFER_ASSERT_B_D = XFER_ASSERT_09
-    XFER_ASSERT_B_SPL = XFER_ASSERT_10
-    XFER_ASSERT_B_CONST = XFER_ASSERT_11
+    XFER_ASSERT_B_DPL = XFER_ASSERT_10
+    XFER_ASSERT_B_TEMP = XFER_ASSERT_11
+
     XFER_ASSERT_C_A = XFER_ASSERT_12
     XFER_ASSERT_C_B = XFER_ASSERT_13
     XFER_ASSERT_C_C = XFER_ASSERT_14
     XFER_ASSERT_C_D = XFER_ASSERT_15
-    XFER_ASSERT_C_SPL = XFER_ASSERT_16
-    XFER_ASSERT_C_CONST = XFER_ASSERT_17
+    XFER_ASSERT_C_DPL = XFER_ASSERT_16
+    XFER_ASSERT_C_TEMP = XFER_ASSERT_17
+
     XFER_ASSERT_D_A = XFER_ASSERT_18
     XFER_ASSERT_D_B = XFER_ASSERT_19
     XFER_ASSERT_D_C = XFER_ASSERT_20
     XFER_ASSERT_D_D = XFER_ASSERT_21
-    XFER_ASSERT_D_SPL = XFER_ASSERT_22
-    XFER_ASSERT_D_CONST = XFER_ASSERT_23
-    XFER_ASSERT_CONST_TEMP = XFER_ASSERT_24
+    XFER_ASSERT_D_DPL = XFER_ASSERT_22
+    XFER_ASSERT_D_TEMP = XFER_ASSERT_23
+
+    XFER_ASSERT_E = XFER_ASSERT_24
     XFER_ASSERT_SP = XFER_ASSERT_25
     XFER_ASSERT_ISR = XFER_ASSERT_26
     XFER_ASSERT_RST = XFER_ASSERT_27
@@ -210,11 +209,15 @@ class Ctrl(IntFlag):
     XFER_ASSERT_PC = XFER_ASSERT_30
     ###################################
 
-    # 2 bits to specify Transfer Bus Loads = 4 devices
+    # 3 bits to specify Transfer Bus Loads = 8 devices
     XFER_LOAD_00 = 0 << 18
     XFER_LOAD_01 = 1 << 18
     XFER_LOAD_02 = 2 << 18
     XFER_LOAD_03 = 3 << 18
+    XFER_LOAD_04 = 4 << 18
+    XFER_LOAD_05 = 5 << 18
+    XFER_LOAD_06 = 6 << 18
+    XFER_LOAD_07 = 7 << 18
 
     # XFER Load Aliases
     #########################
@@ -222,17 +225,19 @@ class Ctrl(IntFlag):
     XFER_LOAD_PC = XFER_LOAD_01
     XFER_LOAD_X = XFER_LOAD_02
     XFER_LOAD_Y = XFER_LOAD_03
+    XFER_LOAD_SP = XFER_LOAD_04
+    XFER_LOAD_E = XFER_LOAD_05
     #########################
 
     # 3 bits to specify Addr Bus Assertions = 8 devices
-    ADDR_ASSERT_00 = 0 << 20
-    ADDR_ASSERT_01 = 1 << 20
-    ADDR_ASSERT_02 = 2 << 20
-    ADDR_ASSERT_03 = 3 << 20
-    ADDR_ASSERT_04 = 4 << 20
-    ADDR_ASSERT_05 = 5 << 20
-    ADDR_ASSERT_06 = 6 << 20
-    ADDR_ASSERT_07 = 7 << 20
+    ADDR_ASSERT_00 = 0 << 21
+    ADDR_ASSERT_01 = 1 << 21
+    ADDR_ASSERT_02 = 2 << 21
+    ADDR_ASSERT_03 = 3 << 21
+    ADDR_ASSERT_04 = 4 << 21
+    ADDR_ASSERT_05 = 5 << 21
+    ADDR_ASSERT_06 = 6 << 21
+    ADDR_ASSERT_07 = 7 << 21
 
     # Addr Assert Aliases
     #########################
@@ -240,19 +245,19 @@ class Ctrl(IntFlag):
     ADDR_ASSERT_X = ADDR_ASSERT_01
     ADDR_ASSERT_Y = ADDR_ASSERT_02
     ADDR_ASSERT_SP = ADDR_ASSERT_03
-    ADDR_ASSERT_ZPG = ADDR_ASSERT_04
-    ADDR_ASSERT_CONST_TEMP = ADDR_ASSERT_05
+    ADDR_ASSERT_DP = ADDR_ASSERT_04
+    ADDR_ASSERT_E = ADDR_ASSERT_05
     #########################
 
     # 3 bits to specify Counter Increments = 8 devices
-    COUNT_INC_00 = 0 << 23
-    COUNT_INC_01 = 1 << 23
-    COUNT_INC_02 = 2 << 23
-    COUNT_INC_03 = 3 << 23
-    COUNT_INC_04 = 4 << 23
-    COUNT_INC_05 = 5 << 23
-    COUNT_INC_06 = 6 << 23
-    COUNT_INC_07 = 7 << 23
+    COUNT_INC_00 = 0 << 24
+    COUNT_INC_01 = 1 << 24
+    COUNT_INC_02 = 2 << 24
+    COUNT_INC_03 = 3 << 24
+    COUNT_INC_04 = 4 << 24
+    COUNT_INC_05 = 5 << 24
+    COUNT_INC_06 = 6 << 24
+    COUNT_INC_07 = 7 << 24
 
     # Counter Inc Aliases
     ########################
@@ -264,10 +269,10 @@ class Ctrl(IntFlag):
     ########################
 
     # 2 bits to specify Counter Decrements = 4 devices
-    COUNT_DEC_00 = 0 << 26
-    COUNT_DEC_01 = 1 << 26
-    COUNT_DEC_02 = 2 << 26
-    COUNT_DEC_03 = 3 << 26
+    COUNT_DEC_00 = 0 << 27
+    COUNT_DEC_01 = 1 << 27
+    COUNT_DEC_02 = 2 << 27
+    COUNT_DEC_03 = 3 << 27
 
     # Counter Dec Aliases
     ##############################
@@ -277,8 +282,21 @@ class Ctrl(IntFlag):
     COUNT_DEC_Y = COUNT_DEC_03
     ##############################
 
-    # Single bit control lines
-    EXTENDED_OP_FLIP = 1 << 28
-    RESET_USTEP = 1 << 29
-    CLEAR_RESET = 1 << 30
-    BREAK = 1 << 31
+    # CPU Control Encodings (3 bits = 8 states)
+    CPU_CTRL_00 = 0 << 29
+    CPU_CTRL_01 = 1 << 29
+    CPU_CTRL_02 = 2 << 29
+    CPU_CTRL_03 = 3 << 29
+    CPU_CTRL_04 = 4 << 29
+    CPU_CTRL_05 = 5 << 29
+    CPU_CTRL_06 = 6 << 29
+    CPU_CTRL_07 = 7 << 29
+
+    # CPU Control Aliases
+    ##############################
+    ##############################
+
+    # EXTENDED_OP_FLIP = 1 << 29
+    # RESET_USTEP = 1 << 30
+    # CLEAR_RESET = 1 << 31
+    # BREAK = 1 << 32
