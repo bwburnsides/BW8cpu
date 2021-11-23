@@ -1,0 +1,3 @@
+# 📺 VGA
+
+The premier BW8cpu peripheral is the VGA video card. This peripheral is similar to the NES's PPU. It runs in a reduced VGA 640x480 mode, producing an output of 320x240 pixels. Although a portion of the MMIO's 256 byte page will be allocated to the video card, the frame buffer will be accessible as one of the 16 KB banks in the top 16 KB of the address space. The card uses a tile and sprite system with 8x8 resolution. This 16 KB region allows for the background and sprite tables to be edited and accessed with the full power of the ISA's complex addressing modes. With 8x8 tile resolution, the VGA card will be capable of displaying 40 columns by 30 rows of text.
