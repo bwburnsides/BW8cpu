@@ -1,12 +1,10 @@
 # 👾 BW8cpu
 
-The BW8cpu is a homemade CPU built with discrete TTL logic chips on custom designed PCBs. It has a target clock rate of approximately 6 MHz, and is comparable to the Motorola 6809, and more specifically the Hitachi 6309. A larger computer system is built around the CPU in the form a full peripheral suite that allows the BW8cpu to perform as an integrated computer similar to the Commodore 64 and NES. From a hardware perspective, the BW8cpu exceeds these systems in capability and usability in most regards. Its my hope that the system will eventually exceed its predecessors from a software perspective as well.
+The BW8cpu is a homemade CPU built with discrete TTL logic chips on custom PCBs. It has a target clock rate of approximately 6 MHz, and is comparable to the Motorola 6809, and more specifically the Hitachi 6309. A larger computer system is built around the CPU in the form of a full peripheral suite that allows the BW8cpu to function as a fully capable computer system similar to the Commodore 64, Apple II, and NES. From a hardware perspective, the BW8cpu exceeds these systems in capability and usability in many regards. Its my hope that the system will eventually exceed its predecessors from a software perspective as well.
 
-The project is originally inspired by Ben Eater's [8-bit breadboard CPU](https://eater.net/8bit) and his [breadboard MOS 6502 computer](https://eater.net/6502). However, ultimately the micro-architecture takes more cues from James Sharman's [8-bit pipelined CPU](https://www.youtube.com/watch?v=3iHag4k4yEg&list=PLFhc0MFC8MiCDOh3cGFji3qQfXziB9yOw). This project would not be possible without the support of many individuals present on James Sharman's Discord server, notably [rj45](https://github.com/rj45/rj32), Quandary, Artentus, and [Louis Jewett](https://www.youtube.com/channel/UCsxBT-Jh5pMDU-uEN_EUXtg/featured).
+The project is originally inspired by Ben Eater's [8-bit breadboard CPU](https://eater.net/8bit) and his [breadboard MOS 6502 computer](https://eater.net/6502). However, ultimately the micro-architecture takes more cues from James Sharman's [8-bit pipelined CPU](https://www.youtube.com/watch?v=3iHag4k4yEg&list=PLFhc0MFC8MiCDOh3cGFji3qQfXziB9yOw). This project would not be possible without the support of many individuals present on James' Discord server, notably [rj45](https://github.com/rj45/rj32), Quandary, Artentus, and [Louis Jewett](https://www.youtube.com/channel/UCsxBT-Jh5pMDU-uEN_EUXtg/featured).
 
 This project is extremely ambitious and long running. This repository will maintain documentation and descriptions of the existent and planned features, as well as supporting schematics and source code files.
-
---- 
 
 ## Features
 
@@ -22,7 +20,6 @@ This project is extremely ambitious and long running. This repository will maint
 - Partially configurable hardware memory map
 - Writable Control Store
 
----
 ## Architecture Overview
 
 ![architecture diagram of BW8cpu](docs/assets/arch_diagram.png)
@@ -31,8 +28,6 @@ This project is extremely ambitious and long running. This repository will maint
 - Vertical microcode (heavily encoded) with 32-bit Control Bus
 - Direct to address bus assertions without MAR
 - No instruction pipelining - up to 8 clocks / instruction
-
----
 
 ## Expansion & Peripherals
 
@@ -51,8 +46,6 @@ This project is extremely ambitious and long running. This repository will maint
     - SPI Controller for SD card-based persistent storage
     - RS-232 UART networking interface
 
----
-
 ## Tool Chain
 
 - Simulation with [Digital](https://github.com/hneemann/Digital)
@@ -62,8 +55,6 @@ This project is extremely ambitious and long running. This repository will maint
 - Microcode development with customasm
 - High level programming with [MHL](https://github.com/Artentus/MHL)
 
-
----
 
 ## Explore
 
