@@ -1,6 +1,8 @@
 # 👾 BW8cpu
 
-The BW8cpu is a homemade CPU built with discrete TTL logic chips on custom PCBs. It has a target clock rate of approximately 6 MHz, and is comparable to the Motorola 6809, and more specifically the Hitachi 6309. A larger computer system is built around the CPU in the form of a full peripheral suite that allows the BW8cpu to function as a fully capable computer system similar to the Commodore 64, Apple II, and NES. From a hardware perspective, the BW8cpu exceeds these systems in capability and usability in many regards. Its my hope that the system will eventually exceed its predecessors from a software perspective as well.
+The BW8cpu is a homemade CPU built with discrete TTL logic chips on custom PCBs. It has a target clock rate of approximately 6 MHz, and is comparable to the Motorola 6809, and more specifically the Hitachi 6309, with its dual accumulators and additional dual general purpose registers.
+
+A larger computer system is built around the CPU in the form of a full peripheral suite that allows the BW8cpu to function as a machine similar to the Commodore 64, Apple II, or NES. From a hardware perspective, the BW8cpu exceeds these systems in capability and usability in many regards. Its my hope that the system will eventually exceed its predecessors from a software perspective as well.
 
 The project is originally inspired by Ben Eater's [8-bit breadboard CPU](https://eater.net/8bit) and his [breadboard MOS 6502 computer](https://eater.net/6502). However, ultimately the micro-architecture takes more cues from James Sharman's [8-bit pipelined CPU](https://www.youtube.com/watch?v=3iHag4k4yEg&list=PLFhc0MFC8MiCDOh3cGFji3qQfXziB9yOw). This project would not be possible without the support of many individuals present on James' Discord server, notably [rj45](https://github.com/rj45/rj32), Quandary, Artentus, and [Louis Jewett](https://www.youtube.com/channel/UCsxBT-Jh5pMDU-uEN_EUXtg/featured).
 
