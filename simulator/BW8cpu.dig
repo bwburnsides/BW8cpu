@@ -426,7 +426,7 @@
           <string>Memory Bridge</string>
         </entry>
       </elementAttributes>
-      <pos x="-8260" y="-520"/>
+      <pos x="-7780" y="-300"/>
     </visualElement>
     <visualElement>
       <elementName>Tunnel</elementName>
@@ -440,7 +440,7 @@
           <string>mem-dbus_l</string>
         </entry>
       </elementAttributes>
-      <pos x="-8280" y="-500"/>
+      <pos x="-7800" y="-280"/>
     </visualElement>
     <visualElement>
       <elementName>Tunnel</elementName>
@@ -454,7 +454,7 @@
           <string>mem-dbus_a</string>
         </entry>
       </elementAttributes>
-      <pos x="-8280" y="-520"/>
+      <pos x="-7800" y="-300"/>
     </visualElement>
     <visualElement>
       <elementName>Tunnel</elementName>
@@ -638,7 +638,7 @@
           <string>dbus</string>
         </entry>
       </elementAttributes>
-      <pos x="-8280" y="-480"/>
+      <pos x="-7800" y="-260"/>
     </visualElement>
     <visualElement>
       <elementName>Tunnel</elementName>
@@ -652,7 +652,7 @@
           <string>mbus</string>
         </entry>
       </elementAttributes>
-      <pos x="-8280" y="-460"/>
+      <pos x="-7800" y="-240"/>
     </visualElement>
     <visualElement>
       <elementName>Tunnel</elementName>
@@ -922,6 +922,16 @@
       </elementAttributes>
       <pos x="-7780" y="-900"/>
     </visualElement>
+    <visualElement>
+      <elementName>alu.dig</elementName>
+      <elementAttributes/>
+      <pos x="-7780" y="-1460"/>
+    </visualElement>
+    <visualElement>
+      <elementName>temp_register2.dig</elementName>
+      <elementAttributes/>
+      <pos x="-7320" y="-300"/>
+    </visualElement>
   </visualElements>
   <wires>
     <wire>
@@ -953,8 +963,8 @@
       <p2 x="-7540" y="-580"/>
     </wire>
     <wire>
-      <p1 x="-8280" y="-520"/>
-      <p2 x="-8260" y="-520"/>
+      <p1 x="-7800" y="-260"/>
+      <p2 x="-7780" y="-260"/>
     </wire>
     <wire>
       <p1 x="-7340" y="-520"/>
@@ -975,10 +985,6 @@
     <wire>
       <p1 x="-6880" y="-1420"/>
       <p2 x="-6860" y="-1420"/>
-    </wire>
-    <wire>
-      <p1 x="-8280" y="-460"/>
-      <p2 x="-8260" y="-460"/>
     </wire>
     <wire>
       <p1 x="-7340" y="-460"/>
@@ -1029,6 +1035,10 @@
       <p2 x="-6540" y="-920"/>
     </wire>
     <wire>
+      <p1 x="-7800" y="-280"/>
+      <p2 x="-7780" y="-280"/>
+    </wire>
+    <wire>
       <p1 x="-7800" y="-1180"/>
       <p2 x="-7780" y="-1180"/>
     </wire>
@@ -1055,10 +1065,6 @@
     <wire>
       <p1 x="-7340" y="-480"/>
       <p2 x="-7320" y="-480"/>
-    </wire>
-    <wire>
-      <p1 x="-8280" y="-480"/>
-      <p2 x="-8260" y="-480"/>
     </wire>
     <wire>
       <p1 x="-6560" y="-1440"/>
@@ -1089,12 +1095,20 @@
       <p2 x="-6540" y="-1000"/>
     </wire>
     <wire>
+      <p1 x="-7800" y="-300"/>
+      <p2 x="-7780" y="-300"/>
+    </wire>
+    <wire>
       <p1 x="-6560" y="-1260"/>
       <p2 x="-6540" y="-1260"/>
     </wire>
     <wire>
       <p1 x="-6560" y="-940"/>
       <p2 x="-6540" y="-940"/>
+    </wire>
+    <wire>
+      <p1 x="-7800" y="-240"/>
+      <p2 x="-7780" y="-240"/>
     </wire>
     <wire>
       <p1 x="-7800" y="-1200"/>
@@ -1135,10 +1149,6 @@
     <wire>
       <p1 x="-7800" y="-500"/>
       <p2 x="-7780" y="-500"/>
-    </wire>
-    <wire>
-      <p1 x="-8280" y="-500"/>
-      <p2 x="-8260" y="-500"/>
     </wire>
     <wire>
       <p1 x="-7800" y="-1080"/>

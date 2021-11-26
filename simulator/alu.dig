@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<circuit>
+  <version>1</version>
+  <attributes>
+    <entry>
+      <string>Width</string>
+      <int>34</int>
+    </entry>
+  </attributes>
+  <visualElements>
+    <visualElement>
+      <elementName>alu_shift_unit.dig</elementName>
+      <elementAttributes/>
+      <pos x="180" y="400"/>
+    </visualElement>
+    <visualElement>
+      <elementName>alu_logic_unit.dig</elementName>
+      <elementAttributes/>
+      <pos x="740" y="400"/>
+    </visualElement>
+    <visualElement>
+      <elementName>alu_arithmetic_unit.dig</elementName>
+      <elementAttributes/>
+      <pos x="460" y="200"/>
+    </visualElement>
+    <visualElement>
+      <elementName>In</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>alu-op</string>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>5</int>
+        </entry>
+      </elementAttributes>
+      <pos x="200" y="180"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>NetName</string>
+          <string>alu-op</string>
+        </entry>
+      </elementAttributes>
+      <pos x="220" y="180"/>
+    </visualElement>
+  </visualElements>
+  <wires>
+    <wire>
+      <p1 x="200" y="180"/>
+      <p2 x="220" y="180"/>
+    </wire>
+  </wires>
+  <measurementOrdering/>
+</circuit>

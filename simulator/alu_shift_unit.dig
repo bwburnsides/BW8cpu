@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <circuit>
   <version>1</version>
-  <attributes/>
+  <attributes>
+    <entry>
+      <string>Width</string>
+      <int>9</int>
+    </entry>
+  </attributes>
   <visualElements>
     <visualElement>
       <elementName>74153.dig</elementName>
@@ -440,12 +445,12 @@
           <string>shift-func_sel</string>
         </entry>
         <entry>
-          <string>intFormat</string>
-          <intFormat>bin</intFormat>
-        </entry>
-        <entry>
           <string>Bits</string>
           <int>3</int>
+        </entry>
+        <entry>
+          <string>intFormat</string>
+          <intFormat>bin</intFormat>
         </entry>
       </elementAttributes>
       <pos x="20" y="300"/>
@@ -458,12 +463,12 @@
           <string>lhs</string>
         </entry>
         <entry>
-          <string>intFormat</string>
-          <intFormat>bin</intFormat>
-        </entry>
-        <entry>
           <string>Bits</string>
           <int>8</int>
+        </entry>
+        <entry>
+          <string>intFormat</string>
+          <intFormat>bin</intFormat>
         </entry>
       </elementAttributes>
       <pos x="20" y="400"/>
@@ -570,12 +575,12 @@
           <string>Q</string>
         </entry>
         <entry>
-          <string>intFormat</string>
-          <intFormat>bin</intFormat>
-        </entry>
-        <entry>
           <string>Bits</string>
           <int>8</int>
+        </entry>
+        <entry>
+          <string>intFormat</string>
+          <intFormat>bin</intFormat>
         </entry>
       </elementAttributes>
       <pos x="300" y="220"/>
@@ -826,12 +831,12 @@
       <elementName>74157.dig</elementName>
       <elementAttributes>
         <entry>
-          <string>Label</string>
-          <string>LSR Carry in Sel</string>
-        </entry>
-        <entry>
           <string>shapeType</string>
           <shapeType>SIMPLE</shapeType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>LSR Carry in Sel</string>
         </entry>
       </elementAttributes>
       <pos x="500" y="340"/>
