@@ -24,7 +24,8 @@ DBUS_ASSERT_DP  = 6 << 0
 DBUS_ASSERT_T1  = 7 << 0
 DBUS_ASSERT_T2  = 8 << 0
 DBUS_ASSERT_MEM = 9 << 0
-; Room for 6 more DBUS Asserts
+DBUS_ASSERT_DPI = 10 << 0
+; Room for 5 more DBUS Asserts
 
 ; 4 bits for DBUS Load
 DBUS_LOAD_NULL = 0 << 4
@@ -112,7 +113,8 @@ XFER_ASSERT_X    = 26 << 13
 XFER_ASSERT_Y    = 27 << 13
 XFER_ASSERT_ISR  = 28 << 13
 XFER_ASSERT_RST  = 29 << 13
-; Room for 2 more XFER Assert
+XFER_ASSERT_SPI  = 30 << 13
+; Room for 1 more XFER Assert
 
 ; 3 bits for XFER Load
 XFER_LOAD_ALU = 0 << 18
