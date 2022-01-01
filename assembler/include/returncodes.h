@@ -1,3 +1,0 @@
-#define GOOD_EXIT 0
-#define NO_FILENAME_SUPPLIED 1
-#define BAD_FILE_OPEN 2

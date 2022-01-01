@@ -1,6 +1,0 @@
-#define READ "r"
-#define WRITE "w"
-#define APPEND "a"
-#define READ_BIN "rb"
-#define WRITE_BIN "wb"
-#define APPEND_BIN "ab"

@@ -14,18 +14,24 @@ struct BW8cpu {
     c: u8,
     d: u8,
 
+    // Implementation
     dp: u8,
-    temp1: u8,
-    temp2: u8,
+    t1: u8,
+    t2: u8,
 
+    // Constants
+    dp_init: u8,
+    sp_init: u16,
     rst_veclo: u16,
     isr_veclo: u16,
 
+    // Indexes
     x: u16,
     y: u16,
-    pc: u16,
-    sp: u16,
 
+    // Special Purpose
+    sp: u16,
+    pc: u16,
     ir: u8,
     sr: u8,
 

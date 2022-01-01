@@ -67,6 +67,27 @@ irq_uops = [
     Ctrl.XFER_ASSERT_Z | Ctrl.XFER_LOAD_TX | Ctrl.RESET_USTEP,
 ]
 
+irq_uops = [
+    Ctrl.ADDR_ASSERT_SP | Ctrl.COUNT_INC_SP | Ctrl.DBUS_ASSERT_SR | Ctrl.DBUS_LOAD_MEM,  # push flags to stack
+    Ctrl.ADDR_ASSERT_SP | Ctrl.COUNT_INC_SP | Ctrl.XFER_ASSERT_PC | Ctrl.ALU_LHS | Ctrl.DBUS_ASSERT_ALU | Ctrl.DBUS_LOAD_MEM,  # push PC H to stack
+    Ctrl.ADDR_ASSERT_SP | Ctrl.COUNT_INC_SP | Ctrl.XFER_ASSERT_PC | Ctrl.ALU_RHS | Ctrl.DBUS_ASSERT_ALU | Ctrl.DBUS_LOAD_MEM,  # push PC L to stack
+    Ctrl.XFER_ASSERT_ISR | Ctrl.XFER_LOAD_PC | Ctrl.ALU_SEI,  # load ISR vector and disable interrupts
+    Ctrl.ADDR_ASSERT_PC | Ctrl.COUNT_INC_PC | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_T2,  # read ISR low
+    Ctrl.ADDR_ASSERT_PC | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_T1,  # read ISR high
+    Ctrl.XFER_ASSERT_T | Ctrl.XFER_LOAD_PC | Ctrl.RESET_USTEP,  # load ISR to PC and end
+]
+
+swi_uops = [
+    Ctrl.ADDR_ASSERT_SP | Ctrl.COUNT_INC_SP | Ctrl.DBUS_ASSERT_SR | Ctrl.DBUS_LOAD_MEM,  # push flags to stack
+    Ctrl.ADDR_ASSERT_SP | Ctrl.COUNT_INC_SP | Ctrl.XFER_ASSERT_PC | Ctrl.ALU_LHS | Ctrl.DBUS_ASSERT_ALU | Ctrl.DBUS_LOAD_MEM,  # push PC H to stack
+    Ctrl.ADDR_ASSERT_SP | Ctrl.COUNT_INC_SP | Ctrl.XFER_ASSERT_PC | Ctrl.ALU_RHS | Ctrl.DBUS_ASSERT_ALU | Ctrl.DBUS_LOAD_MEM,  # push PC L to stack
+    Ctrl.ADDR_ASSERT_X | Ctrl.COUNT_INC_X | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_T2 | Ctrl.ALU_SEI, # read ISR low and disable interrupts
+    Ctrl.ADDR_ASSERT_X | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_T1, # read ISR
+    Ctrl.XFER_ASSERT_T | Ctrl.XFER_LOAD_PC | Ctrl.RESET_USTEP, # load ISR to PC and end
+]
+
+
+
 need_implementation_count = 0
 
 # Below is a massive function that returns the instruction sequence for a given
