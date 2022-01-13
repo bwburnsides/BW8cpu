@@ -1,3 +1,4 @@
+#include "ctrl_state.asm"
 #include "ctrl_lines.asm"
 
 READ_PC = ADDR_ASSERT_PC | COUNT_INC_PC | DBUS_ASSERT_MEM
@@ -85,5 +86,5 @@ _fetch = READ_PC | DBUS_LOAD_IR
         }
     }
 
-    load_const_idx {dst: reg8} {src: }
+    ; load_const_idx {dst: reg8} {src: }
 }

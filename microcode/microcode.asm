@@ -1,11 +1,17 @@
-#include "ctrl_state.asm"
-#include "ctrl_defin.asm"
+#include "ctrl.asm"
 
 #bits 32
 #labelalign 8 * 32
 
 ; Consider "LOAD A [SP]" and/or "STORE A [SP]"?
 
+; USE A FULL DESCENDING STACK
+; So for push:
+;   - dec
+;   - write
+; And for pop:
+;   - read
+;   - inc
 
 #bank mode00  ; NRM Mode
 brk:  ; Opcode 0x00
