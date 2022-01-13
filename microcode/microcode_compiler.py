@@ -5,6 +5,8 @@ import sys
 from typing import Sequence, Optional
 import datetime
 
+Inst = namedtuple("Inst", ["name", "opcode"])
+
 """
 Support two modes:
     1. Produce a microcode source template file
@@ -17,30 +19,7 @@ Support two modes:
         - split into 4x binaries for physical ROMs
 """
 
-
-def produce_template(
-    output_name: Optional[str],
-    opcodes_name: Optional[str],
-    definition_file: Optional[str],
-) -> None:
-    """
-    Produce a microcode source file template, which can then be populated with custom
-    micro-instructions and compiled using this compiler. The template includes customasm
-    directives to align all labels on 8-word boundaries so as to ensure that all
-    instructions start at the beginning of their t-state in the control address space.
-    Labels are placed in order and within their proper mode-banks based on the contents of
-    :opcodes_names:. A helper file can be automatically included at the top of the
-    template file via :definition_file:.
-
-    :output_name: - the location to output the template file
-        default value is based on the current timestamp
-    :opcodes_name: - the location to read opcode definitions from
-        default value is bw8/instructions/opcodes.asm
-    :definition_file: - the name of the file to #include in template file
-        default behavior is to not include anything
-    """
-
-    # Configure output path for template file
+def _config_template_output_path(output_name: Optional[str]) -> Optional[Path]:
     if output_name is None:
         timestamp = datetime.datetime.now()
         default_name = "_AUTOGEN_{time:%Y-%m-%d-%H-%M-%S}_microcode.asm".format(time=timestamp)
@@ -67,8 +46,9 @@ def produce_template(
                 break
 
     print(f"Will output microcode source template file to '{str(output_path)}'.\n")
+    return output_path
 
-    # Configure input path for opcodes file
+def _config_template_opcodes_path(opcodes_name: Optional[str]) -> Optional[Path]:
     if opcodes_name is None:
         parent = Path(__file__).absolute().parent
         opcodes_path = (parent / ".." / "instructions" / "opcodes.asm").resolve()
@@ -85,13 +65,16 @@ def produce_template(
         return
 
     print(f"Will read opcodes from '{str(opcodes_path)}'.\n")
+    return opcodes_path
 
-    # Parse the opcodes file
+def _parse_opcodes_file(
+    opcodes_path: Path
+) -> tuple[list[Inst], list[Inst], list[Inst]]:
     Inst = namedtuple("Inst", ["name", "opcode"])
     with open(opcodes_path, "r") as f:
         input_lines = f.readlines()
 
-    pages: list[list[Inst]] = [[], [], []]
+    pages: tuple[list[Inst]] = ([], [], [])
     page_idx = 0
 
     for line in input_lines:
@@ -106,7 +89,13 @@ def produce_template(
 
         pages[page_idx].append(inst)
 
-    # Build the template file
+    return pages
+
+def _build_microcode_template_file(
+    pages: tuple[list[Inst], list[Inst], list[Inst]],
+    output_path: Path,
+    definition_file: Optional[str],
+) -> None:
     output_lines = [] if definition_file is None else [f"#include \"{definition_file}\""]
     output_lines.extend([
         "#bits 32",
@@ -134,6 +123,40 @@ def produce_template(
 
     print(f"Wrote microcode source template file to '{str(output_path)}'")
 
+def produce_template(
+    output_name: Optional[str],
+    opcodes_name: Optional[str],
+    definition_file: Optional[str],
+) -> None:
+    """
+    Produce a microcode source file template, which can then be populated with custom
+    micro-instructions and compiled using this compiler. The template includes customasm
+    directives to align all labels on 8-word boundaries so as to ensure that all
+    instructions start at the beginning of their t-state in the control address space.
+    Labels are placed in order and within their proper mode-banks based on the contents of
+    :opcodes_names:. A helper file can be automatically included at the top of the
+    template file via :definition_file:.
+
+    :output_name: - the location to output the template file
+        default value is based on the current timestamp
+    :opcodes_name: - the location to read opcode definitions from
+        default value is bw8/instructions/opcodes.asm
+    :definition_file: - the name of the file to #include in template file
+        default behavior is to not include anything
+    """
+
+    output_path = _config_template_output_path(output_name)
+    if output_path is None:
+        return
+
+    opcodes_path = _config_template_opcodes_path(opcodes_name)
+    if opcodes_path is None:
+        return
+
+    pages = _parse_opcodes_file(opcodes_path)
+
+    _build_microcode_template_file(pages, output_path, definition_file)
+
 
 def compile_microcode(
     source_file: Optional[str],
@@ -144,7 +167,7 @@ def compile_microcode(
     ...
 
 
-def main(argv: Sequence[str]):
+def main(argv: Sequence[str]) -> None:
     parser = argparse.ArgumentParser(description="Produce microcode binaries for use in simulation, emulation, and hardware.")
     subparsers = parser.add_subparsers(help="available compiler modes", dest="command")
     template_subparser = subparsers.add_parser("template", help="produce microcode source template")

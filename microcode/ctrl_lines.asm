@@ -17,25 +17,25 @@ MEM_DBUS  = 10
 DPI_DBUS  = 11
 
 ; XFER device addresses
-ALU_XFER  = 0
-PC_XFER   = 1
-SP_XFER   = 2
-E_XFER    = 3
-X_XFER    = 4
-Y_XFER    = 5
-T_XFER    = 6
-ISR_XFER  = 7
-RST_XFER  = 8
-SPI_XFER  = 9
+ALU_XFER   = 0
+SP_XFER    = 1
+PC_XFER    = 2
+X_XFER     = 3
+Y_XFER     = 4
+T_XFER     = 5
+E_XFER     = 6
+ISR_XFER   = 7
+RST_XFER   = 8
+SPI_XFER   = 9
 _XFER_BASE = 10
 
 ; ADDR device addresses
-PC_ADDR = PC_XFER
 SP_ADDR = SP_XFER
-E_ADDR = E_XFER
+PC_ADDR = PC_XFER
 X_ADDR = X_XFER
 Y_ADDR = Y_XFER
 T_ADDR = T_XFER
+E_ADDR = E_XFER
 DP_ADDR = 7
 
 ; Ctrl Fields
@@ -73,7 +73,10 @@ DBUS_LOAD_T1   = T1_DBUS   << DBUS_LOAD
 DBUS_LOAD_T2   = T2_DBUS   << DBUS_LOAD
 DBUS_LOAD_MEM  = MEM_DBUS  << DBUS_LOAD
 DBUS_LOAD_IR   = IR_DBUS   << DBUS_LOAD
-; Room for 5 more DBUS Loads
+
+DBUS_LOAD_PCL  = 12 << DBUS_LOAD
+DBUS_LOAD_PCH  = 13 << DBUS_LOAD
+; Room for 3 more DBUS Loads
 
 ; 5 bits for ALU OP
 ALU_NOP   = 0  << ALU_OP
@@ -82,6 +85,11 @@ ALU_LHS   = 2  << ALU_OP
 ALU_RHS   = 3  << ALU_OP
 ALU_LHS_C = 4  << ALU_OP
 ALU_RHS_C = 5  << ALU_OP
+
+ALU_MSB = ALU_LHS
+ALU_LSB = ALU_RHS
+ALU_MSB_C = ALU_LHS_C
+ALU_LSB_C = ALU_RHS_C
 
 ALU_ADD   = 6  << ALU_OP
 ALU_ADC   = 7  << ALU_OP
@@ -173,17 +181,15 @@ ADDR_ASSERT_T  = T_ADDR  << ADDR_ASSERT
 ; Room for 1 more ADDR Assert
 
 ; 3 bits for Counter Inc/Decs
-COUNT_NULL   = 0 << COUNT
-COUNT_INC_PC = 1 << COUNT
-COUNT_INC_SP = 2 << COUNT
-COUNT_INC_X  = 3 << COUNT
-COUNT_INC_Y  = 4 << COUNT
-COUNT_DEC_SP = 5 << COUNT
-COUNT_DEC_X  = 6 << COUNT
-COUNT_DEC_Y  = 7 << COUNT
+COUNT_NULL   = 0       << COUNT
+COUNT_INC_SP = SP_XFER << COUNT
+COUNT_INC_PC = PC_XFER << COUNT
+COUNT_INC_X  = X_XFER  << COUNT
+COUNT_INC_Y  = Y_XFER  << COUNT
+COUNT_INC_T  = T_XFER  << COUNT
 
-; COUNT_INC_T
-; COUNT_DEC_T
+COUNT_DEC_X  = 6       << COUNT
+COUNT_DEC_Y  = 7       << COUNT
 
 ; 4 bits for CPU CTRL
 RST_USEQ = 1 << 27
@@ -191,4 +197,4 @@ TOG_EXT1 = 1 << 28
 TOG_EXT2 = 1 << 29
 BRK_CLK  = 1 << 30
 
-; 1 spare control line
+COUNT_DEC_SP = SP_XFER << 31

@@ -87,4 +87,39 @@ _fetch = READ_PC | DBUS_LOAD_IR
     }
 
     ; load_const_idx {dst: reg8} {src: }
+
+    push {src: reg8} => {
+        asm {
+            fetch
+            uop COUNT_DEC_SP
+            final ADDR_ASSERT_SP | DBUS_LOAD_MEM | (src << DBUS_ASSERT)
+        }
+    }
+
+    push {src: reg16} => {
+        assert(src != SP_XFER)
+        asm {
+            fetch
+            uop COUNT_DEC_SP
+            uop ADDR_ASSERT_SP | DBUS_LOAD_MEM | (src << XFER_ASSERT) | ALU_LHS | DBUS_ASSERT_ALU | COUNT_DEC_SP
+            final ADDR_ASSERT_SP | DBUS_LOAD_MEM | (src << XFER_ASSERT) | ALU_RHS | DBUS_ASSERT_ALU
+        }
+    }
+
+    pop {dst: reg8} => {
+        asm {
+            fetch
+            final ADDR_ASSERT_SP | DBUS_ASSERT_MEM | (dst << DBUS_LOAD) | COUNT_INC_SP
+        }
+    }
+
+    pop {dst: reg16} => {
+        assert(dst != SP_XFER)
+        asm {
+            fetch
+            uop ADDR_ASSERT_SP | DBUS_ASSERT_MEM | DBUS_LOAD_T2 | COUNT_INC_SP
+            uop ADDR_ASSERT_SP | DBUS_ASSERT_MEM | DBUS_LOAD_T1
+            final (dst << XFER_LOAD) | XFER_ASSERT_T
+        }
+    }
 }
