@@ -45,7 +45,7 @@ def _config_template_output_path(output_name: Optional[str]) -> Optional[Path]:
             else:
                 break
 
-    print(f"Will output microcode source template file to '{str(output_path)}'.\n")
+    print(f"Will output microcode source template file to '{str(output_path)}'.")
     return output_path
 
 def _config_template_opcodes_path(opcodes_name: Optional[str]) -> Optional[Path]:
@@ -64,13 +64,12 @@ def _config_template_opcodes_path(opcodes_name: Optional[str]) -> Optional[Path]
         print(f"The opcodes path '{str(opcodes_path)}' does not exist. Aborting.\n")
         return
 
-    print(f"Will read opcodes from '{str(opcodes_path)}'.\n")
+    print(f"Will read opcodes from '{str(opcodes_path)}'.")
     return opcodes_path
 
 def _parse_opcodes_file(
     opcodes_path: Path
 ) -> tuple[list[Inst], list[Inst], list[Inst]]:
-    Inst = namedtuple("Inst", ["name", "opcode"])
     with open(opcodes_path, "r") as f:
         input_lines = f.readlines()
 
@@ -102,20 +101,22 @@ def _build_microcode_template_file(
         "#labelalign 8 * 32",
     ])
 
+    opcode_fmt_str = "#opcode {name} ; 0x{value:02x}"
+
     output_lines.append("\n#bank mode00  ; NRM Mode")
     for inst in pages[0]:
-        output_lines.append(f"{inst.name}:  ; Opcode 0x{inst.opcode:02X}")
+        output_lines.append(opcode_fmt_str.format(name=inst.name, value=inst.opcode))
 
     output_lines.append("\n#bank mode01  ; EX1 Mode")
     for inst in pages[1]:
-        output_lines.append(f"{inst.name}:  ; Opcode 0x{inst.opcode:02x}")
+        output_lines.append(opcode_fmt_str.format(name=inst.name, value=inst.opcode))
 
     output_lines.append("\n#bank mode10  ; RST Mode")
     output_lines.append("; insert reset sequence here")
 
     output_lines.append("\n#bank mode11  ; EX2 Mode")
     for inst in pages[2]:
-        output_lines.append(f"{inst.name}:  ; Opcode 0x{inst.opcode:02x}")
+        output_lines.append(opcode_fmt_str.format(name=inst.name, value=inst.opcode))
 
     output_text = "\n".join(output_lines)
     with open(output_path, "w") as f:

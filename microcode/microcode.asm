@@ -42,7 +42,6 @@ swi_x:  ; Opcode 0x05
     uop ADDR_ASSERT_X | COUNT_INC_X | DBUS_ASSERT_MEM | DBUS_LOAD_T2 | ALU_SEI  ;  disable interrupts and read ISR-lo
     uop ADDR_ASSERT_X | COUNT_DEC_X | DBUS_ASSERT_MEM | DBUS_LOAD_T1  ;  read ISR-hi and reset X value
     final XFER_ASSERT_T | XFER_LOAD_PC  ;  move ISR to PC
-
 swi_y:  ; Opcode 0x06
     fetch
     uop COUNT_DEC_SP  ; decrement SP to prepare for push

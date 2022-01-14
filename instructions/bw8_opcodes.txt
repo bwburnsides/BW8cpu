@@ -1,0 +1,981 @@
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# HOUSE KEEPING
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
+BRK*
+NOP*
+WAI*
+EX1*
+EX2*
+SWI_X*
+SWI_Y*
+
+# Flags
+CLC
+CLI
+CLV
+SEC
+SEI
+
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# MOVES (8-bit)
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
+# Move to A
+MOV_A_B*
+MOV_A_C*
+MOV_A_D*
+MOV_A_DP
+
+# Move to B
+MOV_B_A*
+MOV_B_C*
+MOV_B_D*
+MOV_B_DP
+
+# Move to C
+MOV_C_A*
+MOV_C_B*
+MOV_C_D*
+MOV_C_DP
+
+# Move to D
+MOV_D_A*
+MOV_D_B*
+MOV_D_C*
+MOV_D_DP
+
+# Move to DP
+MOV_DP_A
+MOV_DP_B
+MOV_DP_C
+MOV_DP_D
+
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# MOVES (16-bit)
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
+# Move to SP
+MOV_SP_X*
+MOV_SP_Y*
+MOV_SP_E*
+
+# Move to X
+MOV_X_Y*
+MOV_X_E*
+MOV_X_SP*
+
+# Move to Y
+MOV_Y_X*
+MOV_Y_E*
+MOV_Y_SP*
+
+# Move to E
+MOV_E_X*
+MOV_E_Y*
+MOV_E_SP*
+
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# LOADS
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
+# Basic Loads Meanings
+# IMM       -> reg = const
+# ABS       -> reg = val at abs addr
+# ZPG       -> reg = val at zpg addr
+# A IDX ZPG -> reg = val found at (zpg addr + A reg)
+# B IDX ZPG -> reg = val found at (zpg addr + B reg)
+# X         -> reg = val found at addr in X
+# Y         -> reg = val found at addr in Y
+
+# Basic A Loads
+LOAD_A_IMM*
+LOAD_A_ABS*
+LOAD_A_ZPG*
+LOAD_A_A_INDEX_ZPG*
+LOAD_A_B_INDEX_ZPG*
+LOAD_A_X*
+LOAD_A_Y*
+LOAD_A_E*
+
+# Indexed Loads Meanings
+# Const Offset -> reg = val at (addr in idx reg + const)
+# Accumulator Offset -> reg = val at (addr in idx reg + val in 8 bit acc reg)
+
+# Constant-Offset Indexed
+LOAD_A_CONST_INDEX_X*
+LOAD_A_CONST_INDEX_Y*
+LOAD_A_CONST_INDEX_E*
+LOAD_A_CONST_INDEX_SP*
+
+# Accumulator-Offset Indexed
+LOAD_A_A_INDEX_X*
+LOAD_A_A_INDEX_Y*
+LOAD_A_A_INDEX_SP*
+LOAD_A_B_INDEX_X*
+LOAD_A_B_INDEX_Y*
+LOAD_A_B_INDEX_SP*
+
+# Basic B Loads
+LOAD_B_IMM*
+LOAD_B_ABS*
+LOAD_B_ZPG*
+LOAD_B_A_INDEX_ZPG
+LOAD_B_B_INDEX_ZPG
+LOAD_B_X*
+LOAD_B_Y*
+LOAD_B_E*
+
+# Constant-Offset Indexed
+LOAD_B_CONST_INDEX_X
+LOAD_B_CONST_INDEX_Y
+LOAD_B_CONST_INDEX_E
+LOAD_B_CONST_INDEX_SP
+
+# Accumulator-Offset Indexed
+LOAD_B_A_INDEX_X
+LOAD_B_A_INDEX_Y
+LOAD_B_A_INDEX_SP
+LOAD_B_B_INDEX_X
+LOAD_B_B_INDEX_Y
+LOAD_B_B_INDEX_SP
+
+# Basic C Loads
+LOAD_C_IMM*
+LOAD_C_ABS*
+LOAD_C_ZPG*
+LOAD_C_A_INDEX_ZPG
+LOAD_C_B_INDEX_ZPG
+LOAD_C_X*
+LOAD_C_Y*
+LOAD_C_E*
+
+# Constant-Offset Indexed
+LOAD_C_CONST_INDEX_X
+LOAD_C_CONST_INDEX_Y
+LOAD_C_CONST_INDEX_E
+LOAD_C_CONST_INDEX_SP
+
+# Accumulator-Offset Indexed
+LOAD_C_A_INDEX_X
+LOAD_C_A_INDEX_Y
+LOAD_C_A_INDEX_SP
+LOAD_C_B_INDEX_X
+LOAD_C_B_INDEX_Y
+LOAD_C_B_INDEX_SP
+
+# Basic D Loads
+LOAD_D_IMM*
+LOAD_D_ABS*
+LOAD_D_ZPG*
+LOAD_D_A_INDEX_ZPG
+LOAD_D_B_INDEX_ZPG
+LOAD_D_X*
+LOAD_D_Y*
+LOAD_D_E*
+
+# Constant-Offset Indexed
+LOAD_D_CONST_INDEX_X
+LOAD_D_CONST_INDEX_Y
+LOAD_D_CONST_INDEX_E
+LOAD_D_CONST_INDEX_SP
+
+# Accumulator-Offset Indexed
+LOAD_D_A_INDEX_X
+LOAD_D_A_INDEX_Y
+LOAD_D_A_INDEX_SP
+LOAD_D_B_INDEX_X
+LOAD_D_B_INDEX_Y
+LOAD_D_B_INDEX_SP
+
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# STORES
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
+# Simple Store Meanings
+# ZPG   -> zpg addr = reg
+# ABS   -> abs addr = reg
+# X     -> addr in X = reg
+# Y     -> addr in Y = reg
+
+# A Stores
+STORE_A_ZPG*
+STORE_A_ABS*
+STORE_A_X*
+STORE_A_Y*
+STORE_A_E*
+
+# Indexed Store Meanings
+# CONST         -> addr in X + const = reg
+# Accumulator   -> addr in X + acc reg = reg 
+
+# Constant-Offset Indexed
+STORE_A_CONST_INDEX_X*
+STORE_A_CONST_INDEX_Y*
+STORE_A_CONST_INDEX_E*
+STORE_A_CONST_INDEX_SP*
+
+# Accumulator-Offset Indexed
+STORE_A_A_INDEX_X*
+STORE_A_A_INDEX_Y*
+STORE_A_A_INDEX_SP*
+STORE_A_B_INDEX_X*
+STORE_A_B_INDEX_Y*
+STORE_A_B_INDEX_SP*
+
+# B Stores
+STORE_B_ZPG*
+STORE_B_ABS*
+STORE_B_X*
+STORE_B_Y*
+STORE_B_E*
+
+# Constant-Offset Indexed
+STORE_B_CONST_INDEX_X
+STORE_B_CONST_INDEX_Y
+STORE_B_CONST_INDEX_E
+STORE_B_CONST_INDEX_SP
+
+# Accumulator-Offset Indexed
+STORE_B_A_INDEX_X
+STORE_B_A_INDEX_Y
+STORE_B_A_INDEX_SP
+STORE_B_B_INDEX_X
+STORE_B_B_INDEX_Y
+STORE_B_B_INDEX_SP
+
+# C Stores
+STORE_C_ZPG*
+STORE_C_ABS*
+STORE_C_X*
+STORE_C_Y*
+STORE_C_E*
+
+# Constant-Offset Indexed
+STORE_C_CONST_INDEX_X
+STORE_C_CONST_INDEX_Y
+STORE_C_CONST_INDEX_E
+STORE_C_CONST_INDEX_SP
+
+# Accumulator-Offset Indexed
+STORE_C_A_INDEX_X
+STORE_C_A_INDEX_Y
+STORE_C_A_INDEX_SP
+STORE_C_B_INDEX_X
+STORE_C_B_INDEX_Y
+STORE_C_B_INDEX_SP
+
+# D Stores
+STORE_D_ZPG*
+STORE_D_ABS*
+STORE_D_X*
+STORE_D_Y*
+STORE_D_E*
+
+# Constant-Offset Indexed
+STORE_D_CONST_INDEX_X
+STORE_D_CONST_INDEX_Y
+STORE_D_CONST_INDEX_E
+STORE_D_CONST_INDEX_SP
+
+# Accumulator-Offset Indexed
+STORE_D_A_INDEX_X
+STORE_D_A_INDEX_Y
+STORE_D_A_INDEX_SP
+STORE_D_B_INDEX_X
+STORE_D_B_INDEX_Y
+STORE_D_B_INDEX_SP
+
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# LOADS (16 - BIT)
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
+# 16-bit Loads work the same except the contents are loaded from the effective addr
+# and the effective addr + 1
+
+# Basic X Loads
+LOAD_X_IMM*
+LOAD_X_ABS*
+LOAD_X_ZPG*
+LOAD_X_X*
+LOAD_X_Y*
+LOAD_X_E*
+
+# Constant-Offset Indexed
+LOAD_X_CONST_INDEX_X
+LOAD_X_CONST_INDEX_Y
+LOAD_X_CONST_INDEX_E
+LOAD_X_CONST_INDEX_SP
+
+# Accumulator-Offset Indexed
+LOAD_X_A_INDEX_X
+LOAD_X_A_INDEX_Y
+LOAD_X_A_INDEX_SP
+LOAD_X_B_INDEX_X
+LOAD_X_B_INDEX_Y
+LOAD_X_B_INDEX_SP
+
+# Basic Y Loads
+LOAD_Y_IMM*
+LOAD_Y_ABS*
+LOAD_Y_ZPG*
+LOAD_Y_X*
+LOAD_Y_Y*
+LOAD_Y_E*
+
+# Constant-Offset Indexed
+LOAD_Y_CONST_INDEX_X
+LOAD_Y_CONST_INDEX_Y
+LOAD_Y_CONST_INDEX_E
+LOAD_Y_CONST_INDEX_SP
+
+# Accumulator-Offset Indexed
+LOAD_Y_A_INDEX_X
+LOAD_Y_A_INDEX_Y
+LOAD_Y_A_INDEX_SP
+LOAD_Y_B_INDEX_X
+LOAD_Y_B_INDEX_Y
+LOAD_Y_B_INDEX_SP
+
+# Basic E Loads
+LOAD_E_IMM*
+LOAD_E_ABS*
+LOAD_E_ZPG*
+LOAD_E_X*
+LOAD_E_Y*
+LOAD_E_E*
+
+# Constant-Offset Indexed
+LOAD_E_CONST_INDEX_X*
+LOAD_E_CONST_INDEX_Y*
+LOAD_E_CONST_INDEX_SP*
+
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# STORES (16 - BIT)
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
+# X Stores
+STORE_X_ZPG*
+STORE_X_ABS*
+STORE_X_Y*
+STORE_X_E*
+
+# Constant-Offset Indexed
+STORE_X_CONST_INDEX_Y
+STORE_X_CONST_INDEX_E
+STORE_X_CONST_INDEX_SP
+
+# Accumulator-Offset Indexed
+STORE_X_A_INDEX_Y
+STORE_X_A_INDEX_E
+STORE_X_A_INDEX_SP
+STORE_X_B_INDEX_Y
+STORE_X_B_INDEX_E
+STORE_X_B_INDEX_SP
+
+# Y Stores
+STORE_Y_ZPG*
+STORE_Y_ABS*
+STORE_Y_X*
+STORE_Y_E*
+
+# Constant-Offset Indexed
+STORE_Y_CONST_INDEX_X
+STORE_Y_CONST_INDEX_E
+STORE_Y_CONST_INDEX_SP
+
+# Accumulator-Offset Indexed
+STORE_Y_A_INDEX_X
+STORE_Y_A_INDEX_E
+STORE_Y_A_INDEX_SP
+STORE_Y_B_INDEX_X
+STORE_Y_B_INDEX_E
+STORE_Y_B_INDEX_SP
+
+# E Stores
+STORE_E_ZPG*
+STORE_E_ABS*
+STORE_E_X*
+STORE_E_Y*
+
+# Constant-Offset Indexed
+STORE_E_CONST_INDEX_X*
+STORE_E_CONST_INDEX_Y*
+STORE_E_CONST_INDEX_SP*
+
+# Accumulator-Offset Indexed
+STORE_E_A_INDEX_X*
+STORE_E_A_INDEX_Y*
+STORE_E_A_INDEX_SP*
+STORE_E_B_INDEX_X*
+STORE_E_B_INDEX_Y*
+STORE_E_B_INDEX_SP*
+
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# ARITHMETIC OPERATIONS
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
+# Inc and Dec
+INC_A*
+INC_B*
+INC_X*
+INC_Y*
+INC_E*
+
+# These instructions read from memory, increment the byte,
+# then write the value back
+INC_ABS
+INC_ZPG
+INC_DEREF_X
+INC_DEREF_Y
+INC_DEREF_E
+INC_DEREF_SP
+
+DEC_A*
+DEC_B*
+DEC_X*
+DEC_Y*
+DEC_E*
+
+DEC_ABS*
+DEC_ZPG*
+DEC_DEREF_X*
+DEC_DEREF_Y*
+DEC_DEREF_E*
+DEC_DEREF_SP*
+
+# Why does 6809 have "ABX" X = B + X
+# Add without Carry
+ADD_A_IMM*
+ADD_A_ZPG*
+ADD_A_ABS*
+ADD_A_DEREF_X*
+ADD_A_DEREF_Y*
+ADD_A_DEREF_SP*
+ADD_A_B*
+ADD_A_C*
+ADD_A_D*
+
+ADD_B_IMM
+ADD_B_ZPG
+ADD_B_ABS
+ADD_B_DEREF_X
+ADD_B_DEREF_Y
+ADD_B_DEREF_SP
+ADD_B_A
+ADD_B_C
+ADD_B_D
+
+ADD_E_IMM*
+ADD_E_ZPG*
+ADD_E_ABS*
+ADD_E_X*
+ADD_E_Y*
+ADD_E_SP*
+ADD_E_DEREF_X*
+ADD_E_DEREF_Y*
+ADD_E_DEREF_SP*
+
+# Add with Carry
+ADC_A_IMM
+ADC_A_ZPG
+ADC_A_ABS
+ADC_A_DEREF_X
+ADC_A_DEREF_Y
+ADC_A_DEREF_SP
+ADC_A_B
+ADC_A_C
+ADC_A_D
+
+ADC_B_IMM
+ADC_B_ZPG
+ADC_B_ABS
+ADC_B_DEREF_X
+ADC_B_DEREF_Y
+ADC_B_DEREF_SP
+ADC_B_A
+ADC_B_C
+ADC_B_D
+
+ADC_E_IMM
+ADC_E_ZPG
+ADC_E_ABS
+ADC_E_X
+ADC_E_Y
+ADC_E_SP
+ADC_E_DEREF_X
+ADC_E_DEREF_Y
+ADC_E_DEREF_SP
+
+# Subtract witout Borrow
+SUB_A_IMM*
+SUB_A_ZPG*
+SUB_A_ABS*
+SUB_A_DEREF_X*
+SUB_A_DEREF_Y*
+SUB_A_DEREF_SP*
+SUB_A_B*
+SUB_A_C*
+SUB_A_D*
+
+SUB_B_IMM
+SUB_B_ZPG
+SUB_B_ABS
+SUB_B_DEREF_X
+SUB_B_DEREF_Y
+SUB_B_DEREF_SP
+SUB_B_A
+SUB_B_C
+SUB_B_D
+
+SUB_E_IMM*
+SUB_E_ZPG*
+SUB_E_ABS*
+SUB_E_X*
+SUB_E_Y*
+SUB_E_SP*
+SUB_E_DEREF_X*
+SUB_E_DEREF_Y*
+SUB_E_DEREF_SP*
+
+# Subtract with Borrow
+SBB_A_IMM
+SBB_A_ZPG
+SBB_A_ABS
+SBB_A_DEREF_X
+SBB_A_DEREF_Y
+SBB_A_DEREF_SP
+SBB_A_B
+SBB_A_C
+SBB_A_D
+
+SBB_B_IMM
+SBB_B_ZPG
+SBB_B_ABS
+SBB_B_DEREF_X
+SBB_B_DEREF_Y
+SBB_B_DEREF_SP
+SBB_B_A
+SBB_B_C
+SBB_B_D
+
+SBB_E_IMM
+SBB_E_ZPG
+SBB_E_ABS
+SBB_E_X
+SBB_E_Y
+SBB_E_SP
+SBB_E_DEREF_X
+SBB_E_DEREF_Y
+SBB_E_DEREF_SP
+
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# LOGICAL OPERATIONS
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
+# Logical AND
+AND_A_IMM
+AND_A_ZPG
+AND_A_ABS
+AND_A_DEREF_X
+AND_A_DEREF_Y
+AND_A_DEREF_SP
+AND_A_B
+AND_A_C
+AND_A_D
+
+AND_B_IMM
+AND_B_ZPG
+AND_B_ABS
+AND_B_DEREF_X
+AND_B_DEREF_Y
+AND_B_DEREF_SP
+AND_B_A
+AND_B_C
+AND_B_D
+
+AND_E_IMM
+AND_E_ZPG
+AND_E_ABS
+AND_E_X
+AND_E_Y
+AND_E_SP
+AND_E_DEREF_X
+AND_E_DEREF_Y
+AND_E_DEREF_SP
+
+# Logical OR
+OR_A_IMM
+OR_A_ZPG
+OR_A_ABS
+OR_A_DEREF_X
+OR_A_DEREF_Y
+OR_A_DEREF_SP
+OR_A_B
+OR_A_C
+OR_A_D
+
+OR_B_IMM
+OR_B_ZPG
+OR_B_ABS
+OR_B_DEREF_X
+OR_B_DEREF_Y
+OR_B_DEREF_SP
+OR_B_A
+OR_B_C
+OR_B_D
+
+OR_E_IMM
+OR_E_ZPG
+OR_E_ABS
+OR_E_X
+OR_E_Y
+OR_E_SP
+OR_E_DEREF_X
+OR_E_DEREF_Y
+OR_E_DEREF_SP
+
+# Logical XOR
+XOR_A_IMM
+XOR_A_ZPG
+XOR_A_ABS
+XOR_A_DEREF_X
+XOR_A_DEREF_Y
+XOR_A_DEREF_SP
+XOR_A_A
+XOR_A_B
+XOR_A_C
+XOR_A_D
+
+XOR_B_IMM
+XOR_B_ZPG
+XOR_B_ABS
+XOR_B_DEREF_X
+XOR_B_DEREF_Y
+XOR_B_DEREF_SP
+XOR_B_A
+XOR_B_B
+XOR_B_C
+XOR_B_D
+
+XOR_E_IMM
+XOR_E_ZPG
+XOR_E_ABS
+XOR_E_X
+XOR_E_Y
+XOR_E_SP
+XOR_E_DEREF_X
+XOR_E_DEREF_Y
+XOR_E_DEREF_SP
+
+# Logical NOT (1s Complement)
+NOT_A
+NOT_B
+NOT_E
+NOT_ZPG
+NOT_ABS
+NOT_DEREF_X
+NOT_DEREF_Y
+NOT_DEREF_E
+NOT_DEREF_SP
+
+# Negation (2s Complement)
+NEG_A
+NEG_B
+NEG_E
+NEG_ZPG
+NEG_ABS
+NEG_DEREF_X
+NEG_DEREF_Y
+NEG_DEREF_E
+NEG_DEREF_SP
+
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# SHIFTS
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
+# Arithmetic Shift Right
+ASR_A
+ASR_B
+ASR_E
+ASR_ZPG
+ASR_ABS
+ASR_DEREF_X
+ASR_DEREF_Y
+ASR_DEREF_E
+ASR_DEREF_SP
+
+# Logical Shift Right (with carry)
+SHRC_A
+SHRC_B
+SHRC_E
+SHRC_ZPG
+SHRC_ABS
+SHRC_DEREF_X
+SHRC_DEREF_Y
+SHRC_DEREF_E
+SHRC_DEREF_SP
+
+# Logical Shift Right (without carry)
+SHR_A
+SHR_B
+SHR_E
+SHR_ZPG
+SHR_ABS
+SHR_DEREF_X
+SHR_DEREF_Y
+SHR_DEREF_E
+SHR_DEREF_SP
+
+# Logical Shift Left (with carry)
+SHLC_A
+SHLC_B
+SHLC_E
+SHLC_ZPG
+SHLC_ABS
+SHLC_DEREF_X
+SHLC_DEREF_Y
+SHLC_DEREF_E
+SHLC_DEREF_SP
+
+# Logical Shift Left (without carry)
+SHL_A
+SHL_B
+SHL_E
+SHL_ZPG
+SHL_ABS
+SHL_DEREF_X
+SHL_DEREF_Y
+SHL_DEREF_E
+SHL_DEREF_SP
+
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# COMPARES
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
+# Compare Register with Memory
+CMP_A_IMM*
+CMP_A_ZPG*
+CMP_A_ABS*
+CMP_A_DEREF_X*
+CMP_A_DEREF_Y*
+CMP_A_DEREF_SP*
+CMP_A_B*
+CMP_A_C*
+CMP_A_D*
+
+CMP_B_IMM
+CMP_B_ZPG
+CMP_B_ABS
+CMP_B_DEREF_X
+CMP_B_DEREF_Y
+CMP_B_DEREF_SP
+CMP_B_A
+CMP_B_C
+CMP_B_D
+
+CMP_C_IMM
+CMP_C_ZPG
+CMP_C_ABS
+CMP_C_DEREF_X
+CMP_C_DEREF_Y
+CMP_C_DEREF_E
+CMP_C_DEREF_SP
+CMP_C_A
+CMP_C_B
+CMP_C_D
+
+CMP_D_IMM
+CMP_D_ZPG
+CMP_D_ABS
+CMP_D_DEREF_X
+CMP_D_DEREF_Y
+CMP_D_DEREF_E
+CMP_D_DEREF_SP
+CMP_D_A
+CMP_D_B
+CMP_D_C
+
+CMP_X_IMM
+CMP_X_ZPG
+CMP_X_ABS
+CMP_X_Y
+CMP_X_E
+CMP_X_SP
+CMP_X_DEREF_Y
+CMP_X_DEREF_E
+CMP_X_DEREF_SP
+
+CMP_Y_IMM
+CMP_Y_ZPG
+CMP_Y_ABS
+CMP_Y_X
+CMP_Y_E
+CMP_Y_SP
+CMP_Y_DEREF_X
+CMP_Y_DEREF_E
+CMP_Y_DEREF_SP
+
+CMP_E_IMM*
+CMP_E_ZPG*
+CMP_E_ABS*
+CMP_E_X*
+CMP_E_Y*
+CMP_E_SP*
+CMP_E_DEREF_X*
+CMP_E_DEREF_Y*
+CMP_E_DEREF_SP*
+
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# TESTS
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
+# Tests (Check for sign and zero)
+TST_A*
+TST_B
+TST_C
+TST_D
+TST_E*
+TST_ZPG*
+TST_ABS*
+TST_DEREF_X
+TST_DEREF_Y
+TST_DEREF_E*
+TST_DEREF_SP
+
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# STACK OPERATIONS
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
+# Stack Operations
+PUSH_A*
+PUSH_B*
+PUSH_C*
+PUSH_D*
+PUSH_DP
+PUSH_E*
+PUSH_X*
+PUSH_Y*
+
+POP_A*
+POP_B*
+POP_C*
+POP_D*
+POP_DP
+POP_E*
+POP_X*
+POP_Y*
+
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# JUMPS, CONDITIONAL JUMPS, AND SUBROUTINE CONTROL
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
+# Jumps
+JMP_ABS
+JMP_REL*
+JMP_IND*
+
+# Subroutine control
+JSR_ABS*
+JSR_REL*
+JSR_IND*
+RTS*
+RTI*
+
+# Jump if overflow
+JO_ABS
+JO_REL*
+JO_IND*
+
+# Jump if not overflow
+JNO_ABS
+JNO_REL*
+JNO_IND*
+
+# Jump if negative
+JN_ABS
+JN_REL*
+JN_IND*
+
+# Jump if positive
+JP_ABS
+JP_REL*
+JP_IND*
+
+# Jump if zero
+JZ_ABS
+JZ_REL*
+JZ_IND*
+
+# Jump if not zero
+JNZ_ABS
+JNZ_REL*
+JNZ_IND*
+
+# Jump if carry
+JC_ABS
+JC_REL*
+JC_IND*
+
+# Jump if not carry
+JNC_ABS
+JNC_REL*
+JNC_IND*
+
+# Jump if Above
+JA_ABS
+JA_REL*
+JA_IND*
+
+# Jump if not above
+JNA_ABS
+JNA_REL*
+JNA_IND*
+
+# Jump if Less than
+JL_ABS
+JL_REL
+JL_IND
+
+# Jump if Greater than or Equal
+JGE_ABS
+JGE_REL
+JGE_IND
+
+# Jump if Greater than
+JG_ABS
+JG_REL
+JG_IND
+
+# Jump if Less than or Equal
+JLE_ABS
+JLE_REL
+JLE_IND
