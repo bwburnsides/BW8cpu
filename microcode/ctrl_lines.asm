@@ -1,6 +1,15 @@
 ; NOTE: take caution when modifying any orderings in this file. the simulator's control unit
 ; and bus decoder has been configured to use these exact values.
 
+; Ctrl Fields
+DBUS_ASSERT = 0
+DBUS_LOAD   = 4
+ALU_OP      = 8
+XFER_ASSERT = 13
+XFER_LOAD   = 18
+ADDR_ASSERT = 21
+COUNT       = 24
+
 ; DBUS device addresses
 NULL_DBUS = 0
 ALU_DBUS  = 0
@@ -37,15 +46,6 @@ Y_ADDR = Y_XFER
 T_ADDR = T_XFER
 E_ADDR = E_XFER
 DP_ADDR = 7
-
-; Ctrl Fields
-DBUS_ASSERT = 0
-DBUS_LOAD   = 4
-ALU_OP      = 8
-XFER_ASSERT = 13
-XFER_LOAD   = 18
-ADDR_ASSERT = 21
-COUNT       = 24
 
 ; 4 bits for DBUS Assert
 DBUS_ASSERT_ALU = ALU_DBUS << DBUS_ASSERT

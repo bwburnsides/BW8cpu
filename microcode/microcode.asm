@@ -14,7 +14,7 @@
 ;   - inc
 
 ; BIG ENDIAN - So for FD Stack, Push Lo first then Hi
-;                               Pull Hi first then Lo
+;                               Pop Hi first then Lo
 ;            - So for ABS Addr, Read Hi first then Lo
 ;                               Write Hi first then Lo
 
@@ -25,7 +25,7 @@
 #bank mode00  ; NRM Mode
 brk:  ; Opcode 0x00
     fetch
-    final_brk
+    final BRK_CLK
 nop:  ; Opcode 0x01
     fetch
     final
@@ -33,10 +33,10 @@ wai:  ; Opcode 0x02
     ; TBD
 ex1:  ; Opcode 0x03
     fetch
-    final_ext1
+    final TOG_EXT1
 ex2:  ; Opcode 0x04
     fetch
-    final_ext2
+    final TOG_EXT2
 swi_x:  ; Opcode 0x05
     swi x
 swi_y:  ; Opcode 0x06
@@ -99,15 +99,9 @@ load_a_abs:  ; Opcode 0x20
 load_a_zpg:  ; Opcode 0x21
     load_zpg a
 load_a_a_index_zpg:  ; Opcode 0x22
-    fetch
-    uop READ_PC | DBUS_LOAD_T1
-    uop ALU_ADD | XFER_ASSERT_A_T1 | DBUS_ASSERT_ALU | DBUS_LOAD_T1
-    final ADDR_ASSERT_DP | DBUS_ASSERT_MEM | DBUS_LOAD_A
+    load_acc_zpg a a
 load_a_b_index_zpg:  ; Opcode 0x23
-    fetch
-    uop READ_PC | DBUS_LOAD_T1
-    uop ALU_ADD | XFER_ASSERT_B_T1 | DBUS_ASSERT_ALU | DBUS_LOAD_T1
-    final ADDR_ASSERT_DP | DBUS_ASSERT_MEM | DBUS_LOAD_A
+    load_acc_zpg a b
 load_a_x:  ; Opcode 0x24
     load_ptr a x
 load_a_y:  ; Opcode 0x25
@@ -115,79 +109,25 @@ load_a_y:  ; Opcode 0x25
 load_a_e:  ; Opcode 0x26
     load_ptr a e
 load_a_const_index_x:  ; Opcode 0x27
-    ; [A] = [[X + [PC]++]]
-    fetch
-    uop READ_PC | DBUS_LOAD_A  ; read offset into A
-    uop XFER_ASSERT_X | ALU_RHS | DBUS_ASSERT_ALU | DBUS_LOAD_T1  ; move X-Lo into T1
-    uop XFER_ASSERT_A_T1 | ALU_ADD | DBUS_ASSERT_ALU | DBUS_LOAD_T1  ; add offset and X-Lo into T1
-    uop XFER_ASSERT_X | ALU_LHS_C | DBUS_ASSERT_ALU | DBUS_LOAD_T2  ; add X-Hi and Cf into T2
-    final ADDR_ASSERT_T | DBUS_ASSERT_MEM | DBUS_LOAD_A  ; read from temp into A
+    load_const_idx a x
 load_a_const_index_y:  ; Opcode 0x28
-    ; [A] = [[Y + [PC]++]]
-    fetch
-    uop READ_PC | DBUS_LOAD_A  ; read offset into A
-    uop XFER_ASSERT_Y | ALU_RHS | DBUS_ASSERT_ALU | DBUS_LOAD_T1  ; move Y-Lo into T1
-    uop XFER_ASSERT_A_T1 | ALU_ADD | DBUS_ASSERT_ALU | DBUS_LOAD_T1  ; add offset and Y-Lo into T1
-    uop XFER_ASSERT_Y | ALU_LHS_C | DBUS_ASSERT_ALU | DBUS_LOAD_T2  ; add Y-Hi and Cf into T2
-    final ADDR_ASSERT_T | DBUS_ASSERT_MEM | DBUS_LOAD_A  ; read from temp into A
+    load_const_idx a y
 load_a_const_index_e:  ; Opcode 0x29
-    ; ; [A] = [[E + [PC]++]]
-    fetch
-    uop READ_PC | DBUS_LOAD_T2  ; read offset into A
-    uop XFER_ASSERT_E | ALU_RHS | DBUS_ASSERT_ALU | DBUS_LOAD_T1  ; move E-Lo into T1
-    uop XFER_ASSERT_T | ALU_ADD | DBUS_ASSERT_ALU | DBUS_LOAD_T1  ; add offset and X-Lo into T1
-    uop XFER_ASSERT_E | ALU_LHS_C | DBUS_ASSERT_ALU | DBUS_LOAD_T2  ; add E-Hi and Cf into T2
-    final ADDR_ASSERT_T | DBUS_ASSERT_MEM | DBUS_LOAD_A  ; read from temp into A
+    load_const_idx a e
 load_a_const_index_sp:  ; Opcode 0x2A
-    ; [A] = [[SP + [PC]++]]
-    fetch
-    uop READ_PC | DBUS_LOAD_A  ; read offset into A
-    uop XFER_ASSERT_SP | ALU_RHS | DBUS_ASSERT_ALU | DBUS_LOAD_T1  ; move SP-Lo into T1
-    uop XFER_ASSERT_A_T1 | ALU_ADD | DBUS_ASSERT_ALU | DBUS_LOAD_T1  ; add offset and X-Lo into T1
-    uop XFER_ASSERT_SP | ALU_LHS_C | DBUS_ASSERT_ALU | DBUS_LOAD_T2  ; add SP-Hi and Cf into T2
-    final ADDR_ASSERT_T | DBUS_ASSERT_MEM | DBUS_LOAD_A  ; read from temp into A
+    load_const_idx a sp
 load_a_a_index_x:  ; Opcode 0x2B
-    ; [A] = [[X + [A]]]
-    fetch
-    uop XFER_ASSERT_X | ALU_RHS | DBUS_ASSERT_ALU | DBUS_LOAD_T1  ; move X-lo into T1
-    uop XFER_ASSERT_A_T1 | ALU_ADD | DBUS_ASSERT_ALU | DBUS_LOAD_T1  ; add offset and X-lo into T1
-    uop XFER_ASSERT_X | ALU_LHS_C | DBUS_ASSERT_ALU | DBUS_LOAD_T2  ; add X-hi and Cf into T2
-    final ADDR_ASSERT_T | DBUS_ASSERT_MEM | DBUS_LOAD_A  ; read from temp into A
+    load_acc_idx a a x
 load_a_a_index_y:  ; Opcode 0x2C
-    ; [A] = [[Y + [A]]]
-    fetch
-    uop XFER_ASSERT_Y | ALU_RHS | DBUS_ASSERT_ALU | DBUS_LOAD_T1  ; move Y-lo into T1
-    uop XFER_ASSERT_A_T1 | ALU_ADD | DBUS_ASSERT_ALU | DBUS_LOAD_T1  ; add offset and Y-lo into T1
-    uop XFER_ASSERT_Y | ALU_LHS_C | DBUS_ASSERT_ALU | DBUS_LOAD_T2  ; add Y-hi and Cf into T2
-    final ADDR_ASSERT_T | DBUS_ASSERT_MEM | DBUS_LOAD_A  ; read from temp into A
+    load_acc_idx a a y
 load_a_a_index_sp:  ; Opcode 0x2D
-    ; [A] = [[SP + [A]]]
-    fetch
-    uop XFER_ASSERT_SP | ALU_RHS | DBUS_ASSERT_ALU | DBUS_LOAD_T1  ; move SP-lo into T1
-    uop XFER_ASSERT_A_T1 | ALU_ADD | DBUS_ASSERT_ALU | DBUS_LOAD_T1  ; add offset and SP-lo into T1
-    uop XFER_ASSERT_SP | ALU_LHS_C | DBUS_ASSERT_ALU | DBUS_LOAD_T2  ; add SP-hi and Cf into T2
-    final ADDR_ASSERT_T | DBUS_ASSERT_MEM | DBUS_LOAD_A  ; read from temp into A
+    load_acc_idx a a sp
 load_a_b_index_x:  ; Opcode 0x2E
-    ; [A] = [[X + [B]]]
-    fetch
-    uop XFER_ASSERT_X | ALU_RHS | DBUS_ASSERT_ALU | DBUS_LOAD_T1  ; move X-lo into T1
-    uop XFER_ASSERT_B_T1 | ALU_ADD | DBUS_ASSERT_ALU | DBUS_LOAD_T1  ; add offset and SP-lo into T1
-    uop XFER_ASSERT_X | ALU_LHS_C | DBUS_ASSERT_ALU | DBUS_LOAD_T2  ; add X-hi and Cf into T2
-    final ADDR_ASSERT_T | DBUS_ASSERT_MEM | DBUS_LOAD_A  ; read from temp into A
+    load_acc_idx a b x
 load_a_b_index_y:  ; Opcode 0x2F
-    ; [A] = [[Y + [B]]]
-    fetch
-    uop XFER_ASSERT_Y | ALU_RHS | DBUS_ASSERT_ALU | DBUS_LOAD_T1  ; move Y-lo into T1
-    uop XFER_ASSERT_B_T1 | ALU_ADD | DBUS_ASSERT_ALU | DBUS_LOAD_T1  ; add offset and SP-lo into T1
-    uop XFER_ASSERT_Y | ALU_LHS_C | DBUS_ASSERT_ALU | DBUS_LOAD_T2  ; add Y-hi and Cf into T2
-    final ADDR_ASSERT_T | DBUS_ASSERT_MEM | DBUS_LOAD_A  ; read from temp into A
+    load_acc_idx a b y
 load_a_b_index_sp:  ; Opcode 0x30
-    ; [A] = [[SP + [B]]]
-    fetch
-    uop XFER_ASSERT_SP | ALU_RHS | DBUS_ASSERT_ALU | DBUS_LOAD_T1  ; move SP-lo into T1
-    uop XFER_ASSERT_B_T1 | ALU_ADD | DBUS_ASSERT_ALU | DBUS_LOAD_T1  ; add offset and SP-lo into T1
-    uop XFER_ASSERT_SP | ALU_LHS_C | DBUS_ASSERT_ALU | DBUS_LOAD_T2  ; add SP-hi and Cf into T2
-    final ADDR_ASSERT_T | DBUS_ASSERT_MEM | DBUS_LOAD_A  ; read from temp into A
+    load_acc_idx a b sp
 
 load_b_imm:  ; Opcode 0x31
     load_imm b
