@@ -179,9 +179,13 @@ store_a_y:  ; Opcode 0x46
 store_a_e:  ; Opcode 0x47
     store_ptr a e
 store_a_const_index_x:  ; Opcode 0x48
+    store_const_idx a x
 store_a_const_index_y:  ; Opcode 0x49
+    store_const_idx a y
 store_a_const_index_e:  ; Opcode 0x4A
+    store_const_idx a e
 store_a_const_index_sp:  ; Opcode 0x4B
+    store_const_idx a sp
 store_a_a_index_x:  ; Opcode 0x4C
 store_a_a_index_y:  ; Opcode 0x4D
 store_a_a_index_sp:  ; Opcode 0x4E

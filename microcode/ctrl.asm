@@ -42,7 +42,7 @@ _fetch = READ_PC | DBUS_LOAD_IR
     b => XFER_ASSERT_B_T1
 }
 
-#ruledef {
+#ruledef Housekeeping {
     ; Software Interrupt
     ; Perform the interrupt sequence, using the address in src as the ISR Vector
     swi {src: regidx} => {
@@ -77,7 +77,9 @@ _fetch = READ_PC | DBUS_LOAD_IR
             final (dst << XFER_LOAD) | (src << XFER_ASSERT)  ; move src to dst via dbus
         }
     }
+}
 
+#ruledef Loads {
     ; Load Immediate (8-bit)
     ; Load 8-bit register with 8-bit constant from inst stream
     load_imm {dst: reg8} => {
@@ -236,7 +238,9 @@ _fetch = READ_PC | DBUS_LOAD_IR
             final ADDR_ASSERT_DP | DBUS_ASSERT_MEM | (dst << DBUS_LOAD)             ; read from addr into dst
         }
     }
+}
 
+#ruledef Stores {
     ; Store Zero Page (8-bit)
     ; Store the contents of an 8-bit register to the zeropage addr given in inst stream
     store_zpg {src: reg8} => {
@@ -293,6 +297,45 @@ _fetch = READ_PC | DBUS_LOAD_IR
         }
     }
 
+    ; Store Pointer with Constant Offset (8-bit)
+    ; Store 8-bit register value to addr given by value
+    ; in 16-bit register + constant offset given in inst stream
+    store_const_idx {src: reg8} {ptr: reg16} => {
+        ; TODO: implement more efficient version for ptr == E_XFER
+        asm {
+            fetch
+            uop READ_PC | DBUS_LOAD_T1                                              ; read offset from inst stream into t-lo
+            uop (ptr << XFER_ASSERT) | ALU_LSB | DBUS_ASSERT_ALU | DBUS_LOAD_T2     ; move ptr-lo into t-hi
+            uop XFER_ASSERT_T | ALU_ADD | DBUS_ASSERT_ALU | DBUS_LOAD_T1            ; add ptr-lo and t-lo into t-lo
+            uop (ptr << XFER_ASSERT) | ALU_MSB_C | DBUS_ASSERT_ALU | DBUS_LOAD_T2   ; add ptr-hi and Cf into t-hi
+            uop ADDR_ASSERT_T | DBUS_LOAD_MEM | (src << DBUS_ASSERT)                ; write src to dst
+        }
+    }
+
+    ; Store Pointer with Accumulator Offset (8-bit)
+    ; Store 8-bit register value to addr given by value
+    ; in 16-bit register + offset given in an accumulator
+    store_acc_idx {dst: reg8} {acc: xfer_assert_acc8_t1} {ptr: reg16} => {
+        assert(ptr != E_XFER)
+
+        assert(ptr != ptr)  ; TODO: implement
+        asm {
+            fetch
+        }
+    }
+
+    ; Store Zero Page with Accumulator Offset (8-bit)
+    ; Store 8-bit register value to addr given by
+    ; zero page addr incremented by accumulator value
+    load_acc_zpg {dst: reg8} {acc: xfer_assert_acc8_t1} => {
+        assert(ptr != ptr)  ; TODO: implement
+        asm {
+            fetch
+        }
+    } 
+}
+
+#ruledef StackOperations {
     ; Push (8-bit)
     ; Store the contents of an 8-bit register to the top of the stack
     push {src: reg8} => {
