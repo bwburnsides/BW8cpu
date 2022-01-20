@@ -1,0 +1,533 @@
+; #include "ctrl_state.asm"
+#include "ctrl_lines.asm"
+
+READ_PC = ADDR_ASSERT_PC | COUNT_INC_PC | DBUS_ASSERT_MEM
+_fetch = READ_PC | DBUS_LOAD_IR
+
+_A  = (XFER_ASSERT_A_A >> XFER_ASSERT)`5 @ (XFER_ASSERT_A_T1 >> XFER_ASSERT)`5 @ (XFER_ASSERT_T2_A >> XFER_ASSERT)`5 @ A_DBUS`4
+_B  = (XFER_ASSERT_B_B >> XFER_ASSERT)`5 @ (XFER_ASSERT_B_T1 >> XFER_ASSERT)`5 @ (XFER_ASSERT_T2_B >> XFER_ASSERT)`5 @ B_DBUS`4
+_C  = (XFER_ASSERT_C_C >> XFER_ASSERT)`5 @ (XFER_ASSERT_C_T1 >> XFER_ASSERT)`5 @ (XFER_ASSERT_T2_C >> XFER_ASSERT)`5 @ C_DBUS`4
+_D  = (XFER_ASSERT_D_D >> XFER_ASSERT)`5 @ (XFER_ASSERT_D_T1 >> XFER_ASSERT)`5 @ (XFER_ASSERT_T2_D >> XFER_ASSERT)`5 @ D_DBUS`4
+_E  = E_XFER`3
+_X  = (COUNT_INC_X  >> COUNT)`3 @  X_XFER`3 
+_Y  = (COUNT_INC_Y  >> COUNT)`3 @  Y_XFER`3 
+_SP = (COUNT_INC_SP >> COUNT)`3 @ SP_XFER`3
+
+#define ID8        0:3
+#define XA_T2_R8   4:8
+#define XA_R8_T1   9:13
+#define XA_R8_R8  14:18
+
+#define ID16       0:2
+#define INC        3:5
+#define DEC_OFFSET 3
+
+#ruledef {
+    fetch           => _fetch`32
+    uop {value}     => value`32
+    final           => RST_USEQ`32
+    final {value}   => (value | RST_USEQ)`32
+}
+
+#subruledef reg8 {
+    a => _A 
+    b => _B
+    c => _C
+    d => _D
+}
+
+#subruledef acc8 {
+    a => _A
+    b => _B
+}
+
+#subruledef reg16 {
+    sp => _SP
+    e  => _E
+    x  => _X
+    y  => _Y
+}
+
+#subruledef idx16 {
+    x => _X
+    y => _Y
+}
+
+#subruledef acc16 {
+    e => _E
+}
+
+#ruledef Housekeeping {
+    ; Software Interrupt
+    ; Perform the interrupt sequence, using the address in src as the ISR Vector
+    swi {src: idx16} => {
+        asm {
+            fetch
+            uop COUNT_DEC_SP                                                                                        ;  decrement SP to prepare for push
+            uop ADDR_ASSERT_SP | DBUS_ASSERT_SR | DBUS_LOAD_MEM | COUNT_DEC_SP                                      ;  push flags to stack
+            uop ADDR_ASSERT_SP | XFER_ASSERT_PC | ALU_LSB | DBUS_ASSERT_ALU | DBUS_LOAD_MEM | COUNT_DEC_SP          ;  push PC-lo to stack
+            uop ADDR_ASSERT_SP | XFER_ASSERT_PC | ALU_MSB | DBUS_ASSERT_ALU | DBUS_LOAD_MEM                         ;  push PC-hi to stack
+            uop (src[ID16] << ADDR_ASSERT) | (src[INC] << COUNT) | DBUS_ASSERT_MEM | DBUS_LOAD_T2 | ALU_SEI         ;  disable interrupts and read ISR-hi
+            uop (src[ID16] << ADDR_ASSERT) | ((src[INC] + DEC_OFFSET) << COUNT) | DBUS_ASSERT_MEM | DBUS_LOAD_T1    ;  read ISR-lo and reset Y value
+            final XFER_ASSERT_T | XFER_LOAD_PC                                                                      ;  move ISR to PC
+        }
+    }
+
+    ; Move (8-bit)
+    ; Move the contents of one 8-bit register to another
+    mov {dst: reg8} {src: reg8} => {
+        assert(dst != src)  ; inst doesn't support same src as dst
+        asm {
+            fetch
+            final (dst[ID8] << DBUS_LOAD) | (src[ID8] << DBUS_ASSERT)   ; move src to dst via dbus
+        }
+    }
+
+    ; Move (16-bit)
+    ; Move the contents of one 16-bit register to another
+    mov {dst: reg16} {src: reg16} => {
+        assert(dst != src)  ; inst doesn't support same src as dst
+        asm {
+            fetch
+            final (dst[ID16] << XFER_LOAD) | (src[ID16] << XFER_ASSERT)     ; move src to dst via dbus
+        }
+    }
+}
+
+#ruledef Loads {
+    ; Load Immediate (8-bit)
+    ; Load 8-bit register with 8-bit constant from inst stream
+    load_imm {dst: reg8} => {
+        asm {
+            fetch
+            final READ_PC | (dst[ID8] << DBUS_LOAD)     ; read inst stream into dst via dbus
+        }
+    }
+
+    ; Load Immediate (16-bit)
+    ; Load 16-bit register with 16-bit constant from inst stream
+    load_imm {dst: reg16} => {
+        assert(dst != _SP)  ; inst doesn't support sp as dst
+        asm {
+            fetch
+            uop READ_PC | DBUS_LOAD_T2                      ; load imm-hi
+            uop READ_PC | DBUS_LOAD_T1                      ; load imm-lo
+            final XFER_ASSERT_T | (dst[ID16] << XFER_LOAD)  ; move imm to dst
+        }
+    }
+
+    ; Load Absolute (8-bit)
+    ; Load 8-bit register with value found at absolute addr given in inst stream
+    load_abs {dst: reg8} => {
+        asm {
+            fetch
+            uop READ_PC | DBUS_LOAD_T2                                          ; read abs-hi
+            uop READ_PC | DBUS_LOAD_T1                                          ; read abs-lo
+            final ADDR_ASSERT_T | DBUS_ASSERT_MEM | (dst[ID8] << DBUS_LOAD)     ; read from abs into dst
+        }
+    }
+
+    ; Load Absolute (16-bit)
+    ; Load 16-bit register with value found at absolute addr and addr + 1 given in inst stream
+    load_abs {dst: reg16} => {
+        assert(dst != _SP)  ; inst doesn't support sp as dst
+        asm {
+            fetch
+            uop READ_PC | DBUS_LOAD_T2                                                              ; read abs-hi
+            uop READ_PC | DBUS_LOAD_T1                                                              ; read abs-lo
+            uop XFER_ASSERT_T | (dst << XFER_LOAD)                                                  ; move addr to dst
+            uop (dst[ID16] << ADDR_ASSERT) | DBUS_ASSERT_MEM | DBUS_LOAD_T2 | (dst[ID16] << COUNT)  ; read val-hi and inc ptr
+            uop (dst[ID16] << ADDR_ASSERT) | DBUS_ASSERT_MEM | DBUS_LOAD_T1                         ; read val-lo
+            final XFER_ASSERT_T | (dst[ID16] << XFER_LOAD)                                          ; move val to dst
+        }
+    }
+
+    ; Load Zero Page (8-bit)
+    ; Load 8-bit register with value found at zeropage addr given in inst stream 
+    load_zpg {dst: reg8} => {
+        asm {
+            fetch
+            uop READ_PC | DBUS_LOAD_T1                                          ; read zpg addr into t1 / dp
+            final ADDR_ASSERT_DP | DBUS_ASSERT_MEM | (dst[ID8] << DBUS_LOAD)    ; read from dp into dst
+        }
+    }
+
+    ; Load Zero Page (16-bit)
+    ; Load 16-bit register with value found at zeropage addr and addr + 1 given in inst stream 
+    load_zpg {dst: idx16} => {
+        asm {
+            fetch
+            uop READ_PC | DBUS_LOAD_T1                                                              ; read zpg addr to t-lo
+            uop DBUS_ASSERT_DP | DBUS_LOAD_T2                                                       ; move dp-hi to t-hi
+            uop XFER_ASSERT_T | (dst[ID16] << XFER_LOAD)                                            ; move t to dst
+            uop (dst[ID16] << ADDR_ASSERT) | DBUS_ASSERT_MEM | DBUS_LOAD_T2 | (dst[ID16] << COUNT)  ; read val-hi into t-hi
+            uop (dst[ID16] << ADDR_ASSERT) | DBUS_ASSERT_MEM | DBUS_LOAD_T1                         ; read val-lo into t-lo
+            final XFER_ASSERT_T | (dst[ID16] << XFER_LOAD)                                          ; move t to dst
+        }
+    }
+
+    ; Load Zero Page (16-bit, E as dst)
+    ; Load 16-bit register with value found at zeropage addr and addr + 1 given in inst stream
+    load_zpg {dst: acc16} => {
+        asm {
+            fetch
+            uop READ_PC | DBUS_LOAD_T1                                          ; read zpg addr to t1 / dp
+            uop ADDR_ASSERT_DP | DBUS_ASSERT_MEM | DBUS_LOAD_A | COUNT_INC_T    ; read from dp into A (E-hi)
+            final ADDR_ASSERT_DP | DBUS_ASSERT_MEM | DBUS_LOAD_B                ; read from dp into B (E-lo)
+        }
+    }
+
+    ; Load Pointer (8-bit)
+    ; Load 8-bit register with value from addr given in 16-bit register
+    load_ptr {dst: reg8} {ptr: reg16} => {
+        assert(ptr != _SP)  ; inst doesn't support sp as ptr
+        asm {
+            fetch
+            final (ptr[ID16] << ADDR_ASSERT) | DBUS_ASSERT_MEM | (dst[ID8] << DBUS_LOAD)    ; read from ptr into dst
+        }
+    }
+
+    ; Load Pointer (16-bit)
+    ; Load 16-bit register with value from addr given in index register
+    load_ptr {dst: reg16} {ptr: idx16} => {
+        asm {
+            fetch
+            uop (ptr[ID16] << ADDR_ASSERT) | DBUS_ASSERT_MEM | DBUS_LOAD_T2 | (ptr[ID16] << COUNT)                  ; read val-hi and inc ptr
+            uop (ptr[ID16] << ADDR_ASSERT) | DBUS_ASSERT_MEM | DBUS_LOAD_T1 | ((ptr[ID16] + DEC_OFFSET) << COUNT)   ; read val-lo and dec ptr to preserve
+            final XFER_ASSERT_T | (dst[ID8] << XFER_LOAD)                                                           ; move val to dst
+        }
+    }
+
+    ; Load Pointer (16-bit, E as ptr)
+    ; Load 16-bit register with value from addr given in E Accumulator
+    load_ptr {dst: reg16} {ptr: acc16} => {
+        asm {
+            fetch
+            uop DBUS_ASSERT_A | DBUS_LOAD_T2                    ; move E-hi to T-hi
+            uop DBUS_ASSERT_B | DBUS_LOAD_T1                    ; move E-lo to T-lo
+            uop COUNT_INC_T                                     ; inc T - now E points to val-hi and T points to val-lo
+            uop ADDR_ASSERT_T | DBUS_ASSERT_MEM | DBUS_LOAD_T1  ; read val-lo to t-lo
+            uop ADDR_ASSERT_E | DBUS_ASSERT_MEM | DBUS_LOAD_T2  ; read val-hi to t-hi
+            final XFER_ASSERT_T | (dst[ID16] << XFER_LOAD)      ; move val to dst
+        }
+    }
+
+    ; Load Pointer with Constant Offset (8-bit)
+    ; Load 8-bit register with value from addr given by value
+    ; in 16-bit register + constant offset given in inst stream
+    load_const_idx {dst: reg8} {ptr: reg16} => {
+        asm {
+            fetch
+            uop READ_PC | (dst[ID8] << DBUS_LOAD)                                           ; read offset into dst
+            uop (ptr[ID16] << XFER_ASSERT) | ALU_RHS | DBUS_ASSERT_ALU | DBUS_LOAD_T1       ; move ptr-Lo into T1
+            uop (dst[XA_R8_T1] << XFER_ASSERT) | ALU_ADD | DBUS_ASSERT_ALU | DBUS_LOAD_T1   ; add offset and ptr-lo into T1
+            uop XFER_ASSERT_X | ALU_LHS_C | DBUS_ASSERT_ALU | DBUS_LOAD_T2                  ; add ptr-hi and Cf into T2
+            final ADDR_ASSERT_T | DBUS_ASSERT_MEM | (dst[ID8] << DBUS_LOAD)                 ; read from temp into dst
+        }
+    }
+
+    ; Load Pointer with Accumulator Offset (8-bit)
+    ; Load 8-bit register with value from addr given by value
+    ; in 16-bit register + offset given in an accumulator
+    load_acc_idx {dst: reg8} {acc: acc8} {ptr: reg16} => {
+        assert(ptr != _E)
+        asm {
+            fetch
+            uop (ptr[ID16] << XFER_ASSERT) | ALU_LSB | DBUS_ASSERT_ALU | DBUS_LOAD_T1       ; move ptr-lo to t-lo
+            uop (acc[XA_R8_T1] << XFER_ASSERT) | ALU_ADD | DBUS_ASSERT_ALU | DBUS_LOAD_T1   ; add acc and t-lo into t-lo 
+            uop (ptr[ID16] << XFER_ASSERT) | ALU_MSB_C | DBUS_ASSERT_ALU | DBUS_LOAD_T2     ; add ptr-hi and Cf into t-hi
+            final ADDR_ASSERT_T | DBUS_ASSERT_MEM | (dst[ID8] << DBUS_LOAD)                 ; read from t into dst
+        }
+    }
+
+    ; Load Zero Page with Accumulator Offset (8-bit)
+    ; Load 8-bit register with value given by zero page addr incremented by
+    ; accumulator value
+    load_acc_zpg {dst: reg8} {acc: acc8} => {
+        asm {
+            fetch
+            uop READ_PC | DBUS_LOAD_T1                                                      ; read zpg addr into t1
+            uop (acc[XA_R8_T1] << XFER_ASSERT) | ALU_ADD | DBUS_ASSERT_ALU | DBUS_LOAD_T1   ; add t-lo and acc into t-lo
+            final ADDR_ASSERT_DP | DBUS_ASSERT_MEM | (dst[ID8] << DBUS_LOAD)                ; read from addr into dst
+        }
+    }
+}
+
+#ruledef Stores {
+    ; Store Zero Page (8-bit)
+    ; Store the contents of an 8-bit register to the zeropage addr given in inst stream
+    store_zpg {src: reg8} => {
+        asm {
+            fetch
+            uop READ_PC | DBUS_LOAD_T1                                          ; read zpg addr into t1/dp
+            final ADDR_ASSERT_DP | DBUS_LOAD_MEM | (src[ID8] << DBUS_ASSERT)    ; write src to dp addr
+        }
+    }
+
+    ; Store Zero Page (16-bit)
+    ; Store the contents of a 16-bit register to the zeropage addr and addr+1 given in inst stream
+    store_zpg {src: reg16} => {
+        assert(src != _SP)
+        asm {
+            fetch
+            uop READ_PC | DBUS_LOAD_T1                                                                                  ; read zpg addr into t1/dp
+            uop (src[ID16] << XFER_ASSERT) | ALU_MSB | DBUS_ASSERT_ALU | ADDR_ASSERT_DP | DBUS_LOAD_MEM | COUNT_INC_T   ; write src-hi to dp
+            final (src[ID16] << XFER_ASSERT) | ALU_LSB | DBUS_ASSERT_ALU | ADDR_ASSERT_DP | DBUS_LOAD_MEM               ; write src-lo to dp+1
+        }
+    }
+
+    ; Store Absolute (8-bit)
+    ; Store the contents of an 8-bit register to the absolute addr given in inst stream
+    store_abs {src: reg8} => {
+        asm {
+            fetch
+            uop READ_PC | DBUS_LOAD_T2                                          ; read abs-hi into t-hi
+            uop READ_PC | DBUS_LOAD_T1                                          ; read abs-lo into t-lo
+            final ADDR_ASSERT_T | DBUS_LOAD_MEM | (src[ID8] << DBUS_ASSERT)     ; write src to t addr
+        }
+    }
+
+    ; Store Absolute (16-bit)
+    ; Store the contents of a 16-bit register to the absolute addr and addr+1 given in inst stream
+    store_abs {src: reg16} => {
+        assert(src != _SP)
+        asm {
+            fetch
+            uop READ_PC | DBUS_LOAD_T2                                                                                  ; read abs-hi into t-hi
+            uop READ_PC | DBUS_LOAD_T1                                                                                  ; read abs-lo into t-lo
+            uop ADDR_ASSERT_T | DBUS_LOAD_MEM | (src[ID16] << XFER_ASSERT) | ALU_MSB | DBUS_ASSERT_ALU | COUNT_INC_T    ; write src-hi to addr
+            final ADDR_ASSERT_T | DBUS_LOAD_MEM | (src[ID16] << XFER_ASSERT) | ALU_LSB | DBUS_ASSERT_ALU                ; write src-lo to addr+1
+        }
+    }
+
+    ; Store Pointer (8-bit)
+    ; Store the contents of an 8-bit register to the addr given in a 16-bit register
+    store_ptr {src: reg8} {ptr: reg16} => {
+        assert(ptr != _SP)
+        asm {
+            fetch
+            final (ptr[ID16] << ADDR_ASSERT) | DBUS_LOAD_MEM | (src[ID8] << DBUS_ASSERT)    ; write src to ptr addr
+        }
+    }
+
+    ; Store Pointer with Constant Offset (8-bit)
+    ; Store 8-bit register value to addr given by value
+    ; in 16-bit register + constant offset given in inst stream
+    store_const_idx {src: reg8} {ptr: reg16} => {
+        asm {
+            fetch
+            uop READ_PC | DBUS_LOAD_T1                                                      ; read offset from inst stream into t-lo
+            uop (ptr[ID16] << XFER_ASSERT) | ALU_LSB | DBUS_ASSERT_ALU | DBUS_LOAD_T2       ; move ptr-lo into t-hi
+            uop XFER_ASSERT_T | ALU_ADD | DBUS_ASSERT_ALU | DBUS_LOAD_T1                    ; add ptr-lo and t-lo into t-lo
+            uop (ptr[ID16] << XFER_ASSERT) | ALU_MSB_C | DBUS_ASSERT_ALU | DBUS_LOAD_T2     ; add ptr-hi and Cf into t-hi
+            final ADDR_ASSERT_T | DBUS_LOAD_MEM | (src[ID8] << DBUS_ASSERT)                 ; write src to dst
+        }
+    }
+
+    ; Store Pointer with Constant Offset (8-bit, ptr=E_XFER)
+    ; Store 8-bit register value to addr given by value
+    ; in 16-bit register + constant offset given in inst stream
+    store_const_idx {src: reg8} {ptr: acc16} => {
+        asm {
+            fetch
+            uop READ_PC | DBUS_LOAD_T1                                          ; read offset from inst stream into t-lo
+            uop XFER_ASSERT_B_T1 | ALU_ADD | DBUS_ASSERT_ALU | DBUS_LOAD_T1     ; add E-lo (B) and t-lo into t-lo
+            uop XFER_ASSERT_E | ALU_MSB_C | DBUS_ASSERT_ALU | DBUS_LOAD_T2      ; add E-hi (A) and Cf into t-hi
+            final ADDR_ASSERT_T | DBUS_LOAD_MEM | (src[ID8] << DBUS_ASSERT)     ; write src to T addr
+        }
+    }
+
+    ; Store Pointer with Accumulator Offset (8-bit)
+    ; Store 8-bit register value to addr given by value
+    ; in 16-bit register + offset given in an accumulator
+    store_acc_idx {dst: reg8} {acc: acc8} {ptr: reg16} => {
+        assert(ptr != _E)  ; inst doesn't support E as ptr (TODO: include this in ISA?)
+        asm {
+            fetch
+            uop (ptr[ID16] << XFER_ASSERT) | ALU_LSB | DBUS_ASSERT_ALU | DBUS_LOAD_T1       ; move ptr-lo to 8-bit side
+            uop (acc[XA_R8_T1] << XFER_ASSERT) | ALU_ADD | DBUS_ASSERT_ALU | DBUS_LOAD_T1   ; ptr-lo + acc to t-lo
+            uop (ptr[ID16] << XFER_ASSERT) | ALU_MSB_C | DBUS_ASSERT_ALU | DBUS_LOAD_T2     ; ptr-hi + Cf to t-hi
+            final ADDR_ASSERT_T | DBUS_LOAD_MEM | (src[ID8] << DBUS_ASSERT)                 ; write src to T addr
+        }
+    }
+
+    ; Store Zero Page with Accumulator Offset (8-bit)
+    ; Store 8-bit register value to addr given by
+    ; zero page addr incremented by accumulator value
+    store_acc_zpg {src: reg8} {acc: acc8} => {
+        asm {
+            fetch
+            uop READ_PC | DBUS_LOAD_T1                                                      ; read zpg addr into t1 / dp
+            uop (acc[XA_R8_T1] << XFER_ASSERT) | ALU_ADD | DBUS_ASSERT_ALU | DBUS_LOAD_T1   ; add acc offset to zpg addr
+            final ADDR_ASSERT_DP | DBUS_LOAD_MEM | (src[ID8] << DBUS_ASSERT)                ; write src to DP addr
+        }
+    } 
+}
+
+#ruledef StackOperations {
+    ; Push (8-bit)
+    ; Store the contents of an 8-bit register to the top of the stack
+    push {src: reg8} => {
+        asm {
+            fetch
+            uop COUNT_DEC_SP                                                    ; dec SP to prep for push
+            final ADDR_ASSERT_SP | DBUS_LOAD_MEM | (src[ID8] << DBUS_ASSERT)    ; write src to sp
+        }
+    }
+
+    ; Push (16-bit)
+    ; Store the contents of a 16-bit register to the top of the stack
+    push {src: reg16} => {
+        assert(src != _SP)
+        asm {
+            fetch
+            uop COUNT_DEC_SP                                                                                            ; dec sp to prep for push
+            uop ADDR_ASSERT_SP | DBUS_LOAD_MEM | (src[ID16] << XFER_ASSERT) | ALU_LSB | DBUS_ASSERT_ALU | COUNT_DEC_SP  ; write src-lo to sp
+            final ADDR_ASSERT_SP | DBUS_LOAD_MEM | (src[ID16] << XFER_ASSERT) | ALU_MSB | DBUS_ASSERT_ALU               ; write src-hi to sp-1
+        }
+    }
+
+    ; Pop (8-bit)
+    ; Load an 8-bit register with the contents at the top of the stack
+    pop {dst: reg8} => {
+        asm {
+            fetch
+            final ADDR_ASSERT_SP | DBUS_ASSERT_MEM | (dst[ID8] << DBUS_LOAD) | COUNT_INC_SP     ; read from SP into dst
+        }
+    }
+
+    ; Pop (16-bit)
+    ; Load a 16-bit register with the contents at the top of the stack
+    pop {dst: reg16} => {
+        assert(dst != _SP)
+        asm {
+            fetch
+            uop ADDR_ASSERT_SP | DBUS_ASSERT_MEM | DBUS_LOAD_T2 | COUNT_INC_SP  ; read hi into t-hi
+            uop ADDR_ASSERT_SP | DBUS_ASSERT_MEM | DBUS_LOAD_T1                 ; read lo into t-lo
+            final (dst[ID16] << XFER_LOAD) | XFER_ASSERT_T                      ; move t to dst
+        }
+    }
+}
+
+#ruledef Additions {
+    inc {src: acc8} => {
+        asm {
+            fetch
+            final (src[XA_R8_R8] << XFER_ASSERT) | ALU_INC | DBUS_ASSERT_ALU | (src[ID8] << DBUS_LOAD)
+        }
+    }
+
+    inc {src: idx16} => {
+        asm {
+            fetch
+            final src[INC] << COUNT
+        }
+    }
+
+    inc {src: acc16} => {
+        asm {
+            fetch
+            uop XFER_ASSERT_B_B | ALU_INC | DBUS_ASSERT_ALU | DBUS_LOAD_B
+            final XFER_ASSERT_A_A | ALU_MSB_C | DBUS_ASSERT_ALU | DBUS_LOAD_A
+        }
+    }
+
+    inc_abs => {
+        assert(1 != 1)  ; TODO: figure out this inst
+        asm {
+            fetch
+            uop READ_PC | DBUS_LOAD_T2  ; read abs-hi
+            uop READ_PC | DBUS_LOAD_T1  ; read abs-lo
+            uop ADDR_ASSERT_T | DBUS_ASSERT_MEM | DBUS_LOAD_T2
+            uop XFER_ASSERT_T | ALU_INC | DBUS_ASSERT_ALU | DBUS_LOAD_T1
+        }
+    }
+
+    inc_zpg => {
+        asm {
+            fetch
+            uop READ_PC | DBUS_LOAD_T1  ; read zpg-addr
+            uop ADDR_ASSERT_DP | DBUS_ASSERT_MEM | DBUS_LOAD_T2
+            uop XFER_ASSERT_T | ALU_INC | DBUS_ASSERT_ALU | DBUS_LOAD_T2
+            final ADDR_ASSERT_DP | DBUS_LOAD_MEM | DBUS_ASSERT_T2
+        }
+    }
+
+    inc_deref {src: reg16} => {
+        asm {
+            fetch
+            uop (src[ID16] << ADDR_ASSERT) | DBUS_ASSERT_MEM | DBUS_LOAD_T2
+            uop XFER_ASSERT_T | ALU_INC | DBUS_ASSERT_ALU | DBUS_LOAD_T2
+            final (src[ID16] << ADDR_ASSERT) | DBUS_LOAD_MEM | DBUS_ASSERT_T2
+        }
+    }
+}
+
+#ruledef Subtractions {
+    dec {src: acc8} => {
+        asm {
+            fetch
+        }
+    }
+
+    dec {src: reg16} => {
+        assert(src != _SP)
+        asm {
+            fetch
+        }
+    }
+
+    dec_abs => {
+        asm {
+            fetch
+        }
+    }
+
+    dec_zpg => {
+        asm {
+            fetch
+        }
+    }
+
+    dec_deref {src: reg16} => {
+        asm {
+            fetch
+        }
+    }
+}
+
+#ruledef LogicalANDs {
+
+}
+
+#ruledef LogicalORs {
+
+}
+
+#ruledef LogicalXORs {
+
+}
+
+#ruledef LogicalNOTs {
+
+}
+
+#ruledef Negations {
+
+}
+
+#ruledef Shifts {
+
+}
+
+#ruledef Compares {
+
+}
+
+#ruledef BitTests {
+
+}
+
+#ruledef Jumps {
+
+}
