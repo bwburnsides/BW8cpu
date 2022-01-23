@@ -27,8 +27,7 @@ brk:  ; Opcode 0x00
     fetch
     final BRK_CLK
 nop:  ; Opcode 0x01
-    fetch
-    final
+    nop
 wai:  ; Opcode 0x02
     ; TBD
 ex1:  ; Opcode 0x03
@@ -413,53 +412,21 @@ pop_y:  ; Opcode 0xE3
     pop y
 
 jmp_rel:  ; Opcode 0xE4
-    fetch
-    uop READ_PC | DBUS_LOAD_T1
-    uop XFER_ASSERT_PC | ALU_RHS | DBUS_ASSERT_ALU | DBUS_LOAD_T2
-    uop XFER_ASSERT_T | ALU_ADD | DBUS_ASSERT_ALU | DBUS_LOAD_T1
-    uop XFER_ASSERT_PC | ALU_LHS_C | DBUS_ASSERT_ALU | DBUS_LOAD_T2
-    final XFER_ASSERT_T | XFER_LOAD_PC
-
+    jmp_rel
 jmp_ind:  ; Opcode 0xE5
-    fetch
-    uop READ_PC | DBUS_LOAD_T2
-    uop READ_PC | DBUS_LOAD_T1
-    uop XFER_ASSERT_T | XFER_LOAD_PC
-    uop READ_PC | DBUS_LOAD_T2
-    uop READ_PC | DBUS_LOAD_T1
-    final XFER_ASSERT_T | XFER_LOAD_PC
+    jmp_ind
 
 jsr_abs:  ; 0xE6
-    fetch
-    uop READ_PC | DBUS_LOAD_T1                                                                      ; Read ABS-hi 
-    uop READ_PC | DBUS_LOAD_T2 | COUNT_DEC_SP                                                       ; Read ABS-lo, dec SP for push
-    uop ADDR_ASSERT_SP | DBUS_LOAD_MEM | XFER_ASSERT_PC | ALU_RHS | DBUS_ASSERT_ALU | COUNT_DEC_SP  ; Push PC-lo, dec SP for push
-    uop ADDR_ASSERT_SP | DBUS_LOAD_MEM | XFER_ASSERT_PC | ALU_LHS | DBUS_ASSERT_ALU                 ; Push PC-hi
-    final XFER_ASSERT_T | XFER_LOAD_PC                                                              ; Move addr to PC
-
+    jsr_abs
 jsr_rel:  ; Opcode 0xE7
-    fetch
-    uop READ_PC | DBUS_LOAD_T1 | COUNT_DEC_SP                                                       ; read offset and decrement SP to prepare for push
-    uop ADDR_ASSERT_SP | DBUS_LOAD_MEM | XFER_ASSERT_PC | ALU_RHS | DBUS_ASSERT_ALU | COUNT_DEC_SP  ; Push PC-lo
-    uop ADDR_ASSERT_SP | DBUS_LOAD_MEM | XFER_ASSERT_PC | ALU_LHS | DBUS_ASSERT_ALU                 ; Push PC-hi
-    uop XFER_ASSERT_PC | ALU_RHS | DBUS_ASSERT_ALU | DBUS_LOAD_T2                                   ; move PC-lo to 8-bit side
-    uop XFER_ASSERT_T | ALU_ADD | DBUS_ASSERT_ALU | DBUS_LOAD_T1                                    ; add offset and PC-lo into T1 (T-lo)
-    uop XFER_ASSERT_PC | ALU_LHS_C | DBUS_ASSERT_ALU | DBUS_LOAD_T2                                 ; move PC-Hi + Cf into T2 (T-hi)
-    final XFER_ASSERT_T | XFER_LOAD_PC                                                              ; move T to PC
-
+    jsr_rel
 jsr_ind:  ; Opcode 0xE8
 
+
 rts:  ; Opcode 0xE9
-    fetch
-    uop ADDR_ASSERT_SP | DBUS_ASSERT_MEM | DBUS_LOAD_T2 | COUNT_INC_SP  ; pull PC-hi
-    uop ADDR_ASSERT_SP | DBUS_ASSERT_MEM | DBUS_LOAD_T1 | COUNT_INC_SP  ; pull PC-lo
-    final XFER_ASSERT_T | XFER_LOAD_PC                                  ; move to PC
+    rts
 rti:  ; Opcode 0xEA
-    fetch
-    uop ADDR_ASSERT_SP | DBUS_ASSERT_MEM | DBUS_LOAD_T2 | COUNT_INC_SP  ; pop PC-hi
-    uop ADDR_ASSERT_SP | DBUS_ASSERT_MEM | DBUS_LOAD_T1 | COUNT_INC_SP; pop PC-lo
-    uop ADDR_ASSERT_SP | DBUS_ASSERT_MEM | DBUS_LOAD_SR | COUNT_INC_SP; pop SR
-    final ALU_CLI | XFER_ASSERT_T | XFER_LOAD_PC
+    rti
 
 jo_rel:  ; Opcode 0xEB
 jo_ind:  ; Opcode 0xEC

@@ -1,3 +1,4 @@
+#once
 ; NOTE: take caution when modifying any orderings in this file. the simulator's control unit
 ; and bus decoder has been configured to use these exact values.
 
