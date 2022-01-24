@@ -906,7 +906,8 @@ JMP_IND*
 # Subroutine control
 JSR_ABS*
 JSR_REL*
-JSR_IND*
+JSR_X*
+JSR_Y*
 RTS*
 RTI*
 

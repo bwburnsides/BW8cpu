@@ -1,5 +1,5 @@
-; Total opcode count: 674
-; Zeropage opcodes: 255
+; Total opcode count: 675
+; Zeropage opcodes: 256
 ; Extended 1 opcodes: 256
 ; Extended 2 opcodes: 163
 
@@ -235,29 +235,30 @@ JMP_REL = 0x00e4
 JMP_IND = 0x00e5
 JSR_ABS = 0x00e6
 JSR_REL = 0x00e7
-JSR_IND = 0x00e8
-RTS = 0x00e9
-RTI = 0x00ea
-JO_REL = 0x00eb
-JO_IND = 0x00ec
-JNO_REL = 0x00ed
-JNO_IND = 0x00ee
-JN_REL = 0x00ef
-JN_IND = 0x00f0
-JP_REL = 0x00f1
-JP_IND = 0x00f2
-JZ_REL = 0x00f3
-JZ_IND = 0x00f4
-JNZ_REL = 0x00f5
-JNZ_IND = 0x00f6
-JC_REL = 0x00f7
-JC_IND = 0x00f8
-JNC_REL = 0x00f9
-JNC_IND = 0x00fa
-JA_REL = 0x00fb
-JA_IND = 0x00fc
-JNA_REL = 0x00fd
-JNA_IND = 0x00fe
+JSR_X = 0x00e8
+JSR_Y = 0x00e9
+RTS = 0x00ea
+RTI = 0x00eb
+JO_REL = 0x00ec
+JO_IND = 0x00ed
+JNO_REL = 0x00ee
+JNO_IND = 0x00ef
+JN_REL = 0x00f0
+JN_IND = 0x00f1
+JP_REL = 0x00f2
+JP_IND = 0x00f3
+JZ_REL = 0x00f4
+JZ_IND = 0x00f5
+JNZ_REL = 0x00f6
+JNZ_IND = 0x00f7
+JC_REL = 0x00f8
+JC_IND = 0x00f9
+JNC_REL = 0x00fa
+JNC_IND = 0x00fb
+JA_REL = 0x00fc
+JA_IND = 0x00fd
+JNA_REL = 0x00fe
+JNA_IND = 0x00ff
 
 CLC = 0x0100
 CLI = 0x0101

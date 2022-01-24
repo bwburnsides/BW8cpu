@@ -628,16 +628,6 @@ DEC_OFFSET          = 3
         }
     }
 
-    jmp_abs {cond} => {
-        assert(($ & cond) == cond)
-        asm { jmp_abs }
-    }
-
-    jmp_abs {cond} => {
-        assert(($ & cond) != cond)
-        asm { nop }
-    }
-
     jmp_rel => {
         asm {
             fetch
@@ -648,16 +638,6 @@ DEC_OFFSET          = 3
             final XFER_ASSERT_T | XFER_LOAD_PC                                  ; move T to PC
             zero 2
         }
-    }
-
-    jmp_rel {cond} => {
-        assert(($ & cond) == cond)
-        asm { jmp_rel }
-    }
-
-    jmp_rel {cond} => {
-        assert(($ & cond) != cond)
-        asm { nop }
     }
 
     jmp_ind => {
@@ -671,16 +651,6 @@ DEC_OFFSET          = 3
             final XFER_ASSERT_T | XFER_LOAD_PC  ; move addr to PC
             zero 1
         }
-    }
-
-    jmp_ind {cond} => {
-        assert(($ & cond) == cond)
-        asm { jmp_ind }
-    }
-
-    jmp_ind {cond} => {
-        assert(($ & cond) != cond)
-        asm { nop }
     }
 
     rts => {
@@ -728,9 +698,13 @@ DEC_OFFSET          = 3
         }
     }
 
-    jsr_ind => {
-        ; TODO: how to implement?
+    jsr_ptr {ptr: idx16} => {
+        asm {
+            fetch
+            uop COUNT_DEC_SP                                                                                ; dec sp to prepare for push
+            uop ADDR_ASSERT_SP | DBUS_LOAD_MEM | XFER_ASSERT_PC | ALU_LSB | DBUS_ASSERT_ALU | COUNT_DEC_SP  ; push pc-lo and dec sp to prep for next push
+            uop ADDR_ASSERT_SP | DBUS_LOAD_MEM | XFER_ASSERT_PC | ALU_MSB | DBUS_ASSERT_ALU                 ; push pc-hi
+            final (id16(ptr) << XFER_ASSERT) | XFER_LOAD_PC                                                 ; move ptr-val into pc
+        }
     }
 }
-
-#bank ucode
