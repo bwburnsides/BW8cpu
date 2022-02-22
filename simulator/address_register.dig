@@ -153,7 +153,7 @@
           <string>xfer</string>
         </entry>
       </elementAttributes>
-      <pos x="-780" y="-160"/>
+      <pos x="-800" y="-160"/>
     </visualElement>
     <visualElement>
       <elementName>Tunnel</elementName>
@@ -2136,20 +2136,20 @@
       <elementName>Splitter</elementName>
       <elementAttributes>
         <entry>
-          <string>Input Splitting</string>
-          <string>1*16</string>
-        </entry>
-        <entry>
           <string>mirror</string>
           <boolean>true</boolean>
         </entry>
         <entry>
-          <string>Output Splitting</string>
-          <string>16</string>
-        </entry>
-        <entry>
           <string>rotation</string>
           <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>Input Splitting</string>
+          <string>1*16</string>
+        </entry>
+        <entry>
+          <string>Output Splitting</string>
+          <string>16</string>
         </entry>
       </elementAttributes>
       <pos x="-780" y="-40"/>
@@ -2690,7 +2690,7 @@
     </wire>
     <wire>
       <p1 x="-820" y="-160"/>
-      <p2 x="-780" y="-160"/>
+      <p2 x="-800" y="-160"/>
     </wire>
     <wire>
       <p1 x="-580" y="-160"/>

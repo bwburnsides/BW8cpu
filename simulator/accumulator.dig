@@ -2135,6 +2135,10 @@
           <string>Label</string>
           <string>reg_a</string>
         </entry>
+        <entry>
+          <string>Bits</string>
+          <int>8</int>
+        </entry>
       </elementAttributes>
       <pos x="-1820" y="460"/>
     </visualElement>
@@ -2148,6 +2152,10 @@
         <entry>
           <string>Label</string>
           <string>reg_b</string>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>8</int>
         </entry>
       </elementAttributes>
       <pos x="-1820" y="540"/>
