@@ -142,6 +142,10 @@
           <string>Bits</string>
           <int>16</int>
         </entry>
+        <entry>
+          <string>isHighZ</string>
+          <boolean>true</boolean>
+        </entry>
       </elementAttributes>
       <pos x="-820" y="-160"/>
     </visualElement>

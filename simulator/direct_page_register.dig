@@ -39,6 +39,10 @@
           <string>Bits</string>
           <int>8</int>
         </entry>
+        <entry>
+          <string>isHighZ</string>
+          <boolean>true</boolean>
+        </entry>
       </elementAttributes>
       <pos x="240" y="220"/>
     </visualElement>
@@ -313,6 +317,14 @@
           <string>Bits</string>
           <int>8</int>
         </entry>
+        <entry>
+          <string>isHighZ</string>
+          <boolean>true</boolean>
+        </entry>
+        <entry>
+          <string>InDefault</string>
+          <value v="0" z="true"/>
+        </entry>
       </elementAttributes>
       <pos x="240" y="300"/>
     </visualElement>
@@ -336,6 +348,10 @@
         <entry>
           <string>Bits</string>
           <int>16</int>
+        </entry>
+        <entry>
+          <string>isHighZ</string>
+          <boolean>true</boolean>
         </entry>
       </elementAttributes>
       <pos x="240" y="380"/>
@@ -1033,12 +1049,12 @@
       <elementName>74193.dig</elementName>
       <elementAttributes>
         <entry>
-          <string>Label</string>
-          <string>T1 lo</string>
-        </entry>
-        <entry>
           <string>shapeType</string>
           <shapeType>SIMPLE</shapeType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>T1 lo</string>
         </entry>
       </elementAttributes>
       <pos x="2060" y="460"/>

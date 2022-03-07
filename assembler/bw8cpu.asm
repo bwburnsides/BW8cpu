@@ -74,9 +74,9 @@ _ = ASSEMBLY_TIME_CHECKS()
     mov e, y                    => opcode(MOV_E_Y)
     mov e, sp                   => opcode(MOV_E_SP)
 
-    load a, #{imm: i8}          => opcode(LOAD_A_IMM)               @ imm
-    load a, *{abs: u16}         => opcode(LOAD_A_ABS)               @ abs
-    load a, *{zpg: u8}          => opcode(LOAD_A_ZPG)               @ zpg
+    load a, #{imm: i8}          => opcode(LOAD_IMM_A)               @ imm
+    load a, *{abs: u16}         => opcode(LOAD_ABS_A)               @ abs
+    load a, *{zpg: u8}          => opcode(LOAD_ZPG_A)               @ zpg
     load a, *({zpg: u8} + a)    => opcode(LOAD_A_A_INDEX_ZPG)       @ zpg
     load a, *({zpg: u8} + b)    => opcode(LOAD_A_B_INDEX_ZPG)       @ zpg
     load a, *x                  => opcode(LOAD_A_X)
@@ -150,8 +150,35 @@ _ = ASSEMBLY_TIME_CHECKS()
     load d, *(y + b)            => opcode(LOAD_D_B_INDEX_Y)
     load d, *(sp + b)           => opcode(LOAD_D_B_INDEX_SP)
 
-    add a, #{imm: i8}           => opcode(ADD_A_IMM)                 @ imm
+    load x, #{imm: i16}         => opcode(LOAD_IMM_X)               @ imm
 
+    load y, {abs: u16}          => opcode(LOAD_ABS_Y)               @ abs
+    load y, #{imm: i16}         => opcode(LOAD_IMM_Y)               @ imm
+
+    store a, *({zpg: i8})       => opcode(STORE_ZPG_A)              @ zpg
+
+    store y, *X                 => opcode(STORE_PTR_X_Y)
+
+    add a, #{imm: i8}           => opcode(ADD_A_IMM)                @ imm
+
+    inc a                       => opcode(INC_A)
+    inc b                       => opcode(INC_B)
+    inc X                       => opcode(INC_X)
+    inc Y                       => opcode(INC_Y)
+
+    xor a, #{imm: i8}           => opcode(XOR_A_IMM)                @ imm
+    xor a, *({zpg: u8})         => opcode(XOR_A_ZPG)                @ zpg
+    xor a, *({abs: u16})        => opcode(XOR_A_ABS)                @ abs
+    xor a, *x                   => opcode(XOR_A_DEREF_X)
+    xor a, *y                   => opcode(XOR_A_DEREF_Y)
+    xor a, *sp                  => opcode(XOR_A_DEREF_SP)
     xor a, a                    => opcode(XOR_A_A)
-    xor a, B                    => opcode(XOR_A_B)
+    xor a, b                    => opcode(XOR_A_B)
+    xor a, c                    => opcode(XOR_A_C)
+    xor a, d                    => opcode(XOR_A_D)
+
+    jsr {abs: i16}              => opcode(JSR_ABS)                  @ abs
+    jsr *X                      => opcode(JSR_X)
+    jsr *Y                      => opcode(JSR_Y)
+    rti                         => opcode(RTI)
 }

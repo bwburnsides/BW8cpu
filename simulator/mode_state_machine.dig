@@ -562,10 +562,6 @@ C   0       0   0      0      0        0           0</dataString>
           <string>Frequency</string>
           <int>4</int>
         </entry>
-        <entry>
-          <string>runRealTime</string>
-          <boolean>true</boolean>
-        </entry>
       </elementAttributes>
       <pos x="340" y="100"/>
     </visualElement>

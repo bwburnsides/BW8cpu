@@ -565,6 +565,14 @@
           <string>Bits</string>
           <int>8</int>
         </entry>
+        <entry>
+          <string>isHighZ</string>
+          <boolean>true</boolean>
+        </entry>
+        <entry>
+          <string>InDefault</string>
+          <value v="0" z="true"/>
+        </entry>
       </elementAttributes>
       <pos x="-260" y="200"/>
     </visualElement>
@@ -578,6 +586,14 @@
         <entry>
           <string>Bits</string>
           <int>8</int>
+        </entry>
+        <entry>
+          <string>isHighZ</string>
+          <boolean>true</boolean>
+        </entry>
+        <entry>
+          <string>InDefault</string>
+          <value v="0" z="true"/>
         </entry>
       </elementAttributes>
       <pos x="-260" y="280"/>
@@ -2379,12 +2395,12 @@
       <elementName>Rectangle</elementName>
       <elementAttributes>
         <entry>
-          <string>Label</string>
-          <string>Determine what ALU Contributes to SR</string>
-        </entry>
-        <entry>
           <string>RectHeight</string>
           <int>39</int>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>Determine what ALU Contributes to SR</string>
         </entry>
         <entry>
           <string>RectWidth</string>
@@ -2535,32 +2551,12 @@
       <pos x="-140" y="360"/>
     </visualElement>
     <visualElement>
-      <elementName>Testcase</elementName>
-      <elementAttributes>
-        <entry>
-          <string>Label</string>
-          <string>ADD</string>
-        </entry>
-        <entry>
-          <string>Testdata</string>
-          <testData>
-            <dataString>CLK ALU-OP LHS RHS  DBUS FLAGS   LOAD-SR-DBUS ASSERT-SR-DBUS ASSERT-ALU-DBUS CLR
-C    4       0   0    0  0b01000            1              1               0   0
-C    4       0   1    1  0b00000            1              1               0   0
-C    4       1   0    1  0b00000            1              1               0   0
-C    4       3   4    7  0b00000            1              1               0   0
-C    4       4   3    7  0b00000            1              1               0   0
-C    4     255   0  255  0b00010            1              1               0   0
-C    4     255   1    0  0b11000            1              1               0   0
-C    4     128 128    0  0b11100            1              1               0   0</dataString>
-          </testData>
-        </entry>
-      </elementAttributes>
-      <pos x="-860" y="-240"/>
-    </visualElement>
-    <visualElement>
       <elementName>Out</elementName>
       <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
         <entry>
           <string>Label</string>
           <string>DBUS</string>
@@ -2569,10 +2565,6 @@ C    4     128 128    0  0b11100            1              1               0   0
           <string>Bits</string>
           <int>8</int>
         </entry>
-        <entry>
-          <string>rotation</string>
-          <rotation rotation="2"/>
-        </entry>
       </elementAttributes>
       <pos x="-260" y="-120"/>
     </visualElement>
@@ -2580,12 +2572,12 @@ C    4     128 128    0  0b11100            1              1               0   0
       <elementName>Rectangle</elementName>
       <elementAttributes>
         <entry>
-          <string>Label</string>
-          <string>ALU Core with DBUS Output</string>
-        </entry>
-        <entry>
           <string>RectHeight</string>
           <int>21</int>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>ALU Core with DBUS Output</string>
         </entry>
         <entry>
           <string>RectWidth</string>
@@ -2598,12 +2590,12 @@ C    4     128 128    0  0b11100            1              1               0   0
       <elementName>Rectangle</elementName>
       <elementAttributes>
         <entry>
-          <string>Label</string>
-          <string>Status Register (Dual Source Register)</string>
-        </entry>
-        <entry>
           <string>RectHeight</string>
           <int>16</int>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>Status Register (Dual Source Register)</string>
         </entry>
         <entry>
           <string>RectWidth</string>
@@ -2611,30 +2603,6 @@ C    4     128 128    0  0b11100            1              1               0   0
         </entry>
       </elementAttributes>
       <pos x="1400" y="-280"/>
-    </visualElement>
-    <visualElement>
-      <elementName>Testcase</elementName>
-      <elementAttributes>
-        <entry>
-          <string>Label</string>
-          <string>ADC</string>
-        </entry>
-        <entry>
-          <string>Testdata</string>
-          <testData>
-            <dataString>CLK ALU-OP LHS RHS  DBUS FLAGS   LOAD-SR-DBUS ASSERT-SR-DBUS ASSERT-ALU-DBUS CLR
-C    5       0   0    0  0b01000            1              1               0   0
-C    5       0   1    1  0b00000            1              1               0   0
-C    5       1   0    1  0b00000            1              1               0   0
-C    5       3   4    7  0b00000            1              1               0   0
-C    5       4   3    7  0b00000            1              1               0   0
-C    5     255   0  255  0b00010            1              1               0   0
-C    5     255   1    0  0b11000            1              1               0   0
-C    5     128 128    1  0b00000            1              1               0   0</dataString>
-          </testData>
-        </entry>
-      </elementAttributes>
-      <pos x="-760" y="-240"/>
     </visualElement>
   </visualElements>
   <wires>
