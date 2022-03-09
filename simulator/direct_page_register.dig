@@ -43,6 +43,10 @@
           <string>isHighZ</string>
           <boolean>true</boolean>
         </entry>
+        <entry>
+          <string>InDefault</string>
+          <value v="0" z="true"/>
+        </entry>
       </elementAttributes>
       <pos x="240" y="220"/>
     </visualElement>
@@ -352,6 +356,10 @@
         <entry>
           <string>isHighZ</string>
           <boolean>true</boolean>
+        </entry>
+        <entry>
+          <string>InDefault</string>
+          <value v="0" z="true"/>
         </entry>
       </elementAttributes>
       <pos x="240" y="380"/>
@@ -864,6 +872,10 @@
           <string>Label</string>
           <string>assert-dp_addr</string>
         </entry>
+        <entry>
+          <string>InDefault</string>
+          <value v="1" z="false"/>
+        </entry>
       </elementAttributes>
       <pos x="240" y="620"/>
     </visualElement>
@@ -956,6 +968,10 @@
           <string>Label</string>
           <string>load-t1_dbus</string>
         </entry>
+        <entry>
+          <string>InDefault</string>
+          <value v="1" z="false"/>
+        </entry>
       </elementAttributes>
       <pos x="240" y="500"/>
     </visualElement>
@@ -965,6 +981,10 @@
         <entry>
           <string>Label</string>
           <string>load-dp_dbus</string>
+        </entry>
+        <entry>
+          <string>InDefault</string>
+          <value v="1" z="false"/>
         </entry>
       </elementAttributes>
       <pos x="240" y="460"/>
@@ -1066,6 +1086,10 @@
           <string>Label</string>
           <string>load-t2_dbus</string>
         </entry>
+        <entry>
+          <string>InDefault</string>
+          <value v="1" z="false"/>
+        </entry>
       </elementAttributes>
       <pos x="240" y="540"/>
     </visualElement>
@@ -1085,6 +1109,10 @@
         <entry>
           <string>Label</string>
           <string>assert-t_addr</string>
+        </entry>
+        <entry>
+          <string>InDefault</string>
+          <value v="1" z="false"/>
         </entry>
       </elementAttributes>
       <pos x="240" y="660"/>
@@ -1575,7 +1603,7 @@
         </entry>
         <entry>
           <string>NetName</string>
-          <string>rhs</string>
+          <string>lhs</string>
         </entry>
       </elementAttributes>
       <pos x="1440" y="1200"/>

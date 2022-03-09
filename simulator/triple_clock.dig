@@ -28,7 +28,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>clk_cpu</string>
+          <string>cpu-clk-out</string>
         </entry>
       </elementAttributes>
       <pos x="1680" y="240"/>
@@ -38,7 +38,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>clk_crystal</string>
+          <string>run-clk-out</string>
         </entry>
       </elementAttributes>
       <pos x="1680" y="280"/>
@@ -58,44 +58,6 @@
       <pos x="1660" y="280"/>
     </visualElement>
     <visualElement>
-      <elementName>In</elementName>
-      <elementAttributes>
-        <entry>
-          <string>Label</string>
-          <string>~run</string>
-        </entry>
-        <entry>
-          <string>InDefault</string>
-          <value v="1" z="false"/>
-        </entry>
-      </elementAttributes>
-      <pos x="660" y="300"/>
-    </visualElement>
-    <visualElement>
-      <elementName>In</elementName>
-      <elementAttributes>
-        <entry>
-          <string>Label</string>
-          <string>~demo</string>
-        </entry>
-        <entry>
-          <string>InDefault</string>
-          <value v="1" z="false"/>
-        </entry>
-      </elementAttributes>
-      <pos x="660" y="420"/>
-    </visualElement>
-    <visualElement>
-      <elementName>In</elementName>
-      <elementAttributes>
-        <entry>
-          <string>Label</string>
-          <string>~break</string>
-        </entry>
-      </elementAttributes>
-      <pos x="660" y="540"/>
-    </visualElement>
-    <visualElement>
       <elementName>Tunnel</elementName>
       <elementAttributes>
         <entry>
@@ -103,25 +65,21 @@
           <string>clk_crystal</string>
         </entry>
       </elementAttributes>
-      <pos x="680" y="-120"/>
+      <pos x="1040" y="20"/>
     </visualElement>
     <visualElement>
-      <elementName>Clock</elementName>
+      <elementName>In</elementName>
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>crystal</string>
+          <string>rst-mode</string>
         </entry>
         <entry>
-          <string>Frequency</string>
-          <int>5</int>
-        </entry>
-        <entry>
-          <string>runRealTime</string>
-          <boolean>true</boolean>
+          <string>Bits</string>
+          <int>3</int>
         </entry>
       </elementAttributes>
-      <pos x="660" y="-120"/>
+      <pos x="660" y="60"/>
     </visualElement>
     <visualElement>
       <elementName>Tunnel</elementName>
@@ -131,21 +89,17 @@
           <string>clk_step</string>
         </entry>
       </elementAttributes>
-      <pos x="680" y="-40"/>
+      <pos x="1040" y="100"/>
     </visualElement>
     <visualElement>
-      <elementName>Clock</elementName>
+      <elementName>In</elementName>
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>555</string>
-        </entry>
-        <entry>
-          <string>runRealTime</string>
-          <boolean>true</boolean>
+          <string>~brk</string>
         </entry>
       </elementAttributes>
-      <pos x="660" y="-80"/>
+      <pos x="660" y="20"/>
     </visualElement>
     <visualElement>
       <elementName>Tunnel</elementName>
@@ -155,7 +109,7 @@
           <string>clk_demo</string>
         </entry>
       </elementAttributes>
-      <pos x="680" y="-80"/>
+      <pos x="1040" y="60"/>
     </visualElement>
     <visualElement>
       <elementName>74151.dig</elementName>
@@ -305,14 +259,18 @@
       <pos x="1440" y="420"/>
     </visualElement>
     <visualElement>
-      <elementName>Clock</elementName>
+      <elementName>In</elementName>
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>step</string>
+          <string>tog-mode</string>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>3</int>
         </entry>
       </elementAttributes>
-      <pos x="660" y="-40"/>
+      <pos x="660" y="140"/>
     </visualElement>
     <visualElement>
       <elementName>74574.dig</elementName>
@@ -460,44 +418,22 @@
       <pos x="940" y="560"/>
     </visualElement>
     <visualElement>
-      <elementName>In</elementName>
+      <elementName>Clock</elementName>
       <elementAttributes>
         <entry>
-          <string>Label</string>
-          <string>~brk</string>
+          <string>runRealTime</string>
+          <boolean>true</boolean>
         </entry>
-      </elementAttributes>
-      <pos x="660" y="20"/>
-    </visualElement>
-    <visualElement>
-      <elementName>In</elementName>
-      <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>~run-rst</string>
+          <string>run-clk</string>
         </entry>
-      </elementAttributes>
-      <pos x="660" y="60"/>
-    </visualElement>
-    <visualElement>
-      <elementName>In</elementName>
-      <elementAttributes>
         <entry>
-          <string>Label</string>
-          <string>~demo-rst</string>
+          <string>Frequency</string>
+          <int>5</int>
         </entry>
       </elementAttributes>
-      <pos x="660" y="100"/>
-    </visualElement>
-    <visualElement>
-      <elementName>In</elementName>
-      <elementAttributes>
-        <entry>
-          <string>Label</string>
-          <string>~step-rst</string>
-        </entry>
-      </elementAttributes>
-      <pos x="660" y="140"/>
+      <pos x="1020" y="20"/>
     </visualElement>
     <visualElement>
       <elementName>Tunnel</elementName>
@@ -517,7 +453,7 @@
           <string>~run_rst</string>
         </entry>
       </elementAttributes>
-      <pos x="680" y="60"/>
+      <pos x="720" y="60"/>
     </visualElement>
     <visualElement>
       <elementName>Tunnel</elementName>
@@ -527,7 +463,7 @@
           <string>~demo_rst</string>
         </entry>
       </elementAttributes>
-      <pos x="680" y="100"/>
+      <pos x="720" y="80"/>
     </visualElement>
     <visualElement>
       <elementName>Tunnel</elementName>
@@ -537,7 +473,178 @@
           <string>~step_rst</string>
         </entry>
       </elementAttributes>
+      <pos x="720" y="100"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>mode</string>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>3</int>
+        </entry>
+      </elementAttributes>
+      <pos x="1680" y="180"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Splitter</elementName>
+      <elementAttributes>
+        <entry>
+          <string>mirror</string>
+          <boolean>true</boolean>
+        </entry>
+        <entry>
+          <string>Input Splitting</string>
+          <string>1*3</string>
+        </entry>
+        <entry>
+          <string>Output Splitting</string>
+          <string>3</string>
+        </entry>
+      </elementAttributes>
+      <pos x="1520" y="180"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Not</elementName>
+      <elementAttributes/>
+      <pos x="1440" y="140"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Not</elementName>
+      <elementAttributes/>
+      <pos x="1440" y="160"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Not</elementName>
+      <elementAttributes/>
+      <pos x="1440" y="180"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Clock</elementName>
+      <elementAttributes>
+        <entry>
+          <string>runRealTime</string>
+          <boolean>true</boolean>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>demo-clk</string>
+        </entry>
+      </elementAttributes>
+      <pos x="1020" y="60"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Splitter</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Input Splitting</string>
+          <string>3</string>
+        </entry>
+        <entry>
+          <string>Output Splitting</string>
+          <string>1*3</string>
+        </entry>
+      </elementAttributes>
+      <pos x="680" y="60"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Clock</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>step-clk</string>
+        </entry>
+      </elementAttributes>
+      <pos x="1020" y="100"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Splitter</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Input Splitting</string>
+          <string>3</string>
+        </entry>
+        <entry>
+          <string>Output Splitting</string>
+          <string>1*3</string>
+        </entry>
+      </elementAttributes>
       <pos x="680" y="140"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>NetName</string>
+          <string>~run</string>
+        </entry>
+      </elementAttributes>
+      <pos x="720" y="140"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>NetName</string>
+          <string>~demo</string>
+        </entry>
+      </elementAttributes>
+      <pos x="720" y="160"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>NetName</string>
+          <string>~break</string>
+        </entry>
+      </elementAttributes>
+      <pos x="720" y="180"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>~run</string>
+        </entry>
+      </elementAttributes>
+      <pos x="660" y="300"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>~demo</string>
+        </entry>
+      </elementAttributes>
+      <pos x="660" y="420"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>~break</string>
+        </entry>
+      </elementAttributes>
+      <pos x="660" y="540"/>
     </visualElement>
   </visualElements>
   <wires>
@@ -555,11 +662,15 @@
     </wire>
     <wire>
       <p1 x="1300" y="260"/>
-      <p2 x="1460" y="260"/>
+      <p2 x="1360" y="260"/>
     </wire>
     <wire>
       <p1 x="1180" y="260"/>
       <p2 x="1200" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="1360" y="260"/>
+      <p2 x="1460" y="260"/>
     </wire>
     <wire>
       <p1 x="700" y="580"/>
@@ -578,8 +689,20 @@
       <p2 x="1100" y="520"/>
     </wire>
     <wire>
+      <p1 x="1480" y="140"/>
+      <p2 x="1520" y="140"/>
+    </wire>
+    <wire>
+      <p1 x="1400" y="140"/>
+      <p2 x="1440" y="140"/>
+    </wire>
+    <wire>
       <p1 x="660" y="140"/>
       <p2 x="680" y="140"/>
+    </wire>
+    <wire>
+      <p1 x="700" y="140"/>
+      <p2 x="720" y="140"/>
     </wire>
     <wire>
       <p1 x="720" y="460"/>
@@ -592,10 +715,6 @@
     <wire>
       <p1 x="1440" y="460"/>
       <p2 x="1460" y="460"/>
-    </wire>
-    <wire>
-      <p1 x="660" y="-80"/>
-      <p2 x="680" y="-80"/>
     </wire>
     <wire>
       <p1 x="700" y="400"/>
@@ -622,6 +741,10 @@
       <p2 x="1120" y="400"/>
     </wire>
     <wire>
+      <p1 x="700" y="80"/>
+      <p2 x="720" y="80"/>
+    </wire>
+    <wire>
       <p1 x="740" y="340"/>
       <p2 x="1060" y="340"/>
     </wire>
@@ -636,6 +759,10 @@
     <wire>
       <p1 x="660" y="20"/>
       <p2 x="680" y="20"/>
+    </wire>
+    <wire>
+      <p1 x="1020" y="20"/>
+      <p2 x="1040" y="20"/>
     </wire>
     <wire>
       <p1 x="700" y="280"/>
@@ -655,7 +782,7 @@
     </wire>
     <wire>
       <p1 x="1300" y="280"/>
-      <p2 x="1460" y="280"/>
+      <p2 x="1380" y="280"/>
     </wire>
     <wire>
       <p1 x="940" y="280"/>
@@ -664,6 +791,10 @@
     <wire>
       <p1 x="1060" y="280"/>
       <p2 x="1080" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="1380" y="280"/>
+      <p2 x="1460" y="280"/>
     </wire>
     <wire>
       <p1 x="660" y="540"/>
@@ -682,6 +813,26 @@
       <p2 x="960" y="480"/>
     </wire>
     <wire>
+      <p1 x="1480" y="160"/>
+      <p2 x="1520" y="160"/>
+    </wire>
+    <wire>
+      <p1 x="1380" y="160"/>
+      <p2 x="1440" y="160"/>
+    </wire>
+    <wire>
+      <p1 x="700" y="160"/>
+      <p2 x="720" y="160"/>
+    </wire>
+    <wire>
+      <p1 x="1020" y="100"/>
+      <p2 x="1040" y="100"/>
+    </wire>
+    <wire>
+      <p1 x="700" y="100"/>
+      <p2 x="720" y="100"/>
+    </wire>
+    <wire>
       <p1 x="660" y="420"/>
       <p2 x="960" y="420"/>
     </wire>
@@ -696,14 +847,6 @@
     <wire>
       <p1 x="1180" y="420"/>
       <p2 x="1200" y="420"/>
-    </wire>
-    <wire>
-      <p1 x="660" y="100"/>
-      <p2 x="680" y="100"/>
-    </wire>
-    <wire>
-      <p1 x="660" y="-40"/>
-      <p2 x="680" y="-40"/>
     </wire>
     <wire>
       <p1 x="740" y="360"/>
@@ -743,11 +886,31 @@
     </wire>
     <wire>
       <p1 x="1300" y="240"/>
+      <p2 x="1400" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="1400" y="240"/>
       <p2 x="1460" y="240"/>
     </wire>
     <wire>
       <p1 x="940" y="560"/>
       <p2 x="960" y="560"/>
+    </wire>
+    <wire>
+      <p1 x="1540" y="180"/>
+      <p2 x="1680" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="1480" y="180"/>
+      <p2 x="1520" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="1360" y="180"/>
+      <p2 x="1440" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="700" y="180"/>
+      <p2 x="720" y="180"/>
     </wire>
     <wire>
       <p1 x="840" y="500"/>
@@ -758,16 +921,24 @@
       <p2 x="1460" y="500"/>
     </wire>
     <wire>
-      <p1 x="660" y="-120"/>
-      <p2 x="680" y="-120"/>
-    </wire>
-    <wire>
       <p1 x="1180" y="440"/>
       <p2 x="1200" y="440"/>
     </wire>
     <wire>
       <p1 x="1440" y="440"/>
       <p2 x="1460" y="440"/>
+    </wire>
+    <wire>
+      <p1 x="660" y="60"/>
+      <p2 x="680" y="60"/>
+    </wire>
+    <wire>
+      <p1 x="700" y="60"/>
+      <p2 x="720" y="60"/>
+    </wire>
+    <wire>
+      <p1 x="1020" y="60"/>
+      <p2 x="1040" y="60"/>
     </wire>
     <wire>
       <p1 x="1440" y="380"/>
@@ -780,10 +951,6 @@
     <wire>
       <p1 x="1180" y="380"/>
       <p2 x="1200" y="380"/>
-    </wire>
-    <wire>
-      <p1 x="660" y="60"/>
-      <p2 x="680" y="60"/>
     </wire>
     <wire>
       <p1 x="720" y="240"/>
@@ -800,6 +967,10 @@
     <wire>
       <p1 x="1120" y="320"/>
       <p2 x="1120" y="400"/>
+    </wire>
+    <wire>
+      <p1 x="1360" y="180"/>
+      <p2 x="1360" y="260"/>
     </wire>
     <wire>
       <p1 x="740" y="340"/>
@@ -822,8 +993,16 @@
       <p2 x="1060" y="580"/>
     </wire>
     <wire>
+      <p1 x="1380" y="160"/>
+      <p2 x="1380" y="280"/>
+    </wire>
+    <wire>
       <p1 x="1080" y="280"/>
       <p2 x="1080" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="1400" y="140"/>
+      <p2 x="1400" y="240"/>
     </wire>
     <wire>
       <p1 x="1180" y="460"/>
