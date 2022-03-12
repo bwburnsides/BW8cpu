@@ -37,4 +37,4 @@ If the decoded address belongs to the highest 32 KB of the physical RAM, then an
 
 Both this, as well as the ROM copy-on-reset, are examples of RAM shadowing. The shadow regions are shown in blue, below.
 
-![architecture diagram of BW8cpu](assets/mem_map.jpg)
+![mem map diagram of BW8comp](assets/mem_map.jpg)
