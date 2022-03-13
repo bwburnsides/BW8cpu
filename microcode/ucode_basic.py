@@ -10,7 +10,6 @@ class Ctrl:
 
     # DBUS device addresses
     NULL_DBUS = 0
-    ALU_DBUS = 0
     IR_DBUS = 1
     A_DBUS = 2
     B_DBUS = 3
@@ -22,19 +21,19 @@ class Ctrl:
     T2_DBUS = 9
     MEM_DBUS = 10
     DPI_DBUS = 11
+    ALU_DBUS = 12
 
     # XFER device addresses
-    ALU_XFER = 0
-    SP_XFER = 1
-    PC_XFER = 2
-    X_XFER = 3
-    Y_XFER = 4
-    T_XFER = 5
-    E_XFER = 6
-    ISR_XFER = 7
-    RST_XFER = 8
-    SPI_XFER = 9
-    _XFER_BASE = 10
+    RST_XFER   = 0
+    SP_XFER    = 1
+    PC_XFER    = 2
+    X_XFER     = 3
+    Y_XFER     = 4
+    T_XFER     = 5
+    E_XFER     = 6
+    ISR_XFER   = 7
+    SPI_XFER   = 8
+    _XFER_BASE = 9
 
     # ADDR device addresses
     ACK_ADDR = 0
@@ -47,7 +46,7 @@ class Ctrl:
     T_ADDR = 7
 
     # 4 bits for DBUS Assert
-    DBUS_ASSERT_ALU = ALU_DBUS << DBUS_ASSERT
+    DBUS_ASSERT_NULL = NULL_DBUS << DBUS_ASSERT
     DBUS_ASSERT_A = A_DBUS << DBUS_ASSERT
     DBUS_ASSERT_B = B_DBUS << DBUS_ASSERT
     DBUS_ASSERT_C = C_DBUS << DBUS_ASSERT
@@ -58,6 +57,7 @@ class Ctrl:
     DBUS_ASSERT_T2 = T2_DBUS << DBUS_ASSERT
     DBUS_ASSERT_MEM = MEM_DBUS << DBUS_ASSERT
     DBUS_ASSERT_DPI = DPI_DBUS << DBUS_ASSERT
+    DBUS_ASSERT_ALU = ALU_DBUS << DBUS_ASSERT
     # Room for 5 more DBUS Asserts
 
     # 4 bits for DBUS Load
@@ -115,6 +115,7 @@ class Ctrl:
     ALU_CLN = 29 << ALU_OP
 
     # 5 bits for XFER Assert
+    XFER_ASSERT_RST = RST_XFER << XFER_ASSERT
     XFER_ASSERT_SP = SP_XFER << XFER_ASSERT
     XFER_ASSERT_PC = PC_XFER << XFER_ASSERT
     XFER_ASSERT_X = X_XFER << XFER_ASSERT
@@ -122,40 +123,39 @@ class Ctrl:
     XFER_ASSERT_T = T_XFER << XFER_ASSERT
     XFER_ASSERT_E = E_XFER << XFER_ASSERT
     XFER_ASSERT_ISR = ISR_XFER << XFER_ASSERT
-    XFER_ASSERT_RST = RST_XFER << XFER_ASSERT
     XFER_ASSERT_SPI = SPI_XFER << XFER_ASSERT
 
-    XFER_ASSERT_A_A = (_XFER_BASE + 0) << XFER_ASSERT
+    XFER_ASSERT_T2_D = (_XFER_BASE + 0) << XFER_ASSERT
+
+    XFER_ASSERT_A_A = (_XFER_BASE + 1) << XFER_ASSERT
     # XFER_ASSERT_A_B  = E_XFER            << XFER_ASSERT
-    XFER_ASSERT_A_C = (_XFER_BASE + 1) << XFER_ASSERT
-    XFER_ASSERT_A_D = (_XFER_BASE + 2) << XFER_ASSERT
-    XFER_ASSERT_A_T1 = (_XFER_BASE + 3) << XFER_ASSERT
+    XFER_ASSERT_A_C = (_XFER_BASE + 2) << XFER_ASSERT
+    XFER_ASSERT_A_D = (_XFER_BASE + 3) << XFER_ASSERT
+    XFER_ASSERT_A_T1 = (_XFER_BASE + 4) << XFER_ASSERT
 
-    XFER_ASSERT_B_A = (_XFER_BASE + 4) << XFER_ASSERT
-    XFER_ASSERT_B_B = (_XFER_BASE + 5) << XFER_ASSERT
-    XFER_ASSERT_B_C = (_XFER_BASE + 6) << XFER_ASSERT
-    XFER_ASSERT_B_D = (_XFER_BASE + 7) << XFER_ASSERT
-    XFER_ASSERT_B_T1 = (_XFER_BASE + 8) << XFER_ASSERT
+    XFER_ASSERT_B_A = (_XFER_BASE + 5) << XFER_ASSERT
+    XFER_ASSERT_B_B = (_XFER_BASE + 6) << XFER_ASSERT
+    XFER_ASSERT_B_C = (_XFER_BASE + 7) << XFER_ASSERT
+    XFER_ASSERT_B_D = (_XFER_BASE + 8) << XFER_ASSERT
+    XFER_ASSERT_B_T1 = (_XFER_BASE + 9) << XFER_ASSERT
 
-    XFER_ASSERT_C_A = (_XFER_BASE + 9) << XFER_ASSERT
-    XFER_ASSERT_C_B = (_XFER_BASE + 10) << XFER_ASSERT
-    XFER_ASSERT_C_C = (_XFER_BASE + 11) << XFER_ASSERT
-    XFER_ASSERT_C_D = (_XFER_BASE + 12) << XFER_ASSERT
-    XFER_ASSERT_C_T1 = (_XFER_BASE + 13) << XFER_ASSERT
+    XFER_ASSERT_C_A = (_XFER_BASE + 10) << XFER_ASSERT
+    XFER_ASSERT_C_B = (_XFER_BASE + 11) << XFER_ASSERT
+    XFER_ASSERT_C_C = (_XFER_BASE + 12) << XFER_ASSERT
+    XFER_ASSERT_C_D = (_XFER_BASE + 13) << XFER_ASSERT
+    XFER_ASSERT_C_T1 = (_XFER_BASE + 14) << XFER_ASSERT
 
-    XFER_ASSERT_D_A = (_XFER_BASE + 14) << XFER_ASSERT
-    XFER_ASSERT_D_B = (_XFER_BASE + 15) << XFER_ASSERT
-    XFER_ASSERT_D_C = (_XFER_BASE + 16) << XFER_ASSERT
-    XFER_ASSERT_D_D = (_XFER_BASE + 17) << XFER_ASSERT
-    XFER_ASSERT_D_T1 = (_XFER_BASE + 18) << XFER_ASSERT
+    XFER_ASSERT_D_A = (_XFER_BASE + 15) << XFER_ASSERT
+    XFER_ASSERT_D_B = (_XFER_BASE + 16) << XFER_ASSERT
+    XFER_ASSERT_D_C = (_XFER_BASE + 17) << XFER_ASSERT
+    XFER_ASSERT_D_D = (_XFER_BASE + 18) << XFER_ASSERT
+    XFER_ASSERT_D_T1 = (_XFER_BASE + 19) << XFER_ASSERT
 
-    XFER_ASSERT_T2_A = (_XFER_BASE + 19) << XFER_ASSERT
-    XFER_ASSERT_T2_B = (_XFER_BASE + 20) << XFER_ASSERT
-    XFER_ASSERT_T2_C = (_XFER_BASE + 21) << XFER_ASSERT
-    XFER_ASSERT_T2_D = 0 << XFER_ASSERT
+    XFER_ASSERT_T2_A = (_XFER_BASE + 20) << XFER_ASSERT
+    XFER_ASSERT_T2_B = (_XFER_BASE + 21) << XFER_ASSERT
+    XFER_ASSERT_T2_C = (_XFER_BASE + 22) << XFER_ASSERT
 
     # 3 bits for XFER Load
-    XFER_LOAD_ALU = ALU_XFER << XFER_LOAD
     XFER_LOAD_PC = PC_XFER << XFER_LOAD
     XFER_LOAD_SP = SP_XFER << XFER_LOAD
     XFER_LOAD_E = E_XFER << XFER_LOAD
@@ -195,10 +195,21 @@ class Ctrl:
 
 active_low_signals = [Ctrl.BRK_CLK]
 
+fetch = 0 | Ctrl.ADDR_ASSERT_PC | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_IR | Ctrl.COUNT_INC_PC | Ctrl.BRK_CLK
+
 def build_uops(mode, irq, opcode, flags, t_state):
-    ctrl_word = 0
-    ctrl_word |= Ctrl.ADDR_ASSERT_PC | Ctrl.COUNT_INC_PC | Ctrl.BRK_CLK
-    return [ctrl_word]
+    uops = [Ctrl.BRK_CLK, Ctrl.BRK_CLK, Ctrl.BRK_CLK, Ctrl.BRK_CLK, Ctrl.BRK_CLK, Ctrl.BRK_CLK, Ctrl.BRK_CLK, Ctrl.BRK_CLK]
+
+    # if opcode == 0x00:  # NOP
+    #     uops[1] |= Ctrl.RST_USEQ
+
+    # if opcode == 0x01:  # LOAD A IMM
+    #     uops[1] |= Ctrl.ADDR_ASSERT_PC | Ctrl.COUNT_INC_PC | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_A | Ctrl.RST_USEQ
+
+    # if opcode == 0x02:  # BRK
+    #     uops[1] = Ctrl.RST_USEQ
+
+    return uops
 
 ucode = []
 for addr in range(2**19):
