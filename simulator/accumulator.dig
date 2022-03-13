@@ -5,15 +5,15 @@
     <entry>
       <string>backgroundColor</string>
       <awt-color>
-        <red>255</red>
-        <green>204</green>
-        <blue>153</blue>
+        <red>153</red>
+        <green>255</green>
+        <blue>255</blue>
         <alpha>255</alpha>
       </awt-color>
     </entry>
     <entry>
       <string>Width</string>
-      <int>34</int>
+      <int>18</int>
     </entry>
   </attributes>
   <visualElements>

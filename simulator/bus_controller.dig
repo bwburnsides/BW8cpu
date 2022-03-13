@@ -7,6 +7,15 @@
       <shapeType>SIMPLE</shapeType>
     </entry>
     <entry>
+      <string>backgroundColor</string>
+      <awt-color>
+        <red>255</red>
+        <green>153</green>
+        <blue>153</blue>
+        <alpha>255</alpha>
+      </awt-color>
+    </entry>
+    <entry>
       <string>Height</string>
       <int>12</int>
     </entry>

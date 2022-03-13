@@ -3,8 +3,17 @@
   <version>1</version>
   <attributes>
     <entry>
+      <string>backgroundColor</string>
+      <awt-color>
+        <red>255</red>
+        <green>204</green>
+        <blue>153</blue>
+        <alpha>255</alpha>
+      </awt-color>
+    </entry>
+    <entry>
       <string>Width</string>
-      <int>34</int>
+      <int>18</int>
     </entry>
   </attributes>
   <visualElements>
@@ -28,7 +37,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>ALU-OP</string>
+          <string>alu-op</string>
         </entry>
         <entry>
           <string>Bits</string>
@@ -76,7 +85,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>LOAD-SR-DBUS</string>
+          <string>load-sr-dbus</string>
         </entry>
         <entry>
           <string>InDefault</string>
@@ -114,7 +123,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>ASSERT-SR-DBUS</string>
+          <string>assert-sr-dbus</string>
         </entry>
         <entry>
           <string>InDefault</string>
@@ -152,7 +161,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>CLK</string>
+          <string>clk</string>
         </entry>
       </elementAttributes>
       <pos x="-260" y="80"/>
@@ -186,7 +195,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>CLR</string>
+          <string>clr</string>
         </entry>
       </elementAttributes>
       <pos x="-260" y="120"/>
@@ -559,7 +568,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>LHS</string>
+          <string>lhs</string>
         </entry>
         <entry>
           <string>Bits</string>
@@ -581,7 +590,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>RHS</string>
+          <string>rhs</string>
         </entry>
         <entry>
           <string>Bits</string>
@@ -2233,7 +2242,7 @@
         </entry>
         <entry>
           <string>Label</string>
-          <string>FLAGS</string>
+          <string>flags</string>
         </entry>
         <entry>
           <string>Bits</string>
@@ -2424,7 +2433,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>ASSERT-ALU-DBUS</string>
+          <string>assert-alu-dbus</string>
         </entry>
         <entry>
           <string>InDefault</string>
@@ -2559,7 +2568,7 @@
         </entry>
         <entry>
           <string>Label</string>
-          <string>DBUS</string>
+          <string>dbus</string>
         </entry>
         <entry>
           <string>Bits</string>

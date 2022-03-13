@@ -1,8 +1,10 @@
 # 👾 BW8cpu
 
+![BW8cpu Digital Simulation top level view](docs/assets/cpu_sim.jpg)
+
 The BW8cpu is a homemade CPU built with discrete TTL logic chips on custom PCBs. It has a target clock rate of approximately 6 MHz, and is comparable to the Motorola 6809, and more specifically the Hitachi 6309, with its dual accumulators and additional dual general purpose registers.
 
-A larger computer system is built around the CPU in the form of a full peripheral suite that allows the BW8cpu to function as a machine similar to the Commodore 64, Apple II, or NES. From a hardware perspective, the BW8cpu exceeds these systems in capability and usability in many regards. Its my hope that the system will eventually exceed its predecessors from a software perspective as well.
+A larger computer system is built around the CPU in the form of a full peripheral suite that allows the BW8cpu to function as a machine similar to the Commodore 64, Apple II, or NES. From a hardware perspective, the BW8cpu matches or maybe exceeds these systems in capability and usability in many regards. Its my hope that the system will eventually exceed its predecessors from a software perspective as well.
 
 The project is originally inspired by Ben Eater's [8-bit breadboard CPU](https://eater.net/8bit) and his [breadboard MOS 6502 computer](https://eater.net/6502). However, ultimately the micro-architecture takes more cues from James Sharman's [8-bit pipelined CPU](https://www.youtube.com/watch?v=3iHag4k4yEg&list=PLFhc0MFC8MiCDOh3cGFji3qQfXziB9yOw). This project would not be possible without the support of many individuals present on James' Discord server, notably [rj45](https://github.com/rj45/rj32), Quandary, Artentus, and [Louis Jewett](https://www.youtube.com/channel/UCsxBT-Jh5pMDU-uEN_EUXtg/featured).
 
@@ -35,18 +37,17 @@ This project is extremely ambitious and long running. This repository will maint
 
 - IO is memory mapped
 - Reference Memory Map features:
-    - 8 KB shadow RAM kernel space
     - 256 bytes IO space
-    - 21.75 KB fixed RAM space
-    - 2 KB stack space
-    - 32 KB total bankable space
+    - 31.75 KB fixed RAM space
+    - 32 KB total bankable space (4x 8 KB banks)
 - Plans for full peripheral suite:
     - Programmable Interrupt Controller with 8 interrupt sources
-    - VGA Video Card with output at 320x240
+    - VGA Video Card with output at 320x240 with 40x30 tilemap, hardware scrolling, and hardware sprite support
     - PS/2 keyboard input
     - Programmable Sound Generator with 4 voices
     - SPI Controller for SD card-based persistent storage
     - RS-232 UART networking interface
+    - DMA Controller for fast block copies
 
 ## Tool Chain
 
