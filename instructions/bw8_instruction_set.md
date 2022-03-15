@@ -75,6 +75,14 @@ These three registers have limited direct support, and are generally interacted 
 
 The first four of these are primarily set by the result of a recent ALU calculation. The final is used to enable or disable maskable interrupt requests (IRQ), and is managed directly by the user via `SEI` and `CLI`.
 
+In the subsequent section, the size of an instruction is given as the total number of bytes required to execute the instruction.
+
+| byte -1  | byte 0 | byte 1   | byte 2   |
+| ------- | ------ | -------- | -------- |
+| `EXT`   | opcode | operand1 | operand2 |
+
+Byte -1 is only present if the instruction is part of the `EXT` Mode set. The theoretical maximum instruction size is thus 4 bytes. However, the current instruction set has been crafted to ensure that no instruction exceeds 3 bytes.
+
 # Addressing Modes
 
 - *Inherent*: There is no relevant operand source, or the source is implied directly by the mnemonic.
@@ -302,7 +310,7 @@ Cycles: TBD
 
 ## `STORE` - Store Register
 
-`STORE` instructions write a register's contents to memory. They are the reciprocal to the [`LOAD`](#load---load-register) instructions. They have identical modes and restrictions as the `LOAD` instructions do, with the exception that the **Immediate** mode does not exist, as that doesn't make sense in the context of a memory write.
+`STORE` instructions write a register's contents to memory. They are the reciprocal to the [`LOAD`](#load---load-register) instructions. They have identical modes and restrictions as the `LOAD` instructions do, with the exceptions that the **Immediate** mode does not exist, as that doesn't make sense in the context of a memory write, and the cycle counts may be different. Those are currently TBD.
 
 ## `LEA` - Load Effective Address
 
