@@ -1,6 +1,6 @@
 # 👾 BW8cpu
 
-![BW8cpu Digital Simulation top level view](docs/assets/cpu_sim.jpg)
+![BW8cpu Digital Simulation top level view](docs/assets/cpu_sim.png)
 
 The BW8cpu is a homemade CPU built with discrete TTL logic chips on custom PCBs. It has a target clock rate of approximately 6 MHz, and is comparable to the Motorola 6809, and more specifically the Hitachi 6309, with its dual accumulators and additional dual general purpose registers.
 
