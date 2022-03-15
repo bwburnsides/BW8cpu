@@ -4,54 +4,54 @@ The BW8cpu instruction set contains the following instructions. Each instruction
 
 Mnemonic   | Name                           | Opcode Count
 ---------- | ------------------------------ | ------------
-`NOP`      | No Operation                   | 1
-`BRK`      | Break Clock                    | 1
-`EXT`      | Extended Mode                  | 1
-`CLC`      | Clear Carry                    | 1
-`CLI`      | Enable Interrupts              | 1
-`CLV`      | Clear Overflow                 | 1
-`SEC`      | Set Carry                      | 1
-`SEI`      | Disable Interrupts             | 1
-`MOV`      | Move Register                  | 22
-`LOAD`     | Load Register                  | 84
-`STORE`    | Store Register                 | 78
-`LEA`      | Load Effective Address         | 24
-`ADC`      | Add with Carry                 | 30
-`SBB`      | Subtract with Borrow           | 26
-`AND`      | Bitwise AND                    | 30
-`OR`       | Bitwise OR                     | 26
-`XOR`      | Bitwise XOR                    | 30
-`NOT`      | Bitwise NOT                    | 5
-`NEG`      | 2s Complement Negation         | 5
-`LSR`      | Logical Shift Right            | 5
-`LRC`      | Logical Shift Right with Carry | 5
-`ASR`      | Arithmetic Shift Right         | 5
-`INC`      | Increment                      | 7
-`DEC`      | Decrement                      | 7
-`PUSH`     | Push to Stack                  | 7
-`POP`      | Pop from Stack                 | 7
-`CMP`      | Compare                        | 25
-`TST`      | Bit Test                       | 5
-`WAI`      | Wait for Interrupt             | 1
-`SWI`      | Software Interrupt             | 2
-`RTI`      | Return from Interrupt          | 1
-`JSR`      | Jump to Subroutine             | 4
-`RTS`      | Return from Subroutine         | 1
-`JMP`      | Jump                           | 4
-`JO`       | Jump if Overflow               | 4
-`JNO`      | Jump if not Overflow           | 4
-`JS`       | Jump if Sign                   | 4
-`JNS`      | Jump if not Sign               | 4
-`JE`       | Jump if Equal                  | 4
-`JNE`      | Jump if not Equal              | 4
-`JC`       | Jump if Carry                  | 4
-`JNC`      | Jump if not Carry              | 4
-`JBE`      | Jump if Below or Equal         | 4
-`JA`       | Jump if Above                  | 4
-`JL`       | Jump if Less                   | 4
-`JGE`      | Jump if Greater or Equal       | 4
-`JLE`      | Jump if Less or Equal          | 4
-`JG`       | Jump if Greater                | 4
+[`NOP`](#nop---no-operation)      | No Operation                   | 1
+[`BRK`](#brk---break-clock)      | Break Clock                    | 1
+[`EXT`](#ext---extended-mode)      | Extended Mode                  | 1
+[`CLC`](#clc---clear-carry)      | Clear Carry                    | 1
+[`CLI`](#cli---enable-interrupts)     | Enable Interrupts              | 1
+[`CLV`](#clv---clear-overflow)      | Clear Overflow                 | 1
+[`SEC`](#sec---set-carry-flag)      | Set Carry                      | 1
+[`SEI`](#sei---disable-interrupts)      | Disable Interrupts             | 1
+[`MOV`](#mov---move-register)      | Move Register                  | 22
+[`LOAD`](#load---load-register)     | Load Register                  | 84
+[`STORE`]()    | Store Register                 | 78
+[`LEA`](#lea---load-effective-address)      | Load Effective Address         | 24
+[`ADC`](#adc---add-with-carry)      | Add with Carry                 | 30
+[`SBB`](#sbb---subtract-with-borrow)      | Subtract with Borrow           | 26
+[`AND`](#and---bitwise-and)      | Bitwise AND                    | 30
+[`OR`](#or---bitwise-or)       | Bitwise OR                     | 26
+[`XOR`](#xor---bitwise-xor)      | Bitwise XOR                    | 30
+[`NOT`](#not---bitwise-inversion)      | Bitwise NOT                    | 5
+[`NEG`](#neg---2s-complement-negation)      | 2s Complement Negation         | 5
+[`LSR`](#lsr---logical-shift-right)      | Logical Shift Right            | 5
+[`LRC`](#lrc---logical-shift-right-with-carry)      | Logical Shift Right with Carry | 5
+[`ASR`](#asr---arithmetic-shift-right)      | Arithmetic Shift Right         | 5
+[`INC`](#inc---increment)      | Increment                      | 7
+[`DEC`](#dec---decrement)      | Decrement                      | 7
+[`PUSH`](#push---push-to-stack)     | Push to Stack                  | 7
+[`POP`](#pop---pop-from-stack)      | Pop from Stack                 | 7
+[`CMP`](#cmp---compare)      | Compare                        | 25
+[`TST`](#tst---bit-test)      | Bit Test                       | 5
+[`WAI`](#wai---wait-for-interrupt)      | Wait for Interrupt             | 1
+[`SWI`](#swi---software-interrupt)      | Software Interrupt             | 2
+[`RTI`](#rti---return-from-interrupt)      | Return from Interrupt          | 1
+[`JSR`](#jsr---jump-to-subroutine)      | Jump to Subroutine             | 4
+[`RTS`](#rts---return-from-subroutine)      | Return from Subroutine         | 1
+[`JMP`](#jmp---unconditional-jump)      | Jump                           | 4
+[`JO`](#jo---jump-if-overflow)      | Jump if Overflow               | 4
+[`JNO`](#jno---jump-if-not-overflow)      | Jump if not Overflow           | 4
+[`JS`](#js---jump-if-sign)       | Jump if Sign                   | 4
+[`JNS`](#jns---jump-if-not-sign)      | Jump if not Sign               | 4
+[`JE`](#je---jump-if-equal)       | Jump if Equal                  | 4
+[`JNE`](#jne---jump-if-not-equal)      | Jump if not Equal              | 4
+[`JC`](#jc---jump-if-carry)       | Jump if Carry                  | 4
+[`JNC`](#jnc---jump-if-not-carry)      | Jump if not Carry              | 4
+[`JBE`](#jbe---jump-if-below-or-equal)     | Jump if Below or Equal         | 4
+[`JA`](#ja---jump-if-above)       | Jump if Above                  | 4
+[`JL`](#jl---jump-if-less)      | Jump if Less                   | 4
+[`JGE`](#jge---jump-if-greater-or-equal)      | Jump if Greater or Equal       | 4
+[`JLE`](#jle---jump-if-less-or-equal)      | Jump if Less or Equal          | 4
+[`JG`](#jg---jump-if-greater)       | Jump if Greater                | 4
 
 The BW8 has an 8-bit Instruction Register, so there is some trickery involved to support up to 512 opcodes, rather than just 256. This is done with the `EXT` instruction. This is a 1 byte, 2 cycle instruction which transitions the CPU from normal "`NRM`" mode to extended "`EXT`" mode, and then fetches the next instruction. This next instruction is interpretted differently due to the system being in `EXT` Mode. At the conclusion of these instructions, they return the CPU to `NRM` Mode.
 
@@ -328,7 +328,7 @@ Mode   | varies
 | --- | --- | --- | --- | ---
 |  +  |  +  |  +  |  +  |  -
 
-`ADC` instructions follow the rules of Binary Math Operations.
+`ADC` instructions follow the rules of [Binary Math Operations](#binary-math-operations).
 
 ## `SBB` - Subtract with Borrow
 
@@ -343,7 +343,7 @@ Mode   | varies
 | --- | --- | --- | --- | ---
 |  +  |  +  |  +  |  +  |  -
 
-`SBB` instructions follow the rules of Binary Math Operations.
+`SBB` instructions follow the rules of [Binary Math Operations](#binary-math-operations).
 
 ## `AND` - Bitwise AND
 
@@ -358,7 +358,7 @@ Mode   | varies
 | --- | --- | --- | --- | ---
 |  +  |  -  |  +  |  -  |  -
 
-`AND` instructions follow the rules of Binary Math Operations.
+`AND` instructions follow the rules of [Binary Math Operations](#binary-math-operations).
 
 ## `OR` - Bitwise OR
 
@@ -373,7 +373,7 @@ Mode   | varies
 | --- | --- | --- | --- | ---
 |  +  |  -  |  +  |  -  |  -
 
-`OR` instructions follow the rules of Binary Math Operations.
+`OR` instructions follow the rules of [Binary Math Operations](#binary-math-operations).
 
 ## `XOR` - Bitwise XOR
 
@@ -388,7 +388,7 @@ Mode   | varies
 | --- | --- | --- | --- | ---
 |  +  |  -  |  +  |  -  |  -
 
-`XOR` instructions follow the rules of Binary Math Operations.
+`XOR` instructions follow the rules of [Binary Math Operations](#binary-math-operations).
 
 ## `NOT` - Bitwise Inversion
 
@@ -403,7 +403,7 @@ Mode   | varies
 | --- | --- | --- | --- | ---
 |  +  |  -  |  +  |  -  |  -
 
-`NOT` instructions follow the rules of Unary Math Operations.
+`NOT` instructions follow the rules of [Unary Math Operations](#unary-math-operations).
 
 ## `NEG` - 2s Complement Negation
 
@@ -418,7 +418,7 @@ Mode   | varies
 | --- | --- | --- | --- | ---
 |  -  |  -  |  -  |  -  |  -
 
-`NEG` instructions follow the rules of Unary Math Operations.
+`NEG` instructions follow the rules of [Unary Math Operations](#unary-math-operations).
 
 ## `LSR` - Logical Shift Right
 
@@ -433,7 +433,7 @@ Mode   | varies
 | --- | --- | --- | --- | ---
 |  +  |  +  |  +  |  -  |  -
 
-`LSR` instructions follow the rules of Unary Math Operations.
+`LSR` instructions follow the rules of [Unary Math Operations](#unary-math-operations).
 
 *TODO*: To be consistent with the lack of `ADD` and `SUB` instructions, this instruction should be removed in favor of the `LRC` instruction. Will allow for `CMP` with Immediate instrutions to be added. This change will probably allow for some reductions in ALU hardware.
 
@@ -450,7 +450,7 @@ Mode   | varies
 | --- | --- | --- | --- | ---
 |  +  |  +  |  +  |  -  |  -
 
-`LRC` instructions follow the rules of Unary Math Operations.
+`LRC` instructions follow the rules of [Unary Math Operations](#unary-math-operations).
 
 ## `ASR` - Arithmetic Shift Right
 
@@ -465,7 +465,7 @@ Mode   | varies
 | --- | --- | --- | --- | ---
 |  +  |  +  |  +  |  -  |  -
 
-`ASR` instructions follow the rules of Unary Math Operations.
+`ASR` instructions follow the rules of [Unary Math Operations](#unary-math-operations).
 
 ## `INC` - Increment
 
@@ -667,102 +667,102 @@ The `RTS` instruction shifts execution from a called subroutine to the previousl
 
 ## `JMP` - Unconditional Jump
 
-`JMP` instructions perform an unconditional jump. They follow the specifications described in Jump Operations.
+`JMP` instructions perform an unconditional jump. They follow the specifications described in [Jump Operations](#jump-operations).
 
 ## `JO` - Jump if Overflow
 
-`JO` instructions perform a conditional jump. They follow the specifications described in Jump Operations.
+`JO` instructions perform a conditional jump. They follow the specifications described in [Jump Operations](#jump-operations).
 
 Flag Condition: `V = 1`
 Signedness: -
 
 ## `JNO` - Jump if not Overflow
 
-`JNO` instructions perform a conditional jump. They follow the specifications described in Jump Operations.
+`JNO` instructions perform a conditional jump. They follow the specifications described in [Jump Operations](#jump-operations).
 
 Flag Condition: `V = 0`
 Signedness: -
 
 ## `JS` - Jump if Sign
 
-`JS` instructions perform a conditional jump. They follow the specifications described in Jump Operations.
+`JS` instructions perform a conditional jump. They follow the specifications described in [Jump Operations](#jump-operations).
 
 Flag Condition: `N = 1`
 Signedness: -
 
 ## `JNS` - Jump if not Sign
 
-`JNS` instructions perform a conditional jump. They follow the specifications described in Jump Operations.
+`JNS` instructions perform a conditional jump. They follow the specifications described in [Jump Operations](#jump-operations).
 
 Flag Condition: `N = 0`
 Signedness: -
 
 ## `JE` - Jump if Equal
 
-`JE` instructions perform a conditional jump. They follow the specifications described in Jump Operations.
+`JE` instructions perform a conditional jump. They follow the specifications described in [Jump Operations](#jump-operations).
 
 Flag Condition: `Z = 1`
 Signedness: -
 
 ## `JNE` - Jump if not Equal
 
-`JNE` instructions perform a conditional jump. They follow the specifications described in Jump Operations.
+`JNE` instructions perform a conditional jump. They follow the specifications described in [Jump Operations](#jump-operations).
 
 Flag Condition: `Z = 0`
 Signedness: -
 
 ## `JC` - Jump if Carry
 
-`JC` instructions perform a conditional jump. They follow the specifications described in Jump Operations.
+`JC` instructions perform a conditional jump. They follow the specifications described in [Jump Operations](#jump-operations).
 
 Flag Condition: `C = 1`
 Signedness: unsigned
 
 ## `JNC` - Jump if not Carry
 
-`JNC` instructions perform a conditional jump. They follow the specifications described in Jump Operations.
+`JNC` instructions perform a conditional jump. They follow the specifications described in [Jump Operations](#jump-operations).
 
 Flag Condition: `C = 0`
 Signedness: unsigned
 
 ## `JBE` - Jump if Below or Equal
 
-`JBE` instructions perform a conditional jump. They follow the specifications described in Jump Operations.
+`JBE` instructions perform a conditional jump. They follow the specifications described in [Jump Operations](#jump-operations).
 
 Flag Condition: `C = 1` or `Z = 1`
 Signedness: unsigned
 
 ## `JA` - Jump if Above
 
-`JA` instructions perform a conditional jump. They follow the specifications described in Jump Operations.
+`JA` instructions perform a conditional jump. They follow the specifications described in [Jump Operations](#jump-operations).
 
 Flag Condition: `C = 0` and `Z = 0`
 Signedness: unsigned
 
 ## `JL` - Jump if Less
 
-`JL` instructions perform a conditional jump. They follow the specifications described in Jump Operations.
+`JL` instructions perform a conditional jump. They follow the specifications described in [Jump Operations](#jump-operations).
 
 Flag Condition: `N != V`
 Signedness: signed
 
 ## `JGE` - Jump if Greater or Equal
 
-`JGE` instructions perform a conditional jump. They follow the specifications described in Jump Operations.
+`JGE` instructions perform a conditional jump. They follow the specifications described in [Jump Operations](#jump-operations).
 
 Flag Condition: `N = V`
 Signedness: signed
 
 ## `JLE` - Jump if Less or Equal
 
-`JLE` instructions perform a conditional jump. They follow the specifications described in Jump Operations.
+`JLE` instructions perform a conditional jump. They follow the specifications described in [Jump Operations](#jump-operations).
 
 Flag Condition: `Z = 1` or `N != V`
 Signedness: signed
 
 ## `JG` - Jump if Greater
 
-`JG` instructions perform a conditional jump. They follow the specifications described in Jump Operations.
+`JG` instructions perform a conditional jump. They follow the specifications described in [Jump Operations](#jump-operations).
 
 Flag Condition: `Z = 0` and `N = V`
 Signedness: signed
