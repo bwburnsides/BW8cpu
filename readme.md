@@ -13,7 +13,7 @@ This project is extremely ambitious and long running. This repository will maint
 ## Features
 
 - 8-bit CPU with 16-bit addressing
-- Up to 768 opcodes across 50+ instructions (CISC ISA)
+- Up to 512 opcodes across 50+ instructions (CISC ISA)
 - Dual 8-bit accumulators (A, B) accessible also as one 16-bit accumulator (E)
 - Two additional 8-bit General Purpose Registers (C, D)
 - Full 16-bit Stack Pointer (SP) and Program Counters (PC)
@@ -22,7 +22,6 @@ This project is extremely ambitious and long running. This repository will maint
 - 32-function ALU with 4 flags (Carry, Zero, Overflow, Sign)
 - Single IRQ source
 - Partially configurable hardware memory map
-- Writable Control Store
 
 ## Architecture Overview
 
