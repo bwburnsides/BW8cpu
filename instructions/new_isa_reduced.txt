@@ -1,0 +1,598 @@
+NOP*
+BRK*
+EXT*
+
+CLC*
+CLI*
+CLV*
+SEC*
+SEI*
+
+MOV A B*
+MOV A C*
+MOV A D*
+
+MOV B A*
+MOV B C*
+MOV B D*
+
+MOV C A*
+MOV C B*
+MOV C D*
+
+MOV D A*
+MOV D B*
+MOV D C*
+
+MOV A DP*
+MOV DP A*
+
+LOAD A IMM*
+LOAD A [ABS]*
+LOAD A [DP]*
+LOAD A [X]*
+LOAD A [X, A]*
+LOAD A [X, B]*
+LOAD A [X, C]*
+LOAD A [X, D]*
+LOAD A [Y]*
+LOAD A [Y, A]*
+LOAD A [Y, B]*
+LOAD A [Y, C]*
+LOAD A [Y, D]*
+LOAD A [SP]*
+LOAD A [SP, A]*
+LOAD A [SP, B]*
+LOAD A [SP, C]*
+LOAD A [SP, D]*
+
+LOAD B IMM*
+LOAD B [ABS]*
+LOAD B [DP]*
+LOAD B [X]*
+LOAD B [X, A]*
+LOAD B [X, B]*
+LOAD B [X, C]*
+LOAD B [X, D]*
+LOAD B [Y]*
+LOAD B [Y, A]*
+LOAD B [Y, B]*
+LOAD B [Y, C]*
+LOAD B [Y, D]*
+LOAD B [SP]*
+LOAD B [SP, A]*
+LOAD B [SP, B]*
+LOAD B [SP, C]*
+LOAD B [SP, D]*
+
+LOAD C IMM*
+LOAD C [ABS]*
+LOAD C [DP]*
+LOAD C [X]*
+LOAD C [X, A]*
+LOAD C [X, B]*
+LOAD C [X, C]*
+LOAD C [X, D]*
+LOAD C [Y]*
+LOAD C [Y, A]*
+LOAD C [Y, B]*
+LOAD C [Y, C]*
+LOAD C [Y, D]*
+LOAD C [SP]*
+LOAD C [SP, A]*
+LOAD C [SP, B]*
+LOAD C [SP, C]*
+LOAD C [SP, D]*
+
+LOAD D IMM*
+LOAD D [ABS]*
+LOAD D [DP]*
+LOAD D [X]*
+LOAD D [X, A]*
+LOAD D [X, B]*
+LOAD D [X, C]*
+LOAD D [X, D]*
+LOAD D [Y]*
+LOAD D [Y, A]*
+LOAD D [Y, B]*
+LOAD D [Y, C]*
+LOAD D [Y, D]*
+LOAD D [SP]*
+LOAD D [SP, A]*
+LOAD D [SP, B]*
+LOAD D [SP, C]*
+LOAD D [SP, D]*
+
+STORE A [ABS]*
+STORE A [DP]*
+STORE A [X]*
+STORE A [X, A]*
+STORE A [X, B]*
+STORE A [X, C]*
+STORE A [X, D]*
+STORE A [Y]*
+STORE A [Y, A]*
+STORE A [Y, B]*
+STORE A [Y, C]*
+STORE A [Y, D]*
+STORE A [SP]*
+STORE A [SP, A]*
+STORE A [SP, B]*
+STORE A [SP, C]*
+STORE A [SP, D]*
+
+STORE B [ABS]*
+STORE B [DP]*
+STORE B [X]*
+STORE B [X, A]*
+STORE B [X, B]*
+STORE B [X, C]*
+STORE B [X, D]*
+STORE B [Y]*
+STORE B [Y, A]*
+STORE B [Y, B]*
+STORE B [Y, C]*
+STORE B [Y, D]*
+STORE B [SP]*
+STORE B [SP, A]*
+STORE B [SP, B]*
+STORE B [SP, C]*
+STORE B [SP, D]*
+
+STORE C [ABS]*
+STORE C [DP]*
+STORE C [X]*
+STORE C [X, A]*
+STORE C [X, B]*
+STORE C [X, C]*
+STORE C [X, D]*
+STORE C [Y]*
+STORE C [Y, A]*
+STORE C [Y, B]*
+STORE C [Y, C]*
+STORE C [Y, D]*
+STORE C [SP]*
+STORE C [SP, A]*
+STORE C [SP, B]*
+STORE C [SP, C]*
+STORE C [SP, D]*
+
+STORE D [ABS]*
+STORE D [DP]*
+STORE D [X]*
+STORE D [X, A]*
+STORE D [X, B]*
+STORE D [X, C]*
+STORE D [X, D]*
+STORE D [Y]*
+STORE D [Y, A]*
+STORE D [Y, B]*
+STORE D [Y, C]*
+STORE D [Y, D]*
+STORE D [SP]*
+STORE D [SP, A]*
+STORE D [SP, B]*
+STORE D [SP, C]*
+STORE D [SP, D]*
+
+MOV X Y*
+MOV X E*
+
+MOV Y X*
+MOV Y E*
+
+MOV E X*
+MOV E Y*
+
+MOV SP E*
+MOV E SP*
+
+LOAD X IMM*
+LOAD X [ABS]*
+LOAD X [DP]*
+LOAD X [X]*
+LOAD X [Y]*
+LOAD X [SP]*
+
+LOAD Y IMM*
+LOAD Y [ABS]*
+LOAD Y [DP]*
+LOAD Y [X]*
+LOAD Y [Y]*
+LOAD Y [SP]*
+
+STORE X [ABS]*
+STORE X [DP]*
+STORE X [X]*
+STORE X [Y]*
+STORE X [SP]*
+
+STORE Y [ABS]*
+STORE Y [DP]*
+STORE Y [X]*
+STORE Y [Y]*
+STORE Y [SP]*
+
+LEA X [X, A]*
+LEA X [X, B]*
+LEA X [X, C]*
+LEA X [X, D]*
+
+LEA X [Y, A]*
+LEA X [Y, B]*
+LEA X [Y, C]*
+LEA X [Y, D]*
+
+LEA X [SP, A]*
+LEA X [SP, B]*
+LEA X [SP, C]*
+LEA X [SP, D]*
+
+LEA Y [X, A]*
+LEA Y [X, B]*
+LEA Y [X, C]*
+LEA Y [X, D]*
+
+LEA Y [Y, A]*
+LEA Y [Y, B]*
+LEA Y [Y, C]*
+LEA Y [Y, D]*
+
+LEA Y [SP, A]*
+LEA Y [SP, B]*
+LEA Y [SP, C]*
+LEA Y [SP, D]*
+
+ADC A A
+ADC A B
+ADC A C
+ADC A D
+ADC A IMM
+ADC A [DP]
+
+ADC B A
+ADC B B
+ADC B C
+ADC B D
+ADC B IMM
+ADC B [DP]
+
+ADC C A
+ADC C B
+ADC C C
+ADC C D
+ADC C IMM
+ADC C [DP]
+
+ADC D A
+ADC D B
+ADC D C
+ADC D D
+ADC D IMM
+ADC D [DP]
+
+ADC [DP] A
+ADC [DP] B
+ADC [DP] C
+ADC [DP] D
+ADC [DP] IMM*
+ADC [DP] [DP]*
+
+SBB A B
+SBB A C
+SBB A D
+SBB A IMM
+SBB A [DP]
+
+SBB B A
+SBB B C
+SBB B D
+SBB B IMM
+SBB B [DP]
+
+SBB C A
+SBB C B
+SBB C D
+SBB C IMM
+SBB C [DP]
+
+SBB D A
+SBB D B
+SBB D C
+SBB D IMM
+SBB D [DP]
+
+SBB [DP] A
+SBB [DP] B
+SBB [DP] C
+SBB [DP] D
+SBB [DP] IMM*
+SBB [DP] [DP]*
+
+AND A A
+AND A B
+AND A C
+AND A D
+AND A IMM
+AND A [DP]
+
+AND B A
+AND B B
+AND B C
+AND B D
+AND B IMM
+AND B [DP]
+
+AND C A
+AND C B
+AND C C
+AND C D
+AND C IMM
+AND C [DP]
+
+AND D A
+AND D B
+AND D C
+AND D D
+AND D IMM
+AND D [DP]
+
+AND [DP] A
+AND [DP] B
+AND [DP] C
+AND [DP] D
+AND [DP] IMM*
+AND [DP] [DP]*
+
+OR A B
+OR A C
+OR A D
+OR A IMM
+OR A [DP]
+
+OR B A
+OR B C
+OR B D
+OR B IMM
+OR B [DP]
+
+OR C A
+OR C B
+OR C D
+OR C IMM
+OR C [DP]
+
+OR D A
+OR D B
+OR D C
+OR D IMM
+OR D [DP]
+
+OR [DP] A
+OR [DP] B
+OR [DP] C
+OR [DP] D
+OR [DP] IMM*
+OR [DP] [DP]*
+
+XOR A A
+XOR A B
+XOR A C
+XOR A D
+XOR A IMM
+XOR A [DP]
+
+XOR B A
+XOR B B
+XOR B C
+XOR B D
+XOR B IMM
+XOR B [DP]
+
+XOR C A
+XOR C B
+XOR C C
+XOR C D
+XOR C IMM
+XOR C [DP]
+
+XOR D A
+XOR D B
+XOR D C
+XOR D D
+XOR D IMM
+XOR D [DP]
+
+XOR [DP] A
+XOR [DP] B
+XOR [DP] C
+XOR [DP] D
+XOR [DP] IMM*
+XOR [DP] [DP]*
+
+NOT A
+NOT B
+NOT C
+NOT D
+NOT [DP]
+
+NEG A
+NEG B
+NEG C
+NEG D
+NEG [DP]
+
+LSR A
+LSR B
+LSR C
+LSR D
+LSR [DP]
+
+LRC A
+LRC B
+LRC C
+LRC D
+LRC [DP]
+
+ASR A
+ASR B
+ASR C
+ASR D
+ASR [DP]
+
+INC A
+INC B
+INC C
+INC D
+INC [DP]
+
+INC X
+INC Y
+
+DEC A
+DEC B
+DEC C
+DEC D
+DEC [DP]
+
+DEC X
+DEC Y
+
+PUSH A
+PUSH B
+PUSH C
+PUSH D
+PUSH X
+PUSH Y
+
+POP A
+POP B
+POP C
+POP D
+POP X
+POP Y
+
+PUSH SR
+POP SR
+
+CMP A A
+CMP A B
+CMP A C
+CMP A D
+CMP A [DP]
+
+CMP B A
+CMP B B
+CMP B C
+CMP B D
+CMP B [DP]
+
+CMP C A
+CMP C B
+CMP C C
+CMP C D
+CMP C [DP]
+
+CMP D A
+CMP D B
+CMP D C
+CMP D D
+CMP D [DP]
+
+CMP [DP] A
+CMP [DP] B
+CMP [DP] C
+CMP [DP] D
+CMP [DP] [DP]*
+
+TST A
+TST B
+TST C
+TST D
+TST [DP]
+
+WAI
+SWI [X]
+SWI [Y]
+RTI*
+
+JSR ABS*
+JSR REL*
+JSR X
+JSR Y
+RTS
+
+JMP ABS*
+JMP REL*
+JMP X
+JMP Y
+
+JO ABS*
+JO REL*
+JO X
+JO Y
+
+JNO ABS*
+JNO REL*
+JNO X
+JNO Y
+
+JS ABS*
+JS REL*
+JS X
+JS Y
+
+JNS ABS*
+JNS REL*
+JNS X
+JNS Y
+
+JE ABS*
+JE REL*
+JE X
+JE Y
+
+JNE ABS*
+JNE REL*
+JNE X
+JNE Y
+
+JC ABS*
+JC REL*
+JC X
+JC Y
+
+JNC ABS*
+JNC REL*
+JNC X
+JNC Y
+
+JBE ABS*
+JBE REL*
+JBE X
+JBE Y
+
+JA ABS*
+JA REL*
+JA X
+JA Y
+
+JL ABS*
+JL REL
+JL X
+JL Y
+
+JGE ABS*
+JGE REL
+JGE X
+JGE Y
+
+JLE ABS*
+JLE REL
+JLE X
+JLE Y
+
+JG ABS*
+JG REL
+JG X
+JG Y
