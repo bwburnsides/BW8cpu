@@ -247,27 +247,32 @@ Destinations: GPRs
 Addressing Modes:
 
 **Immediate**
-    Size: 2
-    Cycles: TBD
+
+Size: 2
+Cycles: TBD
 
 **Absolute**
-    Size: 3
-    Cycles: TBD
+
+Size: 3
+Cycles: TBD
 
 **Direct Page**
-    Size: 2
-    Cycles: TBD
+
+Size: 2
+Cycles: TBD
 
 **Indirect**
-    Indirection Sources: GPPs or `sp`
-    Size: 1
-    Cycles: TBD
+
+Indirection Sources: GPPs or `sp`
+Size: 1
+Cycles: TBD
 
 **Indexed Indirect**
-    Indirection Sources: GPPs or `sp`
-    Index Sources: GPRs
-    Size: 1
-    Cycles: TBD
+
+Indirection Sources: GPPs or `sp`
+Index Sources: GPRs
+Size: 1
+Cycles: TBD
 
 ### 16-bit `LOAD`
 
@@ -275,21 +280,25 @@ Destinations: GPPs
 Addressing Modes:
 
 **Immediate**
-    Size: 3
-    Cycles: TBD
+
+Size: 3
+Cycles: TBD
 
 **Absolute**
-    Size: 3
-    Cycles: TBD
+
+Size: 3
+Cycles: TBD
 
 **Direct Page**
-    Size: 2
-    Cycles: TBD
+
+Size: 2
+Cycles: TBD
 
 **Indirect**
-    Indirection Sources: GPPs or `sp`
-    Size: 1
-    Cycles: TBD
+
+Indirection Sources: GPPs or `sp`
+Size: 1
+Cycles: TBD
 
 ## `LEA` - Load Effective Address
 
@@ -470,14 +479,16 @@ Mode   | varies
 Addressing Modes:
 
 **Inherent**
-    Size: 2
-    Cycles: TBD
+
+Size: 2
+Cycles: TBD
 
 Inherent `INC` instructions have a source which is either a GPR or a GPP.
 
 **Direct Page**
-    Size: 3
-    Cycles: TBD
+
+Size: 3
+Cycles: TBD
 
 Direct Page `INC` instructions operate on 8-byte values only.
 
@@ -500,14 +511,16 @@ Mode   | varies
 Addressing Modes:
 
 **Inherent**
-    Size: 2
-    Cycles: TBD
+
+Size: 2
+Cycles: TBD
 
 Inherent `DEC` instructions have a source which is either a GPR or a GPP.
 
 **Direct Page**
-    Size: 3
-    Cycles: TBD
+
+Size: 3
+Cycles: TBD
 
 Direct Page `DEC` instructions operate on 8-byte values only.
 
@@ -623,20 +636,23 @@ Mode   | varies
 Addressing Modes:
 
 **Absolute**
-    Type: `NRM`
-    Size: 3
-    Cycles: TBD
+
+Type: `NRM`
+Size: 3
+Cycles: TBD
 
 **Relative**
-    Type: `NRM`
-    Size: 2
-    Cycles: TBD
+
+Type: `NRM`
+Size: 2
+Cycles: TBD
 
 **Indirect**
-    Indirection Sources: GPPs
-    Type: `EXT`
-    Size: 2
-    Cycles: TBD
+
+Indirection Sources: GPPs
+Type: `EXT`
+Size: 2
+Cycles: TBD
 
 ## `RTS` - Return from Subroutine
 
@@ -785,12 +801,14 @@ These instructions have a single operand, which is used as both the source and t
 Addressing Modes:
 
 **Inherent**
-    Size: 2
-    Cycles: TBD
+
+Size: 2
+Cycles: TBD
 
 **Direct Page**
-    Size: 3
-    Cycles: TBD
+
+Size: 3
+Cycles: TBD
 
 All Unary Math Operations are of the `EXT` type.
 
@@ -808,19 +826,22 @@ Jump instructions shift the execution path by moving the source into the Program
 Addressing Modes:
 
 **Absolute**
-    Type: `NRM`
-    Size: 3
-    Cycles: TBD
+
+Type: `NRM`
+Size: 3
+Cycles: TBD
 
 **Relative**
-    Type: `NRM`
-    Size: 2
-    Cycles: TBD
+
+Type: `NRM`
+Size: 2
+Cycles: TBD
 
 *NOTE*: Relative Jumps are of type `NRM` for unconditional jumps, and for conditional jumps. *Unless* the conditional jump is for *signed comparisons*, in which case they are of type `EXT`.
 
 **Indirect**
-    Indirection Sources: GPPs
-    Type: `EXT`
-    Size: 2
-    Cycles: TBD
+
+Indirection Sources: GPPs
+Type: `EXT`
+Size: 2
+Cycles: TBD
