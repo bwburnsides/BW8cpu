@@ -16,21 +16,20 @@ Mnemonic                                       | Name                           
 [`LOAD`](#load---load-register)                | Load Register                  | 84
 [`STORE`](#store---store-register)             | Store Register                 | 78
 [`LEA`](#lea---load-effective-address)         | Load Effective Address         | 24
-[`ADC`](#adc---add-with-carry)                 | Add with Carry                 | 30
-[`SBB`](#sbb---subtract-with-borrow)           | Subtract with Borrow           | 26
-[`AND`](#and---bitwise-and)                    | Bitwise AND                    | 30
-[`OR`](#or---bitwise-or)                       | Bitwise OR                     | 26
-[`XOR`](#xor---bitwise-xor)                    | Bitwise XOR                    | 30
+[`ADC`](#adc---add-with-carry)                 | Add with Carry                 | 29
+[`SBB`](#sbb---subtract-with-borrow)           | Subtract with Borrow           | 25
+[`AND`](#and---bitwise-and)                    | Bitwise AND                    | 29
+[`OR`](#or---bitwise-or)                       | Bitwise OR                     | 25
+[`XOR`](#xor---bitwise-xor)                    | Bitwise XOR                    | 29
 [`NOT`](#not---bitwise-inversion)              | Bitwise NOT                    | 5
 [`NEG`](#neg---2s-complement-negation)         | 2s Complement Negation         | 5
-[`LSR`](#lsr---logical-shift-right)            | Logical Shift Right            | 5
-[`LRC`](#lrc---logical-shift-right-with-carry) | Logical Shift Right with Carry | 5
+[`SHR`](#shr---logical-shift-right-with-carry) | Logical Shift Right with Carry | 5
 [`ASR`](#asr---arithmetic-shift-right)         | Arithmetic Shift Right         | 5
 [`INC`](#inc---increment)                      | Increment                      | 7
 [`DEC`](#dec---decrement)                      | Decrement                      | 7
 [`PUSH`](#push---push-to-stack)                | Push to Stack                  | 7
 [`POP`](#pop---pop-from-stack)                 | Pop from Stack                 | 7
-[`CMP`](#cmp---compare)                        | Compare                        | 25
+[`CMP`](#cmp---compare)                        | Compare                        | 29
 [`TST`](#tst---bit-test)                       | Bit Test                       | 5
 [`WAI`](#wai---wait-for-interrupt)             | Wait for Interrupt             | 1
 [`SWI`](#swi---software-interrupt)             | Software Interrupt             | 2
@@ -432,7 +431,7 @@ Mode   | varies
 
 `NEG` instructions follow the rules of [Unary Math Operations](#unary-math-operations).
 
-## `LSR` - Logical Shift Right
+## `SHR` - Logical Shift Right with Carry
 
 Field  | Value
 ------ | ---
@@ -445,24 +444,7 @@ Mode   | varies
 | --- | --- | --- | --- | ---
 |  +  |  +  |  +  |  -  |  -
 
-`LSR` instructions follow the rules of [Unary Math Operations](#unary-math-operations).
-
-*TODO*: To be consistent with the lack of `ADD` and `SUB` instructions, this instruction should be removed in favor of the `LRC` instruction. Will allow for `CMP` with Immediate instrutions to be added. This change will probably allow for some reductions in ALU hardware.
-
-## `LRC` - Logical Shift Right with Carry
-
-Field  | Value
------- | ---
-Type   | `EXT`
-Size   | varies
-Cycles | varies
-Mode   | varies
-
-| `Z` | `C` | `N` | `V` | `I`
-| --- | --- | --- | --- | ---
-|  +  |  +  |  +  |  -  |  -
-
-`LRC` instructions follow the rules of [Unary Math Operations](#unary-math-operations).
+`SHR` instructions follow the rules of [Unary Math Operations](#unary-math-operations).
 
 ## `ASR` - Arithmetic Shift Right
 
@@ -601,8 +583,8 @@ Mode   | varies
 
 Field  | Value
 ------ | ---
-Type   | `EXT`
-Size   | 2
+Type   | `NRM`
+Size   | 1
 Cycles | varies
 Mode   | Inherent
 
@@ -794,9 +776,10 @@ These instructions have left and right hand side operands. The left hand operand
 Destinations: GPRs or Direct Page location
 Sources: GPRs, Direct Page location, or immediate value
 
-When `dst` and `src` are both GPRs, they are allowed to be identical. Left shifts are supported via this mechanism. When the `dst` and `src` are both specified as Direct Page locations, they are specified uniquely in the instruction stream. For this reason, they can refer to the same or unique locations.
+- When `dst` and `src` are both GPRs, they are allowed to be identical. Left shifts are supported via this mechanism.
+- Both the `dst` and `src` may not be Direct Page locations.
 
-Binary Math Instructions which are 3 bytes in size - this occurs when `dst` and `src` are both Direct Page locations, or when `dst` is a Direct Page location and `src` is an immediate value - are of the `NRM` type. Otherwise, they are of the `EXT` type.
+Binary Math Instructions which are 3 bytes in size - this occurs when `dst` is a Direct Page location and `src` is an immediate value - are of the `NRM` type. Otherwise, they are of the `EXT` type.
 
 # Unary Math Operations
 
@@ -848,8 +831,6 @@ Cycles: TBD
 Type: `NRM`
 Size: 2
 Cycles: TBD
-
-*NOTE*: Relative Jumps are of type `NRM` for unconditional jumps, and for conditional jumps. *Unless* the conditional jump is for *signed comparisons*, in which case they are of type `EXT`.
 
 **Indirect**
 
