@@ -23,7 +23,7 @@ Mnemonic                                       | Name                           
 [`XOR`](#xor---bitwise-xor)                    | Bitwise XOR                    | 29
 [`NOT`](#not---bitwise-inversion)              | Bitwise NOT                    | 5
 [`NEG`](#neg---2s-complement-negation)         | 2s Complement Negation         | 5
-[`SHR`](#shr---logical-shift-right-with-carry) | Logical Shift Right with Carry | 5
+[`SRC`](#shr---logical-shift-right-with-carry) | Logical Shift Right with Carry | 5
 [`ASR`](#asr---arithmetic-shift-right)         | Arithmetic Shift Right         | 5
 [`INC`](#inc---increment)                      | Increment                      | 7
 [`DEC`](#dec---decrement)                      | Decrement                      | 7
@@ -94,9 +94,9 @@ Byte -1 is only present if the instruction is part of the `EXT` Mode set. The th
 
 - *Indirect*: The operand source is specified in a pointer register. The pointer register is implied in the opcode.
 
-- *Indexed Indirect*: The operand source is specified by the address that is computed by adding a signed 8-bit index to a pointer register's value. Both the pointer register and the index source are implied in the opcode.
+- *Indexed Indirect*: The operand source is specified by the address that is computed by adding an unsigned 8-bit index to a pointer register's value. Both the pointer register and the index source are implied in the opcode.
 
-- *Relative*: The operand source is specified by the address that is computed by adding a signed 8-bit offset to the Program Counter's value. The offset's source is byte immediately after the opcode in the instruction stream.
+- *Relative*: The operand source is specified by the address that is computed by adding an unsigned 8-bit offset to the Program Counter's value. The offset's source is byte immediately after the opcode in the instruction stream.
 
 # Instruction Details
 
@@ -270,16 +270,18 @@ Cycles: TBD
 
 **Indirect**
 
-Indirection Sources: GPPs or `sp`
+Indirection Sources: GPPs
 Size: 1
 Cycles: TBD
 
 **Indexed Indirect**
 
 Indirection Sources: GPPs or `sp`
-Index Sources: GPRs
-Size: 1
+Index Sources: GPRs (sometimes immediate)
+Size: varies
 Cycles: TBD
+
+The *indexed indirect* 8-bit Load instructions allow for a GPR to be loaded with the value found at an address computed by adding an 8-bit value to a GPP or the SP. In all indirection sources, all 4 GPRs are valid index sources. When the indirection source is the `sp`, then an additional index source is allowed from the instruction stream, as an immediate offset.
 
 ### 16-bit `LOAD`
 
@@ -431,7 +433,7 @@ Mode   | varies
 
 `NEG` instructions follow the rules of [Unary Math Operations](#unary-math-operations).
 
-## `SHR` - Logical Shift Right with Carry
+## `SRC` - Logical Shift Right with Carry
 
 Field  | Value
 ------ | ---
@@ -444,7 +446,7 @@ Mode   | varies
 | --- | --- | --- | --- | ---
 |  +  |  +  |  +  |  -  |  -
 
-`SHR` instructions follow the rules of [Unary Math Operations](#unary-math-operations).
+`SRC` instructions follow the rules of [Unary Math Operations](#unary-math-operations).
 
 ## `ASR` - Arithmetic Shift Right
 
