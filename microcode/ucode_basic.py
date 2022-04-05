@@ -24,15 +24,15 @@ class Ctrl:
     ALU_DBUS = 12
 
     # XFER device addresses
-    RST_XFER   = 0
-    SP_XFER    = 1
-    PC_XFER    = 2
-    X_XFER     = 3
-    Y_XFER     = 4
-    T_XFER     = 5
-    E_XFER     = 6
-    ISR_XFER   = 7
-    SPI_XFER   = 8
+    RST_XFER = 0
+    SP_XFER = 1
+    PC_XFER = 2
+    X_XFER = 3
+    Y_XFER = 4
+    T_XFER = 5
+    E_XFER = 6
+    ISR_XFER = 7
+    SPI_XFER = 8
     _XFER_BASE = 9
 
     # ADDR device addresses
@@ -193,47 +193,65 @@ class Ctrl:
     BRK_CLK = 1 << 31
 
 
-active_low_signals = [Ctrl.BRK_CLK]
+def display_binary(val):
+    bin_str = bin(val)[2:]
 
-fetch = 0 | Ctrl.ADDR_ASSERT_PC | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_IR | Ctrl.COUNT_INC_PC | Ctrl.BRK_CLK
+    final = ["0" for _ in range(32 - len(bin_str))]
+    for char in bin_str:
+        final.append(char)
 
-def build_uops(mode, irq, opcode, flags, t_state):
-    uops = [Ctrl.BRK_CLK, Ctrl.BRK_CLK, Ctrl.BRK_CLK, Ctrl.BRK_CLK, Ctrl.BRK_CLK, Ctrl.BRK_CLK, Ctrl.BRK_CLK, Ctrl.BRK_CLK]
+    final = " ".join(final)
+    print(final)
 
-    # if opcode == 0x00:  # NOP
-    #     uops[1] |= Ctrl.RST_USEQ
 
-    # if opcode == 0x01:  # LOAD A IMM
-    #     uops[1] |= Ctrl.ADDR_ASSERT_PC | Ctrl.COUNT_INC_PC | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_A | Ctrl.RST_USEQ
+fetch = (
+    0
+    | Ctrl.ADDR_ASSERT_PC
+    | Ctrl.DBUS_ASSERT_MEM
+    | Ctrl.DBUS_LOAD_IR
+    | Ctrl.COUNT_INC_PC
+)
 
-    # if opcode == 0x02:  # BRK
-    #     uops[1] = Ctrl.RST_USEQ
 
+rst_uops = [
+    Ctrl.XFER_ASSERT_RST | Ctrl.XFER_LOAD_PC | Ctrl.DBUS_ASSERT_DPI | Ctrl.DBUS_LOAD_DP,
+    Ctrl.ADDR_ASSERT_PC | Ctrl.COUNT_INC_PC | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_T2,
+    Ctrl.ADDR_ASSERT_PC | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_T1 | Ctrl.XFER_ASSERT_SPI | Ctrl.XFER_LOAD_SP,
+    Ctrl.XFER_ASSERT_T | Ctrl.XFER_LOAD_PC | Ctrl.ALU_SEI | Ctrl.TOG_EXT1 | Ctrl.RST_USEQ,
+    0,
+    0,
+    0,
+    0,
+]
+
+display_binary(rst_uops[0])
+print()
+display_binary(rst_uops[1])
+print()
+display_binary(rst_uops[2])
+print()
+display_binary(rst_uops[3])
+
+def build_uops(rst, irq, ext, opcode, flags):
+    uops = [0, 0, 0, 0, 0, 0, 0, 0]
+
+    if rst:
+        return rst_uops
     return uops
 
+
 ucode = []
-for addr in range(2**19):
-    mode = (addr & (0b11 << 17)) >> 17
-    irq = (addr & (0b1 << 15)) >> 15
-    opcode = (addr & (0b1111_1111 << 8)) >> 8
-    flags = (addr & (0b11111 << 3)) >> 3
-    t_state = (addr & (0b111 << 0)) >> 0
+for addr in range(2 ** 16):
+    rst = (addr & (0b1 << 15)) >> 15
+    irq = (addr & (0b1 << 14)) >> 14
+    ext = (addr & (0b1 << 13)) >> 13
+    opcode = (addr & (0b1111_1111 << 5)) >> 5
+    flags = (addr & (0b11111 << 0)) >> 0
 
-    # irq is an active-low signal
-    irq = 1 if irq else 0
- 
-    uops = build_uops(mode, irq, opcode, flags, t_state)
+    irq = 1 if not irq else 0
+
+    uops = build_uops(rst, irq, ext, opcode, flags)
     ucode.extend(uops)
-
-print(len(ucode) / 1024)
-
-val = bin(ucode[-1])[2:]
-new = []
-for char in val:
-    new.append(char)
-    new.append(" ")
-
-print("".join(new))
 
 roms = [[], [], [], []]
 for word in ucode:
@@ -247,10 +265,6 @@ for word in ucode:
     roms[2].append(byte2)
     roms[3].append(byte3)
 
-print(roms[0][0])
-print(roms[1][0])
-print(roms[2][0])
-print(roms[3][0])
 handles = [
     ("control_0.bin", roms[0]),
     ("control_1.bin", roms[1]),

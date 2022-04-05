@@ -95,7 +95,7 @@ _ = ASSEMBLY_TIME_CHECKS()
     load b, [y + b]             => opcode(LOAD_B_Y_B)
     load b, [y + c]             => opcode(LOAD_B_Y_C)
     load b, [y + d]             => opcode(LOAD_B_Y_D)
-    load b, [sp + {imm: u8}]    => opcode(LOAD_B_SP_IMM)    @ imm
+    load b, [sp + #{imm: u8}]    => opcode(LOAD_B_SP_IMM)    @ imm
     load b, [sp + a]            => opcode(LOAD_B_SP_A)
     load b, [sp + b]            => opcode(LOAD_B_SP_B)
     load b, [sp + c]            => opcode(LOAD_B_SP_C)
@@ -149,7 +149,7 @@ _ = ASSEMBLY_TIME_CHECKS()
     load d, [y + b]             => opcode(LOAD_D_Y_B)
     load d, [y + c]             => opcode(LOAD_D_Y_C)
     load d, [y + d]             => opcode(LOAD_D_Y_D)
-    load d, [sp + {imm: u8}]    => opcode(LOAD_D_SP_IMM)    @ imm
+    load d, [sp + #{imm: u8}]    => opcode(LOAD_D_SP_IMM)    @ imm
     load d, [sp + a]            => opcode(LOAD_D_SP_A)
     load d, [sp + b]            => opcode(LOAD_D_SP_B)
     load d, [sp + c]            => opcode(LOAD_D_SP_C)
@@ -176,7 +176,7 @@ _ = ASSEMBLY_TIME_CHECKS()
     store a, [y + b]            => opcode(STORE_A_Y_B)
     store a, [y + c]            => opcode(STORE_A_Y_C)
     store a, [y + d]            => opcode(STORE_A_Y_D)
-    store a, [sp + {imm: u8}]   => opcode(STORE_A_SP_IMM)   @ imm
+    store a, [sp + #{imm: u8}]   => opcode(STORE_A_SP_IMM)   @ imm
     store a, [sp + a]           => opcode(STORE_A_SP_A)
     store a, [sp + b]           => opcode(STORE_A_SP_B)
     store a, [sp + c]           => opcode(STORE_A_SP_C)
@@ -194,7 +194,7 @@ _ = ASSEMBLY_TIME_CHECKS()
     store b, [y + b]            => opcode(STORE_B_Y_B)
     store b, [y + c]            => opcode(STORE_B_Y_C)
     store b, [y + d]            => opcode(STORE_B_Y_D)
-    store b, [sp + {imm: u8}]   => opcode(STORE_B_SP_IMM)   @ imm
+    store b, [sp + #{imm: u8}]   => opcode(STORE_B_SP_IMM)   @ imm
     store b, [sp + a]           => opcode(STORE_B_SP_A)
     store b, [sp + b]           => opcode(STORE_B_SP_B)
     store b, [sp + c]           => opcode(STORE_B_SP_C)
@@ -212,7 +212,7 @@ _ = ASSEMBLY_TIME_CHECKS()
     store c, [y + b]            => opcode(STORE_C_Y_B)
     store c, [y + c]            => opcode(STORE_C_Y_C)
     store c, [y + d]            => opcode(STORE_C_Y_D)
-    store c, [sp + {imm: u8}]   => opcode(STORE_C_SP_IMM)   @ imm
+    store c, [sp + #{imm: u8}]   => opcode(STORE_C_SP_IMM)   @ imm
     store c, [sp + a]           => opcode(STORE_C_SP_A)
     store c, [sp + b]           => opcode(STORE_C_SP_B)
     store c, [sp + c]           => opcode(STORE_C_SP_C)
@@ -230,7 +230,7 @@ _ = ASSEMBLY_TIME_CHECKS()
     store d, [y + b]            => opcode(STORE_D_Y_B)
     store d, [y + c]            => opcode(STORE_D_Y_C)
     store d, [y + d]            => opcode(STORE_D_Y_D)
-    store d, [sp + {imm: u8}]   => opcode(STORE_D_SP_IMM)   @ imm
+    store d, [sp + #{imm: u8}]   => opcode(STORE_D_SP_IMM)   @ imm
     store d, [sp + a]           => opcode(STORE_D_SP_A)
     store d, [sp + b]           => opcode(STORE_D_SP_B)
     store d, [sp + c]           => opcode(STORE_D_SP_C)
@@ -255,27 +255,27 @@ _ = ASSEMBLY_TIME_CHECKS()
     load x, [{dp: u8}]          => opcode(LOAD_X_DP)        @ dp
     load x, [x]                 => opcode(LOAD_X_X)
     load x, [y]                 => opcode(LOAD_X_Y)
-    load x, [sp + {imm: u8}]    => opcode(LOAD_X_SP_IMM)    @ imm
+    load x, [sp + #{imm: u8}]    => opcode(LOAD_X_SP_IMM)    @ imm
 
     load y, #{imm: i16}         => opcode(LOAD_Y_IMM)       @ imm
     load y, [{abs: u16}]        => opcode(LOAD_Y_ABS)       @ abs
     load y, [{dp: u8}]          => opcode(LOAD_Y_DP)        @ dp
     load y, [x]                 => opcode(LOAD_Y_X)
     load y, [y]                 => opcode(LOAD_Y_Y)
-    load y, [sp + {imm: u8}]    => opcode(LOAD_Y_SP)        @ imm
+    load y, [sp + #{imm: u8}]    => opcode(LOAD_Y_SP)        @ imm
 
     ; 16-bit Stores
     store x, [{abs: u16}]       => opcode(STORE_X_ABS)      @ abs
     store x, [{dp: u8}]         => opcode(STORE_X_DP)       @ dp
     store x, [x]                => opcode(STORE_X_X)
     store x, [y]                => opcode(STORE_X_Y)
-    store x, [sp + {imm: u8}]   => opcode(STORE_X_SP_IMM)   @ imm
+    store x, [sp + #{imm: u8}]   => opcode(STORE_X_SP_IMM)   @ imm
 
     store y, [{abs: u16}]       => opcode(STORE_Y_ABS)      @ abs
     store y, [{dp: u8}]         => opcode(STORE_Y_DP)       @ dp
     store y, [x]                => opcode(STORE_Y_X)
     store y, [y]                => opcode(STORE_Y_Y)
-    store y, [sp + {imm: u8}]   => opcode(STORE_Y_SP)       @ imm
+    store y, [sp + #{imm: u8}]   => opcode(STORE_Y_SP)       @ imm
 
     ; Load Effective Address
     lea x, [x + a]              => opcode(LEA_X_X_A)
@@ -489,6 +489,67 @@ _ = ASSEMBLY_TIME_CHECKS()
     xor [{dp: u8}], d           => opcode(XOR_D_D)          @ dp
     xor [{dp: u8}], #{imm: i8}  => opcode(XOR_D_IMM)        @ imm @ dp
 
+    ; swap (XOR-swap alias)
+    swap a, b => asm {
+        xor a, b
+        xor b, a
+        xor a, b
+    }
+    swap b, a => asm {
+        swap a, b
+    }
+
+    swap a, c => asm {
+        xor a, c
+        xor c, a
+        xor a, c
+    }
+    swap c, a => asm {
+        swap a, c
+    }
+
+    swap a, d => asm {
+        xor a, d
+        xor d, a
+        xor a, d
+    }
+    swap d, a => asm {
+        swap a, d
+    }
+
+    swap b, c => asm {
+        xor b, c
+        xor c, b
+        xor b, c
+    }
+    swap c, b => asm {
+        swap b, c
+    }
+
+    swap b, d => asm {
+        xor b, d
+        xor d, b
+        xor b, d
+    }
+    swap d, b => asm {
+        swap b, d
+    }
+
+    swap c, d => asm {
+        xor c, d
+        xor d, c
+        xor c, d
+    }
+    swap d, c => asm {
+        swap c, d
+    }
+
+    ; clr (self-xor alias)
+    clr a => asm { xor a, a }
+    clr b => asm { xor b, b }
+    clr c => asm { xor c, c }
+    clr d => asm { xor d, d }
+
     ; Logical NOT
     not a                       => opcode(NOT_A)
     not b                       => opcode(NOT_B)
@@ -544,6 +605,11 @@ _ = ASSEMBLY_TIME_CHECKS()
     push y                      => opcode(PUSH_Y)
     push sr                     => opcode(PUSH_SR)
 
+    push e => asm {
+        push a
+        push b
+    }
+
     ; Stack Pops
     pop a                       => opcode(POP_A)
     pop b                       => opcode(POP_B)
@@ -552,6 +618,11 @@ _ = ASSEMBLY_TIME_CHECKS()
     pop x                       => opcode(POP_X)
     pop y                       => opcode(POP_Y)
     pop sr                      => opcode(POP_SR)
+
+    pop e => asm {
+        pop b
+        pop a
+    }
 
     ; Compares
     cmp a, a                    => opcode(CMP_A_A)
@@ -602,85 +673,85 @@ _ = ASSEMBLY_TIME_CHECKS()
 
     ; Subroutine Control
     jsr {abs: u16}              => opcode(JSR_ABS)          @ abs
-    jsr +{rel: u8}              => opcode(JSR_REL)          @ rel
+    jsr +{rel: s8}              => opcode(JSR_REL)          @ rel
     jsr x                       => opcode(JSR_X)
     jsr y                       => opcode(JSR_Y)
     rts                         => opcode(RTS)
 
     ; Unconditional Jumps
     jmp {abs: u16}              => opcode(JMP_ABS)          @ abs
-    jmp +{rel: u8}              => opcode(JMP_REL)          @ rel
+    jmp +{rel: s8}              => opcode(JMP_REL)          @ rel
     jmp x                       => opcode(JMP_X)
     jmp y                       => opcode(JMP_Y)
 
     ; Conditional Jumps
     jo {abs: u16}               => opcode(JO_ABS)           @ abs
-    jo +{rel: u8}               => opcode(JO_REL)           @ rel
+    jo +{rel: s8}               => opcode(JO_REL)           @ rel
     jo x                        => opcode(JO_X)
     jo y                        => opcode(JO_Y)
 
     jno {abs: u16}              => opcode(JNO_ABS)          @ abs
-    jno +{rel: u8}              => opcode(JNO_REL)          @ rel
+    jno +{rel: s8}              => opcode(JNO_REL)          @ rel
     jno x                       => opcode(JNO_X)
     jno y                       => opcode(JNO_Y)
 
     js {abs: u16}               => opcode(JS_ABS)           @ abs
-    js +{rel: u8}               => opcode(JS_REL)           @ rel
+    js +{rel: s8}               => opcode(JS_REL)           @ rel
     js x                        => opcode(JS_X)
     js y                        => opcode(JS_Y)
 
     jns {abs: u16}              => opcode(JNS_ABS)          @ abs
-    jns +{rel: u8}              => opcode(JNS_REL)          @ rel
+    jns +{rel: s8}              => opcode(JNS_REL)          @ rel
     jns x                       => opcode(JNS_X)
     jns y                       => opcode(JNS_Y)
 
     je {abs: u16}               => opcode(JE_ABS)           @ abs
-    je +{rel: u8}               => opcode(JE_REL)           @ rel
+    je +{rel: s8}               => opcode(JE_REL)           @ rel
     je x                        => opcode(JE_X)
     je y                        => opcode(JE_Y)
 
     jne {abs: u16}              => opcode(JNE_ABS)          @ abs
-    jne +{rel: u8}              => opcode(JNE_REL)          @ rel
+    jne +{rel: s8}              => opcode(JNE_REL)          @ rel
     jne x                       => opcode(JNE_X)
     jne y                       => opcode(JNE_Y)
 
     jc {abs: u16}               => opcode(JC_ABS)           @ abs
-    jc +{rel: u8}               => opcode(JC_REL)           @ rel
+    jc +{rel: s8}               => opcode(JC_REL)           @ rel
     jc x                        => opcode(JC_X)
     jc y                        => opcode(JC_Y)
 
     jnc {abs: u16}              => opcode(JNC_ABS)          @ abs
-    jnc +{rel: u8}              => opcode(JNC_REL)          @ rel
+    jnc +{rel: s8}              => opcode(JNC_REL)          @ rel
     jnc x                       => opcode(JNC_X)
     jnc y                       => opcode(JNC_Y)
 
     jbe {abs: u16}              => opcode(JBE_ABS)          @ abs
-    jbe +{rel: u8}              => opcode(JBE_REL)          @ rel
+    jbe +{rel: s8}              => opcode(JBE_REL)          @ rel
     jbe x                       => opcode(JBE_X)
     jbe y                       => opcode(JBE_Y)
 
     ja {abs: u16}               => opcode(JA_ABS)           @ abs
-    ja +{rel: u8}               => opcode(JA_REL)           @ rel
+    ja +{rel: s8}               => opcode(JA_REL)           @ rel
     ja x                        => opcode(JA_X)
     ja y                        => opcode(JA_Y)
 
     jl {abs: u16}               => opcode(JL_ABS)           @ abs
-    jl +{rel: u8}               => opcode(JL_REL)           @ rel
+    jl +{rel: s8}               => opcode(JL_REL)           @ rel
     jl x                        => opcode(JL_X)
     jl y                        => opcode(JL_Y)
 
     jge {abs: u16}              => opcode(JGE_ABS)          @ abs
-    jge +{rel: u8}              => opcode(JGE_REL)          @ rel
+    jge +{rel: s8}              => opcode(JGE_REL)          @ rel
     jge x                       => opcode(JGE_X)
     jge y                       => opcode(JGE_Y)
 
     jle {abs: u16}              => opcode(JLE_ABS)          @ abs
-    jle +{rel: u8}              => opcode(JLE_REL)          @ rel
+    jle +{rel: s8}              => opcode(JLE_REL)          @ rel
     jle x                       => opcode(JLE_X)
     jle y                       => opcode(JLE_Y)
 
     jg {abs: u16}               => opcode(JG_ABS)           @ abs
-    jg +{rel: u8}               => opcode(JG_REL)           @ rel
+    jg +{rel: s8}               => opcode(JG_REL)           @ rel
     jg x                        => opcode(JG_X)
     jg y                        => opcode(JG_Y)
 }

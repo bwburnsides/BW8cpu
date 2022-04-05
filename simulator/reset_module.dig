@@ -5,12 +5,7 @@
   <visualElements>
     <visualElement>
       <elementName>Counter</elementName>
-      <elementAttributes>
-        <entry>
-          <string>Bits</string>
-          <int>2</int>
-        </entry>
-      </elementAttributes>
+      <elementAttributes/>
       <pos x="560" y="360"/>
     </visualElement>
     <visualElement>
