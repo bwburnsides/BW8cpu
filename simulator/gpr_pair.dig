@@ -278,7 +278,7 @@
       <elementAttributes>
         <entry>
           <string>NetName</string>
-          <string>load_a</string>
+          <string>load_hi</string>
         </entry>
       </elementAttributes>
       <pos x="-1340" y="-460"/>
@@ -416,7 +416,7 @@
         </entry>
         <entry>
           <string>NetName</string>
-          <string>load-a-dbus</string>
+          <string>load-hi-dbus</string>
         </entry>
       </elementAttributes>
       <pos x="-1480" y="-440"/>
@@ -444,7 +444,7 @@
         </entry>
         <entry>
           <string>NetName</string>
-          <string>load-b-dbus</string>
+          <string>load-lo-dbus</string>
         </entry>
       </elementAttributes>
       <pos x="-1480" y="-400"/>
@@ -469,7 +469,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>B to addr</string>
+          <string>Lo Reg to addr</string>
         </entry>
       </elementAttributes>
       <pos x="-80" y="380"/>
@@ -546,7 +546,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>A to addr</string>
+          <string>Hi Reg to addr</string>
         </entry>
       </elementAttributes>
       <pos x="-720" y="380"/>
@@ -641,7 +641,7 @@
       <elementAttributes>
         <entry>
           <string>NetName</string>
-          <string>addr_hi</string>
+          <string>addr-hi</string>
         </entry>
       </elementAttributes>
       <pos x="-1760" y="360"/>
@@ -651,7 +651,7 @@
       <elementAttributes>
         <entry>
           <string>NetName</string>
-          <string>addr_lo</string>
+          <string>addr-lo</string>
         </entry>
       </elementAttributes>
       <pos x="-1760" y="380"/>
@@ -681,7 +681,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>A hi mux in</string>
+          <string>Hi Reg Hi mux in</string>
         </entry>
       </elementAttributes>
       <pos x="-1040" y="-460"/>
@@ -691,7 +691,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>A lo mux in</string>
+          <string>Hi Reg Lo mux in</string>
         </entry>
       </elementAttributes>
       <pos x="-720" y="-460"/>
@@ -701,7 +701,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>B hi mux in</string>
+          <string>Lo Reg Hi mux in</string>
         </entry>
       </elementAttributes>
       <pos x="-400" y="-460"/>
@@ -711,7 +711,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>B lo mux in</string>
+          <string>Lo Reg Lo mux in</string>
         </entry>
       </elementAttributes>
       <pos x="-80" y="-460"/>
@@ -725,7 +725,7 @@
         </entry>
         <entry>
           <string>NetName</string>
-          <string>load-b-dbus</string>
+          <string>load-lo-dbus</string>
         </entry>
       </elementAttributes>
       <pos x="-100" y="-460"/>
@@ -739,7 +739,7 @@
         </entry>
         <entry>
           <string>NetName</string>
-          <string>load-b-dbus</string>
+          <string>load-lo-dbus</string>
         </entry>
       </elementAttributes>
       <pos x="-420" y="-460"/>
@@ -753,7 +753,7 @@
         </entry>
         <entry>
           <string>NetName</string>
-          <string>load-a-dbus</string>
+          <string>load-hi-dbus</string>
         </entry>
       </elementAttributes>
       <pos x="-740" y="-460"/>
@@ -767,7 +767,7 @@
         </entry>
         <entry>
           <string>NetName</string>
-          <string>load-a-dbus</string>
+          <string>load-hi-dbus</string>
         </entry>
       </elementAttributes>
       <pos x="-1060" y="-460"/>
@@ -841,7 +841,7 @@
         </entry>
         <entry>
           <string>NetName</string>
-          <string>dbus_lo</string>
+          <string>dbus-lo</string>
         </entry>
       </elementAttributes>
       <pos x="-740" y="-440"/>
@@ -855,7 +855,7 @@
         </entry>
         <entry>
           <string>NetName</string>
-          <string>dbus_lo</string>
+          <string>dbus-lo</string>
         </entry>
       </elementAttributes>
       <pos x="-100" y="-440"/>
@@ -869,7 +869,7 @@
         </entry>
         <entry>
           <string>NetName</string>
-          <string>dbus_hi</string>
+          <string>dbus-hi</string>
         </entry>
       </elementAttributes>
       <pos x="-420" y="-440"/>
@@ -883,7 +883,7 @@
         </entry>
         <entry>
           <string>NetName</string>
-          <string>dbus_hi</string>
+          <string>dbus-hi</string>
         </entry>
       </elementAttributes>
       <pos x="-1060" y="-440"/>
@@ -989,7 +989,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>B to dbus</string>
+          <string>Lo Reg to dbus</string>
         </entry>
       </elementAttributes>
       <pos x="-400" y="120"/>
@@ -999,7 +999,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>B to lhs</string>
+          <string>Lo Reg to lhs</string>
         </entry>
       </elementAttributes>
       <pos x="-80" y="120"/>
@@ -1009,7 +1009,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>B to rhs</string>
+          <string>Lo Reg to rhs</string>
         </entry>
       </elementAttributes>
       <pos x="-400" y="380"/>
@@ -1258,7 +1258,7 @@
         </entry>
         <entry>
           <string>NetName</string>
-          <string>load_b</string>
+          <string>load-lo</string>
         </entry>
       </elementAttributes>
       <pos x="-760" y="-140"/>
@@ -1272,7 +1272,7 @@
         </entry>
         <entry>
           <string>NetName</string>
-          <string>d_lo</string>
+          <string>d-lo</string>
         </entry>
       </elementAttributes>
       <pos x="-760" y="-100"/>
@@ -1282,7 +1282,7 @@
       <elementAttributes>
         <entry>
           <string>NetName</string>
-          <string>q_b</string>
+          <string>q-lo</string>
         </entry>
       </elementAttributes>
       <pos x="-620" y="-100"/>
@@ -1292,7 +1292,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>A to dbus</string>
+          <string>Hi Reg to dbus</string>
         </entry>
       </elementAttributes>
       <pos x="-1040" y="120"/>
@@ -1302,7 +1302,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>A to lhs</string>
+          <string>Hi Reg to lhs</string>
         </entry>
       </elementAttributes>
       <pos x="-720" y="120"/>
@@ -1312,7 +1312,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>A to rhs</string>
+          <string>Hi Reg to rhs</string>
         </entry>
       </elementAttributes>
       <pos x="-1040" y="380"/>
@@ -1561,7 +1561,7 @@
         </entry>
         <entry>
           <string>NetName</string>
-          <string>load_a</string>
+          <string>load-hi</string>
         </entry>
       </elementAttributes>
       <pos x="-1060" y="-140"/>
@@ -1575,7 +1575,7 @@
         </entry>
         <entry>
           <string>NetName</string>
-          <string>d_hi</string>
+          <string>d-hi</string>
         </entry>
       </elementAttributes>
       <pos x="-1060" y="-100"/>
@@ -1585,7 +1585,7 @@
       <elementAttributes>
         <entry>
           <string>NetName</string>
-          <string>q_a</string>
+          <string>q-hi</string>
         </entry>
       </elementAttributes>
       <pos x="-920" y="-100"/>
@@ -1623,7 +1623,7 @@
       <elementAttributes>
         <entry>
           <string>NetName</string>
-          <string>dbus_lo</string>
+          <string>dbus-lo</string>
         </entry>
       </elementAttributes>
       <pos x="-1380" y="-100"/>
@@ -1633,7 +1633,7 @@
       <elementAttributes>
         <entry>
           <string>NetName</string>
-          <string>dbus_hi</string>
+          <string>dbus-hi</string>
         </entry>
       </elementAttributes>
       <pos x="-1380" y="-80"/>
@@ -1767,7 +1767,7 @@
         </entry>
         <entry>
           <string>Label</string>
-          <string>reg_a</string>
+          <string>reg-hi</string>
         </entry>
         <entry>
           <string>Bits</string>
@@ -1785,7 +1785,7 @@
         </entry>
         <entry>
           <string>Label</string>
-          <string>reg_b</string>
+          <string>reg-lo</string>
         </entry>
         <entry>
           <string>Bits</string>
@@ -1799,7 +1799,7 @@
       <elementAttributes>
         <entry>
           <string>NetName</string>
-          <string>q_a</string>
+          <string>q-hi</string>
         </entry>
       </elementAttributes>
       <pos x="-1800" y="460"/>
@@ -1809,7 +1809,7 @@
       <elementAttributes>
         <entry>
           <string>NetName</string>
-          <string>q_b</string>
+          <string>q-lo</string>
         </entry>
       </elementAttributes>
       <pos x="-1800" y="540"/>
@@ -1819,7 +1819,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>B Register</string>
+          <string>Lo Reg</string>
         </entry>
       </elementAttributes>
       <pos x="-740" y="-140"/>
@@ -1829,7 +1829,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>A Register</string>
+          <string>Hi Reg</string>
         </entry>
       </elementAttributes>
       <pos x="-1040" y="-140"/>

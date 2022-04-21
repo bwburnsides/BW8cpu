@@ -5,7 +5,12 @@
   <visualElements>
     <visualElement>
       <elementName>Counter</elementName>
-      <elementAttributes/>
+      <elementAttributes>
+        <entry>
+          <string>Bits</string>
+          <int>3</int>
+        </entry>
+      </elementAttributes>
       <pos x="560" y="360"/>
     </visualElement>
     <visualElement>
