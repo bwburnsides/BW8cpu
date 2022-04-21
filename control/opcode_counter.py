@@ -1,7 +1,7 @@
 from pprint import pprint
 
 lines = []
-with open("bwb_opcodes.txt") as f:
+with open("new_isa_reduced.txt") as f:
     for line in f:
         stripped = line.strip()
         if stripped and not stripped.startswith("#"):
@@ -13,7 +13,7 @@ print("Unique: ", len(set(lines)))
 movs_loads_stores = [op for op in lines if any(op.startswith(pre) for pre in ["MOV", "LOAD", "STORE"])]
 loads = [op for op in lines if any(op.startswith(pre) for pre in ["LOAD"])]
 stores = [op for op in lines if any(op.startswith(pre) for pre in ["STORE"])]
-adds_subs = [op for op in lines if any(op.startswith(pre) for pre in ["ADD", "SUB"])]
+adds_subs = [op for op in lines if any(op.startswith(pre) for pre in ["ADD", "SUB", "ADC", "SBB", "SBC"])]
 jumps = [op for op in lines if any(op.startswith(pre) for pre in ["J"])]
 
 abss = [op for op in lines if "ABS" in op]
