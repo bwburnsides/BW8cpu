@@ -2,6 +2,7 @@
 ; Total opcode count: 497
 ; Zeropage opcodes: 256
 ; Extended opcodes: 241
+#once
 NOP = 0x0000
 EXT = 0x0001
 CLC = 0x0002

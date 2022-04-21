@@ -68,6 +68,7 @@ def write_output(out_paths, opcodes):
 
         if path.suffix == ".asm":
             comment_token = ";"
+            extra_lines.append("#once")
         elif path.suffix == ".py":
             comment_token = "#"
             padding = "\t"
