@@ -137,7 +137,7 @@ class Ctrl:
     BRK_CLK = 1 << 31
 
     @staticmethod
-    def decode(word: int) -> None:
+    def decode(word: int) -> str:
         DBUS_ASSERT = (word >> 0) & (2 ** 4 - 1)
         DBUS_LOAD = (word >> 4) & (2 ** 5 - 1)
         ALU_OP = (word >> 9) & (2 ** 4 - 1)
@@ -177,49 +177,49 @@ class Flags:
     Z: bool
     C: bool
 
-    def unconditional(self):
+    def unconditional(self) -> bool:
         return True
 
-    def is_overflow(self):
+    def is_overflow(self) -> bool:
         return self.V
 
-    def is_not_overflow(self):
+    def is_not_overflow(self) -> bool:
         return not self.V
 
-    def is_negative(self):
+    def is_negative(self) -> bool:
         return self.N
 
-    def is_not_negative(self):
+    def is_not_negative(self) -> bool:
         return not self.N
 
-    def is_equal(self):
+    def is_equal(self) -> bool:
         return self.Z
 
-    def is_not_equal(self):
+    def is_not_equal(self) -> bool:
         return not self.Z
 
-    def is_carry(self):
+    def is_carry(self) -> bool:
         return self.C
 
-    def is_not_carry(self):
+    def is_not_carry(self) -> bool:
         return not self.C
 
-    def is_below_or_equal(self):
+    def is_below_or_equal(self) -> bool:
         return self.C or self.Z
 
-    def is_above(self):
+    def is_above(self) -> bool:
         return not self.C and not self.Z
 
-    def is_less(self):
+    def is_less(self) -> bool:
         return self.N != self.V
 
-    def is_greater_or_equal(self):
+    def is_greater_or_equal(self) -> bool:
         return self.N == self.V
 
-    def is_less_or_equal(self):
+    def is_less_or_equal(self) -> bool:
         return self.Z or (self.N != self.V)
 
-    def is_greater(self):
+    def is_greater(self) -> bool:
         return not self.Z and self.N == self.V
 
 
@@ -249,7 +249,9 @@ class GPR(Enum):
         Ctrl.XFER_ASSERT_TH_D,
     )
 
-    def __init__(self, dbus_load, dbus_assert, xfer_assert_tl, xfer_assert_th):
+    def __init__(
+        self, dbus_load: int, dbus_assert: int, xfer_assert_tl: int, xfer_assert_th: int
+    ):
         self.DBUS_LOAD = dbus_load
         self.DBUS_ASSERT = dbus_assert
         self.XFER_ASSERT_TL = xfer_assert_tl
@@ -292,6 +294,7 @@ class GPR(Enum):
                 return Ctrl.XFER_ASSERT_D_C
             if rhs == GPR.D:
                 return Ctrl.XFER_ASSERT_D_D
+        raise ValueError("Unexpected inputs")
 
 
 class MOV16(Enum):
@@ -300,7 +303,7 @@ class MOV16(Enum):
     AB = Ctrl.XFER_LOAD_AB, Ctrl.XFER_ASSERT_A_B
     CD = Ctrl.XFER_LOAD_CD, Ctrl.XFER_ASSERT_C_D
 
-    def __init__(self, xfer_load, xfer_assert):
+    def __init__(self, xfer_load: int, xfer_assert: int):
         self.XFER_LOAD = xfer_load
         self.XFER_ASSERT = xfer_assert
 
@@ -321,7 +324,14 @@ class GPP(Enum):
         Ctrl.DBUS_LOAD_YL,
     )
 
-    def __init__(self, xfer_load, xfer_assert, addr_assert, dbus_load_hi, dbus_load_lo):
+    def __init__(
+        self,
+        xfer_load: int,
+        xfer_assert: int,
+        addr_assert: int,
+        dbus_load_hi: int,
+        dbus_load_lo: int,
+    ):
         self.XFER_LOAD = xfer_load
         self.XFER_ASSERT = xfer_assert
         self.ADDR_ASSERT = addr_assert
@@ -334,7 +344,7 @@ class PTR(Enum):
     Y = Ctrl.ADDR_ASSERT_Y, Ctrl.XFER_LOAD_Y
     SP = Ctrl.ADDR_ASSERT_SP, Ctrl.XFER_LOAD_SP
 
-    def __init__(self, addr_assert, xfer_load):
+    def __init__(self, addr_assert: int, xfer_load: int):
         self.ADDR_ASSERT = addr_assert
         self.XFER_LOAD = xfer_load
 
@@ -359,7 +369,7 @@ class UnyOp(Enum):
     INC = Ctrl.ALU_INC, ALUSide.LogicUnit
     DEC = Ctrl.ALU_DEC, ALUSide.LogicUnit
 
-    def __init__(self, alu_op, alu_side):
+    def __init__(self, alu_op: int, alu_side: ALUSide):
         self.ALU_OP = alu_op
         self.ALU_SIDE = alu_side
 
@@ -371,7 +381,7 @@ class StackOperable8(Enum):
     D = Ctrl.DBUS_LOAD_D, Ctrl.DBUS_ASSERT_D
     SR = Ctrl.DBUS_LOAD_SR, Ctrl.DBUS_ASSERT_SR
 
-    def __init__(self, dbus_load, dbus_assert):
+    def __init__(self, dbus_load: int, dbus_assert: int):
         self.DBUS_LOAD = dbus_load
         self.DBUS_ASSERT = dbus_assert
 
@@ -380,7 +390,7 @@ class StackOperable16(Enum):
     X = Ctrl.XFER_ASSERT_X, Ctrl.DBUS_LOAD_XH, Ctrl.DBUS_LOAD_XL
     Y = Ctrl.XFER_ASSERT_Y, Ctrl.DBUS_LOAD_YH, Ctrl.DBUS_LOAD_YL
 
-    def __init__(self, xfer_assert, dbus_load_hi, dbus_load_lo):
+    def __init__(self, xfer_assert: int, dbus_load_hi: int, dbus_load_lo: int):
         self.XFER_ASSERT = xfer_assert
         self.DBUS_LOAD_HI = dbus_load_hi
         self.DBUS_LOAD_LO = dbus_load_lo
@@ -1080,7 +1090,7 @@ def jsr_ptr(ptr: GPP) -> list[int]:
     return uops
 
 
-def jmp_abs(pred: Callable) -> list[int]:
+def jmp_abs(pred: Callable[[], bool]) -> list[int]:
     uops = BASE.copy()
 
     if pred():
@@ -1102,7 +1112,7 @@ def jmp_abs(pred: Callable) -> list[int]:
     return uops
 
 
-def jmp_rel(pred: Callable) -> list[int]:
+def jmp_rel(pred: Callable[[], bool]) -> list[int]:
     uops = BASE.copy()
 
     if pred():
@@ -1124,7 +1134,7 @@ def jmp_rel(pred: Callable) -> list[int]:
     return uops
 
 
-def jmp_ptr(pred: Callable, ptr: GPP) -> list[int]:
+def jmp_ptr(pred: Callable[[], bool], ptr: GPP) -> list[int]:
     uops = BASE.copy()
 
     if pred():
@@ -2390,7 +2400,7 @@ def get_uops(flags: Flags, OP: int, IRQ: bool, RST: bool) -> list[int]:
     return uops
 
 
-def make_extended(uops, flags, OP, IRQ, EXT) -> list[int]:
+def make_extended(uops: list[int], OP: int) -> list[int]:
     if not OP & 0b1_00000000:
         return uops
 
@@ -2413,7 +2423,8 @@ def make_extended(uops, flags, OP, IRQ, EXT) -> list[int]:
 def get_cycles(uops: list[int]) -> int:
     for i, word in enumerate(reversed(uops)):
         if word:
-            return (7 - i) + 1
+            return 8 - i
+    raise ValueError("All cycles are null")
 
 
 def get_size(uops: list[int]) -> int:
@@ -2423,30 +2434,36 @@ def get_size(uops: list[int]) -> int:
     )
 
 
-def main():
+def write_ucode(ucode: list[int]) -> None:
+    with open("ucode.bin", "wb") as f:
+        for uop in ucode:
+            f.write(uop.to_bytes(4, "big"))
+
+
+def main() -> None:
     # 19b of state input:
     # 1b RST, 1b IRQ, 1b EXT, 8b OP, 5b flags, 5b t-state
 
     ucode, lens, sizes = [], [], []
     for addr in range(2 ** 16):
-        flags = (addr >> 0) & 0b11111
+        flags_packed = (addr >> 0) & 0b11111
         OP = (addr >> 5) & 0b1111_1111
         EXT = (addr >> 13) & 0b1
         IRQ = bool((addr >> 14) & 0b1)
         RST = bool((addr >> 15) & 0b1)
 
-        If = bool((flags >> 4) & 16)
-        Nf = bool((flags >> 3) & 8)
-        Vf = bool((flags >> 2) & 4)
-        Zf = bool((flags >> 1) & 2)
-        Cf = bool((flags >> 0) & 1)
+        If = bool((flags_packed >> 4) & 16)
+        Nf = bool((flags_packed >> 3) & 8)
+        Vf = bool((flags_packed >> 2) & 4)
+        Zf = bool((flags_packed >> 1) & 2)
+        Cf = bool((flags_packed >> 0) & 1)
         flags = Flags(If, Nf, Vf, Zf, Cf)
 
         OP |= EXT << 8
 
         uops = get_uops(flags, OP, IRQ, RST)
         if not uops[0] == -1:
-            corrected = make_extended(uops, flags, OP, IRQ, EXT)
+            corrected = make_extended(uops, OP)
 
             if (not RST) and (not IRQ) and (OP != Op.EXT):
                 lens.append(get_cycles(corrected))
@@ -2458,6 +2475,8 @@ def main():
 
     print(f"Clocks per Instruction estimate: {sum(lens) / len(lens):.2f}")
     print(f"Bytes per Instruction estimate: {sum(sizes) / len(sizes):.2f}")
+
+    write_ucode(ucode)
 
 
 if __name__ == "__main__":
