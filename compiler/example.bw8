@@ -1,0 +1,14 @@
+extern fn some_asm_func(arg: word): char;
+
+# comments look like this
+fn main() {
+    a: int = 44;
+    b: int = a + 2;
+
+    c: int = 0b0101_0101;
+    if (b == 6) {
+        print("foo");
+    }
+
+    my_str: char* = "Hello, World!";
+}

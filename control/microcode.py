@@ -17,11 +17,8 @@ class Ctrl:
     DBUS_ASSERT_TL = 8 << 0
     DBUS_ASSERT_SR = 9 << 0
     DBUS_ASSERT_MEM = 10 << 0
-    DBUS_ASSERT_DPI = 11 << 0
-    DBUS_ASSERT_SPIH = 12 << 0
-    DBUS_ASSERT_SPIL = 13 << 0
-    DBUS_ASSERT_MSB = 14 << 0
-    DBUS_ASSERT_LSB = 15 << 0
+    DBUS_ASSERT_MSB = 11 << 0
+    DBUS_ASSERT_LSB = 12 << 0
 
     # 5 bits for DBUS Load
     DBUS_LOAD_NULL = 0 << 4
@@ -69,34 +66,33 @@ class Ctrl:
     XFER_ASSERT_SP = 1 << 13
     XFER_ASSERT_X = 2 << 13
     XFER_ASSERT_Y = 3 << 13
-    XFER_ASSERT_RST = 4 << 13
-    XFER_ASSERT_ISR = 5 << 13
-    XFER_ASSERT_ADDR = 6 << 13
-    XFER_ASSERT_A_A = 7 << 13
-    XFER_ASSERT_A_B = 8 << 13
-    XFER_ASSERT_A_C = 9 << 13
-    XFER_ASSERT_A_D = 10 << 13
-    XFER_ASSERT_A_TL = 11 << 13
-    XFER_ASSERT_B_A = 12 << 13
-    XFER_ASSERT_B_B = 13 << 13
-    XFER_ASSERT_B_C = 14 << 13
-    XFER_ASSERT_B_D = 15 << 13
-    XFER_ASSERT_B_TL = 16 << 13
-    XFER_ASSERT_C_A = 17 << 13
-    XFER_ASSERT_C_B = 18 << 13
-    XFER_ASSERT_C_C = 19 << 13
-    XFER_ASSERT_C_D = 20 << 13
-    XFER_ASSERT_C_TL = 21 << 13
-    XFER_ASSERT_D_A = 22 << 13
-    XFER_ASSERT_D_B = 23 << 13
-    XFER_ASSERT_D_C = 24 << 13
-    XFER_ASSERT_D_D = 25 << 13
-    XFER_ASSERT_D_TL = 26 << 13
-    XFER_ASSERT_TH_A = 27 << 13
-    XFER_ASSERT_TH_B = 28 << 13
-    XFER_ASSERT_TH_C = 29 << 13
-    XFER_ASSERT_TH_D = 30 << 13
-    XFER_ASSERT_T = 31 << 13
+    XFER_ASSERT_ISR = 4 << 13
+    XFER_ASSERT_ADDR = 5 << 13
+    XFER_ASSERT_A_A = 6 << 13
+    XFER_ASSERT_A_B = 7 << 13
+    XFER_ASSERT_A_C = 8 << 13
+    XFER_ASSERT_A_D = 9 << 13
+    XFER_ASSERT_A_TL = 10 << 13
+    XFER_ASSERT_B_A = 11 << 13
+    XFER_ASSERT_B_B = 12 << 13
+    XFER_ASSERT_B_C = 13 << 13
+    XFER_ASSERT_B_D = 14 << 13
+    XFER_ASSERT_B_TL = 15 << 13
+    XFER_ASSERT_C_A = 16 << 13
+    XFER_ASSERT_C_B = 17 << 13
+    XFER_ASSERT_C_C = 18 << 13
+    XFER_ASSERT_C_D = 19 << 13
+    XFER_ASSERT_C_TL = 20 << 13
+    XFER_ASSERT_D_A = 21 << 13
+    XFER_ASSERT_D_B = 22 << 13
+    XFER_ASSERT_D_C = 23 << 13
+    XFER_ASSERT_D_D = 24 << 13
+    XFER_ASSERT_D_TL = 25 << 13
+    XFER_ASSERT_TH_A = 26 << 13
+    XFER_ASSERT_TH_B = 27 << 13
+    XFER_ASSERT_TH_C = 28 << 13
+    XFER_ASSERT_TH_D = 29 << 13
+    XFER_ASSERT_T = 30 << 13
 
     # 3 bits for XFER Load
     XFER_LOAD_NULL = 0 << 18
@@ -115,6 +111,7 @@ class Ctrl:
     ADDR_ASSERT_Y = 4 << 21
     ADDR_ASSERT_DP = 5 << 21
     ADDR_ASSERT_T = 6 << 21
+    ADDR_ASSERT_IO = 7 << 21
 
     # 3 bits for Counter Inc/Decs
     COUNT_NULL = 0 << 24
@@ -138,18 +135,18 @@ class Ctrl:
 
     @staticmethod
     def decode(word: int) -> str:
-        DBUS_ASSERT = (word >> 0) & (2 ** 4 - 1)
-        DBUS_LOAD = (word >> 4) & (2 ** 5 - 1)
-        ALU_OP = (word >> 9) & (2 ** 4 - 1)
-        XFER_ASSERT = (word >> 13) & (2 ** 5 - 1)
-        XFER_LOAD = (word >> 18) & (2 ** 3 - 1)
-        ADDR_ASSERT = (word >> 21) & (2 ** 3 - 1)
-        COUNT = (word >> 24) & (2 ** 3 - 1)
-        DEC_SP = (word >> 27) & (2 ** 1 - 1)
-        RST_USEQ = (word >> 28) & (2 ** 1 - 1)
-        TOG_EXT = (word >> 29) & (2 ** 1 - 1)
-        OFFSET = (word >> 30) & (2 ** 1 - 1)
-        BRK_CLK = (word >> 31) & (2 ** 1 - 1)
+        DBUS_ASSERT = (word >> 0) & (2**4 - 1)
+        DBUS_LOAD = (word >> 4) & (2**5 - 1)
+        ALU_OP = (word >> 9) & (2**4 - 1)
+        XFER_ASSERT = (word >> 13) & (2**5 - 1)
+        XFER_LOAD = (word >> 18) & (2**3 - 1)
+        ADDR_ASSERT = (word >> 21) & (2**3 - 1)
+        COUNT = (word >> 24) & (2**3 - 1)
+        DEC_SP = (word >> 27) & (2**1 - 1)
+        RST_USEQ = (word >> 28) & (2**1 - 1)
+        TOG_EXT = (word >> 29) & (2**1 - 1)
+        OFFSET = (word >> 30) & (2**1 - 1)
+        BRK_CLK = (word >> 31) & (2**1 - 1)
 
         return "\n".join(
             [
@@ -229,72 +226,66 @@ class GPR(Enum):
         Ctrl.DBUS_ASSERT_A,
         Ctrl.XFER_ASSERT_A_TL,
         Ctrl.XFER_ASSERT_TH_A,
+        {
+            "A": Ctrl.XFER_ASSERT_A_A,
+            "B": Ctrl.XFER_ASSERT_A_B,
+            "C": Ctrl.XFER_ASSERT_A_C,
+            "D": Ctrl.XFER_ASSERT_A_D,
+        },
     )
     B = (
         Ctrl.DBUS_LOAD_B,
         Ctrl.DBUS_ASSERT_B,
         Ctrl.XFER_ASSERT_B_TL,
         Ctrl.XFER_ASSERT_TH_B,
+        {
+            "A": Ctrl.XFER_ASSERT_B_A,
+            "B": Ctrl.XFER_ASSERT_B_B,
+            "C": Ctrl.XFER_ASSERT_B_C,
+            "D": Ctrl.XFER_ASSERT_B_D,
+        },
     )
     C = (
         Ctrl.DBUS_LOAD_C,
         Ctrl.DBUS_ASSERT_C,
         Ctrl.XFER_ASSERT_C_TL,
         Ctrl.XFER_ASSERT_TH_C,
+        {
+            "A": Ctrl.XFER_ASSERT_C_A,
+            "B": Ctrl.XFER_ASSERT_C_B,
+            "C": Ctrl.XFER_ASSERT_C_C,
+            "D": Ctrl.XFER_ASSERT_C_D,
+        },
     )
     D = (
         Ctrl.DBUS_LOAD_D,
         Ctrl.DBUS_ASSERT_D,
         Ctrl.XFER_ASSERT_D_TL,
         Ctrl.XFER_ASSERT_TH_D,
+        {
+            "A": Ctrl.XFER_ASSERT_D_A,
+            "B": Ctrl.XFER_ASSERT_D_B,
+            "C": Ctrl.XFER_ASSERT_D_C,
+            "D": Ctrl.XFER_ASSERT_D_D,
+        },
     )
 
     def __init__(
-        self, dbus_load: int, dbus_assert: int, xfer_assert_tl: int, xfer_assert_th: int
+        self,
+        dbus_load: int,
+        dbus_assert: int,
+        xfer_assert_tl: int,
+        xfer_assert_th: int,
+        xfer_assert_gpr: dict[str, int],
     ):
         self.DBUS_LOAD = dbus_load
         self.DBUS_ASSERT = dbus_assert
         self.XFER_ASSERT_TL = xfer_assert_tl
         self.XFER_ASSERT_TH = xfer_assert_th
+        self.xfer_assert_gpr = xfer_assert_gpr
 
     def xfer_assert(self, rhs: "GPR") -> int:
-        if self == GPR.A:
-            if rhs == GPR.A:
-                return Ctrl.XFER_ASSERT_A_A
-            if rhs == GPR.B:
-                return Ctrl.XFER_ASSERT_A_B
-            if rhs == GPR.C:
-                return Ctrl.XFER_ASSERT_A_C
-            if rhs == GPR.D:
-                return Ctrl.XFER_ASSERT_A_D
-        if self == GPR.B:
-            if rhs == GPR.A:
-                return Ctrl.XFER_ASSERT_B_A
-            if rhs == GPR.B:
-                return Ctrl.XFER_ASSERT_B_B
-            if rhs == GPR.C:
-                return Ctrl.XFER_ASSERT_B_C
-            if rhs == GPR.D:
-                return Ctrl.XFER_ASSERT_B_D
-        if self == GPR.C:
-            if rhs == GPR.A:
-                return Ctrl.XFER_ASSERT_C_A
-            if rhs == GPR.B:
-                return Ctrl.XFER_ASSERT_C_B
-            if rhs == GPR.C:
-                return Ctrl.XFER_ASSERT_C_C
-            if rhs == GPR.D:
-                return Ctrl.XFER_ASSERT_C_D
-        if self == GPR.D:
-            if rhs == GPR.A:
-                return Ctrl.XFER_ASSERT_D_A
-            if rhs == GPR.B:
-                return Ctrl.XFER_ASSERT_D_B
-            if rhs == GPR.C:
-                return Ctrl.XFER_ASSERT_D_C
-            if rhs == GPR.D:
-                return Ctrl.XFER_ASSERT_D_D
-        raise ValueError("Unexpected inputs")
+        return self.xfer_assert_gpr[rhs.name]
 
 
 class MOV16(Enum):
@@ -401,19 +392,7 @@ FETCH = (
 )
 BASE = [FETCH, 0, 0, 0, 0, 0, 0, 0]
 
-RST_UOPS = [
-    Ctrl.XFER_ASSERT_RST | Ctrl.XFER_LOAD_PC | Ctrl.DBUS_ASSERT_DPI | Ctrl.DBUS_LOAD_DP,
-    Ctrl.ADDR_ASSERT_PC | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_PCH,
-    Ctrl.ADDR_ASSERT_PC
-    | Ctrl.COUNT_INC_ADDR
-    | Ctrl.DBUS_ASSERT_MEM
-    | Ctrl.DBUS_LOAD_PCL,
-    Ctrl.DBUS_ASSERT_SPIH | Ctrl.DBUS_LOAD_SPH,
-    Ctrl.DBUS_ASSERT_SPIL | Ctrl.DBUS_LOAD_SPL | Ctrl.ALU_SEI | Ctrl.RST_USEQ,
-    0,
-    0,
-    0,
-]
+REQ_UOPS = [0, 0, 0, 0, 0, 0, 0, 0]
 IRQ_UOPS = [
     Ctrl.COUNT_DEC_SP,
     Ctrl.ADDR_ASSERT_SP
@@ -445,6 +424,38 @@ def mov8(dst: GPR, src: GPR) -> list[int]:
     uops = BASE.copy()
 
     uops[1] |= dst.DBUS_LOAD | src.DBUS_ASSERT | Ctrl.RST_USEQ
+    return uops
+
+
+def in_gpr(dst: GPR) -> list[int]:
+    uops = BASE.copy()
+
+    uops[1] |= (
+        Ctrl.ADDR_ASSERT_PC
+        | Ctrl.DBUS_ASSERT_MEM
+        | Ctrl.DBUS_LOAD_TL
+        | Ctrl.COUNT_INC_PC
+    )
+    uops[2] |= (
+        Ctrl.ADDR_ASSERT_IO | Ctrl.DBUS_ASSERT_MEM | dst.DBUS_LOAD | Ctrl.RST_USEQ
+    )
+
+    return uops
+
+
+def out_gpr(src: GPR) -> list[int]:
+    uops = BASE.copy()
+
+    uops[1] |= (
+        Ctrl.ADDR_ASSERT_PC
+        | Ctrl.DBUS_ASSERT_MEM
+        | Ctrl.DBUS_LOAD_TH
+        | Ctrl.COUNT_INC_PC
+    )
+    uops[2] |= (
+        Ctrl.ADDR_ASSERT_IO | Ctrl.DBUS_LOAD_MEM | src.DBUS_ASSERT | Ctrl.RST_USEQ
+    )
+
     return uops
 
 
@@ -1144,11 +1155,11 @@ def jmp_ptr(pred: Callable[[], bool], ptr: GPP) -> list[int]:
     return uops
 
 
-def get_uops(flags: Flags, OP: int, IRQ: bool, RST: bool) -> list[int]:
+def get_uops(flags: Flags, OP: int, IRQ: bool, REQ: bool) -> list[int]:
     uops = BASE.copy()
 
-    if RST:
-        return RST_UOPS.copy()
+    if REQ:
+        return REQ_UOPS.copy()
 
     if IRQ and not flags.I:
         return IRQ_UOPS.copy()
@@ -1200,6 +1211,84 @@ def get_uops(flags: Flags, OP: int, IRQ: bool, RST: bool) -> list[int]:
         uops[1] |= Ctrl.DBUS_ASSERT_DP | Ctrl.DBUS_LOAD_A | Ctrl.RST_USEQ
     elif OP == Op.MOV_DP_A:
         uops[1] |= Ctrl.DBUS_ASSERT_A | Ctrl.DBUS_LOAD_DP | Ctrl.RST_USEQ
+
+    # IO Operations
+    elif OP == Op.IN_A:
+        return in_gpr(GPR.A)
+    elif OP == Op.IN_B:
+        return in_gpr(GPR.B)
+    elif OP == Op.IN_C:
+        return in_gpr(GPR.C)
+    elif OP == Op.IN_D:
+        return in_gpr(GPR.D)
+    elif OP == Op.IN_DP:
+        uops[1] |= (
+            Ctrl.ADDR_ASSERT_PC
+            | Ctrl.DBUS_ASSERT_MEM
+            | Ctrl.DBUS_LOAD_DA
+            | Ctrl.COUNT_INC_PC
+        )
+        uops[2] |= (
+            Ctrl.ADDR_ASSERT_PC
+            | Ctrl.DBUS_ASSERT_MEM
+            | Ctrl.DBUS_LOAD_TL
+            | Ctrl.COUNT_INC_PC
+        )
+        uops[3] |= Ctrl.ADDR_ASSERT_IO | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_TH
+        uops[4] |= (
+            Ctrl.ADDR_ASSERT_DP
+            | Ctrl.DBUS_LOAD_MEM
+            | Ctrl.DBUS_ASSERT_TH
+            | Ctrl.RST_USEQ
+        )
+
+    elif OP == Op.OUT_A:
+        return out_gpr(GPR.A)
+    elif OP == Op.OUT_B:
+        return out_gpr(GPR.B)
+    elif OP == Op.OUT_C:
+        return out_gpr(GPR.C)
+    elif OP == Op.OUT_D:
+        return out_gpr(GPR.D)
+    elif OP == Op.OUT_DP:
+        uops[1] |= (
+            Ctrl.ADDR_ASSERT_PC
+            | Ctrl.DBUS_ASSERT_MEM
+            | Ctrl.DBUS_LOAD_DA
+            | Ctrl.COUNT_INC_PC
+        )
+        uops[2] |= (
+            Ctrl.ADDR_ASSERT_PC
+            | Ctrl.DBUS_ASSERT_MEM
+            | Ctrl.DBUS_LOAD_TL
+            | Ctrl.COUNT_INC_PC
+        )
+        uops[3] |= Ctrl.ADDR_ASSERT_DP | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_TH
+        uops[4] |= (
+            Ctrl.ADDR_ASSERT_IO
+            | Ctrl.DBUS_LOAD_MEM
+            | Ctrl.DBUS_ASSERT_TH
+            | Ctrl.RST_USEQ
+        )
+    elif OP == Op.OUT_IMM:
+        uops[1] |= (
+            Ctrl.ADDR_ASSERT_PC
+            | Ctrl.DBUS_ASSERT_MEM
+            | Ctrl.DBUS_LOAD_TH
+            | Ctrl.COUNT_INC_PC
+        )
+        uops[2] |= (
+            Ctrl.ADDR_ASSERT_PC
+            | Ctrl.DBUS_ASSERT_MEM
+            | Ctrl.DBUS_LOAD_TL
+            | Ctrl.COUNT_INC_PC
+        )
+        uops[3] |= (
+            Ctrl.ADDR_ASSERT_IO
+            | Ctrl.DBUS_LOAD_MEM
+            | Ctrl.DBUS_ASSERT_TH
+            | Ctrl.RST_USEQ
+        )
 
     # A Loads
     elif OP == Op.LOAD_A_IMM:
@@ -2421,10 +2510,14 @@ def make_extended(uops: list[int], OP: int) -> list[int]:
 
 
 def get_cycles(uops: list[int]) -> int:
+    if not any(uops):
+        raise ValueError("All cycles are null")
+
     for i, word in enumerate(reversed(uops)):
         if word:
-            return 8 - i
-    raise ValueError("All cycles are null")
+            break
+
+    return 8 - i
 
 
 def get_size(uops: list[int]) -> int:
@@ -2435,22 +2528,31 @@ def get_size(uops: list[int]) -> int:
 
 
 def write_ucode(ucode: list[int]) -> None:
-    with open("ucode.bin", "wb") as f:
-        for uop in ucode:
-            f.write(uop.to_bytes(4, "big"))
+    roms = [[] for i in range(4)]
+    for word in ucode:
+        for i in range(4):
+            byte = (word & (255 << (8 * i))) >> (8 * i)
+            roms[i].append(byte)
+
+    names = [f"microcode{i}.bin" for i in range(4)]
+
+    for rom, name in zip(roms, names):
+        with open(name, "wb") as f:
+            for uop in rom:
+                f.write(uop.to_bytes(1, "big"))
 
 
 def main() -> None:
     # 19b of state input:
-    # 1b RST, 1b IRQ, 1b EXT, 8b OP, 5b flags, 5b t-state
+    # 1b REQ, 1b IRQ, 1b EXT, 8b OP, 5b flags, 3b t-state
 
     ucode, lens, sizes = [], [], []
-    for addr in range(2 ** 16):
+    for addr in range(2**16):
         flags_packed = (addr >> 0) & 0b11111
         OP = (addr >> 5) & 0b1111_1111
         EXT = (addr >> 13) & 0b1
         IRQ = bool((addr >> 14) & 0b1)
-        RST = bool((addr >> 15) & 0b1)
+        REQ = bool((addr >> 15) & 0b1)
 
         If = bool((flags_packed >> 4) & 16)
         Nf = bool((flags_packed >> 3) & 8)
@@ -2461,15 +2563,15 @@ def main() -> None:
 
         OP |= EXT << 8
 
-        uops = get_uops(flags, OP, IRQ, RST)
+        uops = get_uops(flags, OP, IRQ, REQ)
         if not uops[0] == -1:
             corrected = make_extended(uops, OP)
 
-            if (not RST) and (not IRQ) and (OP != Op.EXT):
+            if (not REQ) and (not IRQ) and (OP != Op.EXT):
                 lens.append(get_cycles(corrected))
                 sizes.append(get_size(corrected))
         else:
-            corrected = get_uops(flags, Op.NOP, IRQ, RST)
+            corrected = get_uops(flags, Op.NOP, IRQ, REQ)
 
         ucode.extend(corrected)
 

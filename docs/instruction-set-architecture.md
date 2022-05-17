@@ -2,56 +2,56 @@
 
 The BW8cpu instruction set contains the following instructions. Each instruction has several opcodes that implement various combinations of operands and addressing mode variations on their base behavior. These will be discussed below.
 
-Mnemonic                                       | Name                           | Opcode Count
----------------------------------------------- | ------------------------------ | ------------:
-[`NOP`](#nop---no-operation)                   | No Operation                   | 1
-[`BRK`](#brk---break-clock)                    | Break Clock                    | 1
-[`EXT`](#ext---extended-mode)                  | Extended Mode                  | 1
-[`CLC`](#clc---clear-carry)                    | Clear Carry                    | 1
-[`CLI`](#cli---enable-interrupts)              | Enable Interrupts              | 1
-[`CLV`](#clv---clear-overflow)                 | Clear Overflow                 | 1
-[`SEC`](#sec---set-carry-flag)                 | Set Carry                      | 1
-[`SEI`](#sei---disable-interrupts)             | Disable Interrupts             | 1
-[`MOV`](#mov---move-register)                  | Move Register                  | 22
-[`LOAD`](#load---load-register)                | Load Register                  | 84
-[`STORE`](#store---store-register)             | Store Register                 | 78
-[`LEA`](#lea---load-effective-address)         | Load Effective Address         | 24
-[`ADC`](#adc---add-with-carry)                 | Add with Carry                 | 29
-[`SBB`](#sbb---subtract-with-borrow)           | Subtract with Borrow           | 25
-[`AND`](#and---bitwise-and)                    | Bitwise AND                    | 29
-[`OR`](#or---bitwise-or)                       | Bitwise OR                     | 25
-[`XOR`](#xor---bitwise-xor)                    | Bitwise XOR                    | 29
-[`NOT`](#not---bitwise-inversion)              | Bitwise NOT                    | 5
-[`NEG`](#neg---2s-complement-negation)         | 2s Complement Negation         | 5
-[`SRC`](#shr---logical-shift-right-with-carry) | Logical Shift Right with Carry | 5
-[`ASR`](#asr---arithmetic-shift-right)         | Arithmetic Shift Right         | 5
-[`INC`](#inc---increment)                      | Increment                      | 7
-[`DEC`](#dec---decrement)                      | Decrement                      | 7
-[`PUSH`](#push---push-to-stack)                | Push to Stack                  | 7
-[`POP`](#pop---pop-from-stack)                 | Pop from Stack                 | 7
-[`CMP`](#cmp---compare)                        | Compare                        | 29
-[`TST`](#tst---bit-test)                       | Bit Test                       | 5
-[`WAI`](#wai---wait-for-interrupt)             | Wait for Interrupt             | 1
-[`RTI`](#rti---return-from-interrupt)          | Return from Interrupt          | 1
-[`JSR`](#jsr---jump-to-subroutine)             | Jump to Subroutine             | 4
-[`RTS`](#rts---return-from-subroutine)         | Return from Subroutine         | 1
-[`JMP`](#jmp---unconditional-jump)             | Jump                           | 4
-[`JO`](#jo---jump-if-overflow)                 | Jump if Overflow               | 4
-[`JNO`](#jno---jump-if-not-overflow)           | Jump if not Overflow           | 4
-[`JS`](#js---jump-if-sign)                     | Jump if Sign                   | 4
-[`JNS`](#jns---jump-if-not-sign)               | Jump if not Sign               | 4
-[`JE`](#je---jump-if-equal)                    | Jump if Equal                  | 4
-[`JNE`](#jne---jump-if-not-equal)              | Jump if not Equal              | 4
-[`JC`](#jc---jump-if-carry)                    | Jump if Carry                  | 4
-[`JNC`](#jnc---jump-if-not-carry)              | Jump if not Carry              | 4
-[`JBE`](#jbe---jump-if-below-or-equal)         | Jump if Below or Equal         | 4
-[`JA`](#ja---jump-if-above)                    | Jump if Above                  | 4
-[`JL`](#jl---jump-if-less)                     | Jump if Less                   | 4
-[`JGE`](#jge---jump-if-greater-or-equal)       | Jump if Greater or Equal       | 4
-[`JLE`](#jle---jump-if-less-or-equal)          | Jump if Less or Equal          | 4
-[`JG`](#jg---jump-if-greater)                  | Jump if Greater                | 4
+Mnemonic                                       | Name                           
+---------------------------------------------- | ------------------------------
+[`NOP`](#nop---no-operation)                   | No Operation                   
+[`BRK`](#brk---break-clock)                    | Break Clock                    
+[`EXT`](#ext---extended-mode)                  | Extended Mode                  
+[`CLC`](#clc---clear-carry)                    | Clear Carry                    
+[`CLI`](#cli---enable-interrupts)              | Enable Interrupts              
+[`CLV`](#clv---clear-overflow)                 | Clear Overflow                 
+[`SEC`](#sec---set-carry-flag)                 | Set Carry                      
+[`SEI`](#sei---disable-interrupts)             | Disable Interrupts             
+[`MOV`](#mov---move-register)                  | Move Register                  
+[`LOAD`](#load---load-register)                | Load Register                  
+[`STORE`](#store---store-register)             | Store Register                 
+[`LEA`](#lea---load-effective-address)         | Load Effective Address         
+[`ADC`](#adc---add-with-carry)                 | Add with Carry                 
+[`SBB`](#sbb---subtract-with-borrow)           | Subtract with Borrow           
+[`AND`](#and---bitwise-and)                    | Bitwise AND                    
+[`OR`](#or---bitwise-or)                       | Bitwise OR                     
+[`XOR`](#xor---bitwise-xor)                    | Bitwise XOR                    
+[`NOT`](#not---bitwise-inversion)              | Bitwise NOT                    
+[`NEG`](#neg---2s-complement-negation)         | 2s Complement Negation         
+[`SRC`](#shr---logical-shift-right-with-carry) | Logical Shift Right with Carry 
+[`ASR`](#asr---arithmetic-shift-right)         | Arithmetic Shift Right         
+[`INC`](#inc---increment)                      | Increment                      
+[`DEC`](#dec---decrement)                      | Decrement                      
+[`PUSH`](#push---push-to-stack)                | Push to Stack                  
+[`POP`](#pop---pop-from-stack)                 | Pop from Stack                 
+[`CMP`](#cmp---compare)                        | Compare                       
+[`TST`](#tst---bit-test)                       | Bit Test                       
+[`WAI`](#wai---wait-for-interrupt)             | Wait for Interrupt             
+[`RTI`](#rti---return-from-interrupt)          | Return from Interrupt          
+[`JSR`](#jsr---jump-to-subroutine)             | Jump to Subroutine             
+[`RTS`](#rts---return-from-subroutine)         | Return from Subroutine         
+[`JMP`](#jmp---unconditional-jump)             | Jump                           
+[`JO`](#jo---jump-if-overflow)                 | Jump if Overflow               
+[`JNO`](#jno---jump-if-not-overflow)           | Jump if not Overflow           
+[`JS`](#js---jump-if-sign)                     | Jump if Sign                   
+[`JNS`](#jns---jump-if-not-sign)               | Jump if not Sign               
+[`JE`](#je---jump-if-equal)                    | Jump if Equal                  
+[`JNE`](#jne---jump-if-not-equal)              | Jump if not Equal              
+[`JC`](#jc---jump-if-carry)                    | Jump if Carry                  
+[`JNC`](#jnc---jump-if-not-carry)              | Jump if not Carry              
+[`JBE`](#jbe---jump-if-below-or-equal)         | Jump if Below or Equal         
+[`JA`](#ja---jump-if-above)                    | Jump if Above                  
+[`JL`](#jl---jump-if-less)                     | Jump if Less                   
+[`JGE`](#jge---jump-if-greater-or-equal)       | Jump if Greater or Equal       
+[`JLE`](#jle---jump-if-less-or-equal)          | Jump if Less or Equal          
+[`JG`](#jg---jump-if-greater)                  | Jump if Greater                
 
-The BW8 has an 8-bit Instruction Register, so there is some trickery involved to support up to 512 opcodes, rather than just 256. This is done with the `EXT` instruction. This is a 1 byte, 2 cycle instruction which transitions the CPU from normal "`NRM`" mode to extended "`EXT`" mode, and then fetches the next instruction. This next instruction is interpretted differently due to the system being in `EXT` Mode. At the conclusion of these instructions, they return the CPU to `NRM` Mode.
+The BW8 has an 8-bit Instruction Register, so there is some trickery involved to support up to 512 opcodes, rather than just 256. This is done with the `EXT` instruction. This is a 1 byte, 1 cycle instruction which transitions the CPU from normal "`NRM`" mode to extended "`EXT`" mode, and then fetches the next instruction. This next instruction is interpretted differently due to the system being in `EXT` Mode. At the conclusion of these instructions, they return the CPU to `NRM` Mode.
 
 The `NRM` Mode instructions are those which are commonly used, have long cycle counts, or have larger operand counts. The idea is to limit the cycle penalty incurred by `EXT` Mode opcodes to those which already execute quickly, or are not commonly used. In addition, by making sure that large operand count instructions exist in NRM Mode, we limit the maximum instruction size to 3 bytes, thereby keeping the program size penalty down.
 

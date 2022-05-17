@@ -6,7 +6,7 @@
 
 ; X is used as Frame Pointer
 ; A, B, and Y are used for function arguments
-; Excess arguments are on the stack, directly above
+; Excess arguments are on the stack, directly below
 ; the Return Address
 
 ; Return Values are in A or AB.

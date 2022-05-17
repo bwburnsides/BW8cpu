@@ -25,10 +25,17 @@ from pathlib import Path
 
 EXT = "EXT"
 
+
 def parse_args():
-    parser = argparse.ArgumentParser(description="Produce canonical opcode assignments for instruction set.")
-    parser.add_argument("input_fname", help="file which contains list of instructions in set")
-    parser.add_argument("output_fname", help="file root to write assigned opcodes to, no suffix")
+    parser = argparse.ArgumentParser(
+        description="Produce canonical opcode assignments for instruction set."
+    )
+    parser.add_argument(
+        "input_fname", help="file which contains list of instructions in set"
+    )
+    parser.add_argument(
+        "output_fname", help="file root to write assigned opcodes to, no suffix"
+    )
     args = parser.parse_args()
 
     in_path = Path(args.input_fname)
@@ -46,6 +53,7 @@ def parse_args():
 
     return in_path, out_paths
 
+
 def read_input(in_path):
     # Read in input lines. Discard comment lines and strip whitespace.
     lines = []
@@ -61,6 +69,7 @@ def read_input(in_path):
 
     return lines
 
+
 def write_output(out_paths, opcodes):
     for path in out_paths:
         extra_lines = []
@@ -68,10 +77,11 @@ def write_output(out_paths, opcodes):
 
         if path.suffix == ".asm":
             comment_token = ";"
+            padding = "OP_"
             extra_lines.append("#once")
         elif path.suffix == ".py":
             comment_token = "#"
-            padding = "\t"
+            padding = "    "
             extra_lines.append("class Op:")
         else:
             raise ValueError(f"{path} has unexpected suffix.")
@@ -96,6 +106,7 @@ def write_output(out_paths, opcodes):
                 for i, opcode in enumerate(page):
                     f.write(f"{padding}{opcode} = 0x{pre:02x}{i:02x}\n")
                 f.write("\n")
+
 
 def main():
     in_path, out_path = parse_args()
@@ -125,6 +136,7 @@ def main():
         print(f"{EXT} must be present in the instruction zeropage. Exiting...")
 
     write_output(out_path, opcodes)
+
 
 if __name__ == "__main__":
     main()

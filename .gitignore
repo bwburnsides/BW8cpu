@@ -5,3 +5,8 @@
 *.sch-bak
 *.kicad_pcb-bak
 .vscode/
+Debug/
+.vs/
+*.vcxproj
+*.filters
+*.user

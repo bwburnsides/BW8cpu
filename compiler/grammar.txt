@@ -1,0 +1,186 @@
+Identifier
+  [a-zA-Z_][a-zA-Z0-9_]*
+
+IntegerLiteral
+  "0x" [0-9a-fA-F_]+
+| "0b" [01_]+
+| [0-9_]+
+
+CharLiteral
+"'" (   "\n"
+      | "\r"
+      | "\t"
+      | "\'"
+      | "\\"
+      | <ascii char>
+) "'"
+
+StringLiteral
+"\"" (   "\n"
+       | "\r"
+       | "\t"
+       | "\""
+       | "\\"
+       | <ascii char>
+)* "\""
+
+Type
+  "word"
+| "uword"
+| "int"
+| "uint"
+| "long"
+| "ulong"
+| "char"
+| Identifier
+| Type "*"
+| Type "[" IntegerLiteral "]"
+
+UnaryOperator
+  "+"
+| "-"
+| "!"
+| "&"
+| "*"
+
+BinaryOperator
+  "+"
+| "-"
+| "*"
+| "/"
+| "%"
+| "<<"
+| ">>"
+| "&&"
+| "||"
+| "&"
+| "|"
+| "^"
+| "=="
+| "!="
+| "<"
+| "<="
+| ">"
+| ">="
+
+AssignmentOperator
+  "="
+| "+="
+| "-="
+| "*="
+| "/="
+| "%="
+| "<<="
+| ">>="
+| "&="
+| "|="
+| "^="
+
+Expression
+  IntegerLiteral
+| CharLiteral
+| StringLiteral
+| Identifier
+| "sizeof(" Type ")"
+| "offsetof(" Type "," Identifier ")"
+| Identifier "(" ( Expression "," )* ")"
+| Expression "[" Expression "]"
+| Expression "." Identifier
+| "<" Type ">" Expression
+| UnaryOperator Expression
+| Expression BinaryOperator Expression
+| "(" Expression ")"
+
+ConstantPrototype
+  "const" Identifier ":" Type
+ConstantDeclaration
+  ConstantPrototype ";"
+ConstantDefinition
+  ConstantPrototype "=" Expression ";"
+
+VariablePrototype
+  Identifier ":" Type
+VariableDeclaration
+  VariablePrototype ";"
+VariableDefinition
+  VariablePrototype "=" Expression ";"
+
+Assignment
+  Expression AssignmentOperator Expression ";"
+
+IfStatement
+  "if" Expression "{" Statement* "}" "else" "{" Statement* "}"
+| "if" Expression "{" Statement* "}"
+
+WhileLoop
+  "while" Expression "{" Statement* "}"
+
+BreakStatement
+  "break" IntegerLiteral ";"
+| "break" ";"
+
+ContinueStatement
+  "continue" IntegerLiteral ";"
+| "continue" ";"
+
+ReturnStatement
+  "return" Expression ";"
+| "return" ";"
+
+Statement
+  ConstantDefinition
+| VariableDeclaration
+| Assignment
+| IfStatement
+| WhileLoop
+| BreakStatement
+| ContinueStatement
+| ReturnStatement
+
+Argument
+  Identifier ":" Type
+
+FunctionPrototype
+  "fn" Identifier "(" ( Argument "," )* ")" ":" Type
+| "fn" Identifier "(" ( Argument "," )* ")"
+FunctionDeclaration
+    FunctionPrototype ";"
+FunctionDefinition
+  FunctionPrototype "{" Statement* "}"
+
+Field
+  Identifier ":" Type
+
+StructPrototype
+  "struct" Identifier
+StructDeclaration
+  StructPrototype ";"
+StructDefinition
+  StructPrototype "{" ( Field "," )* "}"
+
+UnionPrototype
+  "union" Identifier
+UnionDeclaration
+  UnionPrototype ";"
+UnionDefinition
+  UnionPrototype "{" ( Field "," )* "}"
+
+ExternDeclaration
+  "extern" FunctionDeclaration
+| "extern" ConstantDeclaration
+| "extern" VariableDeclaration
+
+TopLevelStatement
+  ConstantDefinition
+| VariableDeclaration
+| VariableDefinition
+| FunctionDeclaration
+| FunctionDefinition
+| StructDeclaration
+| StructDefinition
+| UnionDeclaration
+| UnionDefinition
+| ExternDeclaration
+
+Program
+  TopLevelStatement*

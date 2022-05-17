@@ -1,0 +1,3 @@
+#once
+TRUE = 0xFF
+FALSE = 0x00

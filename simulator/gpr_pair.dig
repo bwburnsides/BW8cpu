@@ -13,7 +13,7 @@
     </entry>
     <entry>
       <string>Width</string>
-      <int>18</int>
+      <int>11</int>
     </entry>
   </attributes>
   <visualElements>
@@ -22,7 +22,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>addr_assert</string>
+          <string>~addr_assert</string>
         </entry>
         <entry>
           <string>InDefault</string>
@@ -36,7 +36,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>xfer_load</string>
+          <string>~xfer_load</string>
         </entry>
         <entry>
           <string>InDefault</string>
@@ -50,7 +50,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>a-dbus_load</string>
+          <string>~hi-dbus_load</string>
         </entry>
         <entry>
           <string>InDefault</string>
@@ -64,7 +64,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>b-dbus_load</string>
+          <string>~lo-dbus_load</string>
         </entry>
         <entry>
           <string>InDefault</string>
@@ -78,7 +78,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>a-dbus_assert</string>
+          <string>~hi-dbus_assert</string>
         </entry>
         <entry>
           <string>InDefault</string>
@@ -92,7 +92,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>b-dbus_assert</string>
+          <string>~lo-dbus_assert</string>
         </entry>
         <entry>
           <string>InDefault</string>
@@ -106,7 +106,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>a-lhs_assert</string>
+          <string>~hi-lhs_assert</string>
         </entry>
         <entry>
           <string>InDefault</string>
@@ -120,7 +120,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>b-lhs_assert</string>
+          <string>~lo-lhs_assert</string>
         </entry>
         <entry>
           <string>InDefault</string>
@@ -134,7 +134,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>a-rhs_assert</string>
+          <string>~hi-rhs_assert</string>
         </entry>
         <entry>
           <string>InDefault</string>
@@ -148,7 +148,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>b-rhs_assert</string>
+          <string>~lo-rhs_assert</string>
         </entry>
         <entry>
           <string>InDefault</string>
@@ -278,7 +278,7 @@
       <elementAttributes>
         <entry>
           <string>NetName</string>
-          <string>load_hi</string>
+          <string>load-hi</string>
         </entry>
       </elementAttributes>
       <pos x="-1340" y="-460"/>
@@ -288,7 +288,7 @@
       <elementAttributes>
         <entry>
           <string>NetName</string>
-          <string>load_b</string>
+          <string>load-lo</string>
         </entry>
       </elementAttributes>
       <pos x="-1340" y="-440"/>
@@ -308,7 +308,7 @@
       <elementAttributes>
         <entry>
           <string>NetName</string>
-          <string>assert-a-dbus</string>
+          <string>assert-hi-dbus</string>
         </entry>
       </elementAttributes>
       <pos x="-1800" y="-320"/>
@@ -318,7 +318,7 @@
       <elementAttributes>
         <entry>
           <string>NetName</string>
-          <string>assert-b-dbus</string>
+          <string>assert-lo-dbus</string>
         </entry>
       </elementAttributes>
       <pos x="-1800" y="-280"/>
@@ -328,7 +328,7 @@
       <elementAttributes>
         <entry>
           <string>NetName</string>
-          <string>assert-a-lhs</string>
+          <string>assert-hi-lhs</string>
         </entry>
       </elementAttributes>
       <pos x="-1800" y="-240"/>
@@ -338,7 +338,7 @@
       <elementAttributes>
         <entry>
           <string>NetName</string>
-          <string>assert-b-lhs</string>
+          <string>assert-lo-lhs</string>
         </entry>
       </elementAttributes>
       <pos x="-1800" y="-200"/>
@@ -348,7 +348,7 @@
       <elementAttributes>
         <entry>
           <string>NetName</string>
-          <string>assert-a-rhs</string>
+          <string>assert-hi-rhs</string>
         </entry>
       </elementAttributes>
       <pos x="-1800" y="-160"/>
@@ -358,7 +358,7 @@
       <elementAttributes>
         <entry>
           <string>NetName</string>
-          <string>assert-b-rhs</string>
+          <string>assert-lo-rhs</string>
         </entry>
       </elementAttributes>
       <pos x="-1800" y="-120"/>
@@ -378,7 +378,7 @@
       <elementAttributes>
         <entry>
           <string>NetName</string>
-          <string>load-a-dbus</string>
+          <string>load-hi-dbus</string>
         </entry>
       </elementAttributes>
       <pos x="-1800" y="0"/>
@@ -388,7 +388,7 @@
       <elementAttributes>
         <entry>
           <string>NetName</string>
-          <string>load-b-dbus</string>
+          <string>load-lo-dbus</string>
         </entry>
       </elementAttributes>
       <pos x="-1800" y="40"/>
@@ -522,7 +522,7 @@
         </entry>
         <entry>
           <string>NetName</string>
-          <string>addr_lo</string>
+          <string>addr-lo</string>
         </entry>
       </elementAttributes>
       <pos x="-100" y="440"/>
@@ -613,7 +613,7 @@
         </entry>
         <entry>
           <string>NetName</string>
-          <string>addr_hi</string>
+          <string>addr-hi</string>
         </entry>
       </elementAttributes>
       <pos x="-740" y="440"/>
@@ -1053,7 +1053,7 @@
         </entry>
         <entry>
           <string>NetName</string>
-          <string>assert-b-dbus</string>
+          <string>assert-lo-dbus</string>
         </entry>
       </elementAttributes>
       <pos x="-420" y="140"/>
@@ -1067,7 +1067,7 @@
         </entry>
         <entry>
           <string>NetName</string>
-          <string>assert-b-lhs</string>
+          <string>assert-lo-lhs</string>
         </entry>
       </elementAttributes>
       <pos x="-100" y="140"/>
@@ -1081,7 +1081,7 @@
         </entry>
         <entry>
           <string>NetName</string>
-          <string>assert-b-rhs</string>
+          <string>assert-lo-rhs</string>
         </entry>
       </elementAttributes>
       <pos x="-420" y="400"/>
@@ -1356,7 +1356,7 @@
         </entry>
         <entry>
           <string>NetName</string>
-          <string>assert-a-dbus</string>
+          <string>assert-hi-dbus</string>
         </entry>
       </elementAttributes>
       <pos x="-1060" y="140"/>
@@ -1370,7 +1370,7 @@
         </entry>
         <entry>
           <string>NetName</string>
-          <string>assert-a-lhs</string>
+          <string>assert-hi-lhs</string>
         </entry>
       </elementAttributes>
       <pos x="-740" y="140"/>
@@ -1384,7 +1384,7 @@
         </entry>
         <entry>
           <string>NetName</string>
-          <string>assert-a-rhs</string>
+          <string>assert-hi-rhs</string>
         </entry>
       </elementAttributes>
       <pos x="-1060" y="400"/>
@@ -1873,7 +1873,7 @@
         </entry>
         <entry>
           <string>NetName</string>
-          <string>d_lo</string>
+          <string>d-lo</string>
         </entry>
       </elementAttributes>
       <pos x="-1440" y="260"/>
@@ -1917,7 +1917,7 @@
         </entry>
         <entry>
           <string>NetName</string>
-          <string>d_hi</string>
+          <string>d-hi</string>
         </entry>
       </elementAttributes>
       <pos x="-1440" y="200"/>
