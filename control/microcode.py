@@ -43,6 +43,8 @@ class Ctrl:
     DBUS_LOAD_YH = 19 << 4
     DBUS_LOAD_YL = 20 << 4
 
+    DBUS_LOAD_PORT = DBUS_LOAD_TL
+
     # 4 bits for ALU OP
     ALU_NOP = 0 << 9
     ALU_ADC = 1 << 9
@@ -433,7 +435,7 @@ def in_gpr(dst: GPR) -> list[int]:
     uops[1] |= (
         Ctrl.ADDR_ASSERT_PC
         | Ctrl.DBUS_ASSERT_MEM
-        | Ctrl.DBUS_LOAD_TL
+        | Ctrl.DBUS_LOAD_PORT
         | Ctrl.COUNT_INC_PC
     )
     uops[2] |= (
@@ -449,7 +451,7 @@ def out_gpr(src: GPR) -> list[int]:
     uops[1] |= (
         Ctrl.ADDR_ASSERT_PC
         | Ctrl.DBUS_ASSERT_MEM
-        | Ctrl.DBUS_LOAD_TH
+        | Ctrl.DBUS_LOAD_PORT
         | Ctrl.COUNT_INC_PC
     )
     uops[2] |= (
@@ -1254,13 +1256,13 @@ def get_uops(flags: Flags, OP: int, IRQ: bool, REQ: bool) -> list[int]:
         uops[1] |= (
             Ctrl.ADDR_ASSERT_PC
             | Ctrl.DBUS_ASSERT_MEM
-            | Ctrl.DBUS_LOAD_DA
+            | Ctrl.DBUS_LOAD_PORT
             | Ctrl.COUNT_INC_PC
         )
         uops[2] |= (
             Ctrl.ADDR_ASSERT_PC
             | Ctrl.DBUS_ASSERT_MEM
-            | Ctrl.DBUS_LOAD_TL
+            | Ctrl.DBUS_LOAD_DA
             | Ctrl.COUNT_INC_PC
         )
         uops[3] |= Ctrl.ADDR_ASSERT_DP | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_TH
@@ -1274,13 +1276,13 @@ def get_uops(flags: Flags, OP: int, IRQ: bool, REQ: bool) -> list[int]:
         uops[1] |= (
             Ctrl.ADDR_ASSERT_PC
             | Ctrl.DBUS_ASSERT_MEM
-            | Ctrl.DBUS_LOAD_TH
+            | Ctrl.DBUS_LOAD_PORT
             | Ctrl.COUNT_INC_PC
         )
         uops[2] |= (
             Ctrl.ADDR_ASSERT_PC
             | Ctrl.DBUS_ASSERT_MEM
-            | Ctrl.DBUS_LOAD_TL
+            | Ctrl.DBUS_LOAD_TH
             | Ctrl.COUNT_INC_PC
         )
         uops[3] |= (

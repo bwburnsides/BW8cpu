@@ -45,18 +45,18 @@ _ = ASSEMBLY_TIME_CHECKS()
     sei                             => opcode(OP_SEI)
 
     ; IO Operations
-    in a, [{io_reg: u8}]            => opcode(OP_IN_A)          @ io_reg
-    in b, [{io_reg: u8}]            => opcode(OP_IN_B)          @ io_reg
-    in c, [{io_reg: u8}]            => opcode(OP_IN_C)          @ io_reg
-    in d, [{io_reg: u8}]            => opcode(OP_IN_D)          @ io_reg
-    in [{dp: u8}], [{io_reg: u8}]   =>  opcode(OP_IN_DP)        @ dp @ io_reg
+    in a, <{port: u8}>              => opcode(OP_IN_A)          @ port
+    in b, <{port: u8}>              => opcode(OP_IN_B)          @ port
+    in c, <{port: u8}>              => opcode(OP_IN_C)          @ port
+    in d, <{port: u8}>              => opcode(OP_IN_D)          @ port
+    in [{dp: u8}], <{port: u8}>     => opcode(OP_IN_DP)         @ dp @ port
 
-    out a, [{io_reg: u8}]           => opcode(OP_OUT_A)         @ io_reg
-    out b, [{io_reg: u8}]           => opcode(OP_OUT_B)         @ io_reg
-    out c, [{io_reg: u8}]           => opcode(OP_OUT_C)         @ io_reg
-    out d, [{io_reg: u8}]           => opcode(OP_OUT_D)         @ io_reg
-    out [{dp: u8}], [{io_reg: u8}]  => opcode(OP_OUT_DP)        @ dp @ io_reg
-    out #{imm: i8}, [{io_reg: u8}]  => opcode(OP_OUT_IMM)       @ imm @ io_reg
+    out <{port: u8}>, a             => opcode(OP_OUT_A)         @ port
+    out <{port: u8}>, b             => opcode(OP_OUT_B)         @ port
+    out <{port: u8}>, c             => opcode(OP_OUT_C)         @ port
+    out <{port: u8}>, d             => opcode(OP_OUT_D)         @ port
+    out <{port: u8}>, [{dp: u8}]    => opcode(OP_OUT_DP)        @ port @ dp
+    out <{port: u8}>, #{imm: i8}    => opcode(OP_OUT_IMM)       @ port @ imm
 
     ; 8-bit Moves
     mov a, b                        => opcode(OP_MOV_A_B)
