@@ -1,5 +1,5 @@
 NOP*
-BRK
+BRK*
 EXT*
 
 CLC*
@@ -509,14 +509,12 @@ TST_C
 TST_D
 TST_DP*
 
-WAI*
-RTI*
-
 JSR_ABS*
 JSR_REL*
 JSR_X
 JSR_Y
 RTS*
+RTI*
 
 JMP_ABS*
 JMP_REL*

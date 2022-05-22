@@ -1,31 +1,55 @@
 ; contains bank definitions for the reference computer
 
-#bankdef mmio {
+#bankdef rom {
     #addr 0x0000
-    #size 256
+    #size (32 * 1024)
     #outp 0x0000 * 8
     #fill
 }
 
-#bankdef rom {
-    #addr 0x0100
-    #size (32 * 1024) - 256
-    #outp 0x0100 * 8
-    #fill
+#bankdef ram {
+    #addr 0x8000
+    #size (32 * 1024)
 }
 
-IO_PIC = 0x00
-IO_MMU = 0x01
-IO_UART = 0x02
-IO_SPI = 0x03
-IO_VDP = 0x04
-IO_PSG = 0x05
-IO_DMA = 0x07
-IO_KEY = 0x08
-IO_DEV10 = 0x09
-IO_DEV11 = 0x0A
-IO_DEV12 = 0x0B
-IO_DEV13 = 0x0C
-IO_DEV14 = 0x0D
-IO_DEV15 = 0x0E
-IO_DEV16 = 0x0F
+
+PIC_BASE = 0x00
+MMU_BASE = 0x01
+UART_BASE = 0x02
+SPI_BASE = 0x03
+VDP_BASE = 0x04
+PSG_BASE = 0x05
+DMA_BASE = 0x07
+KEY_BASE = 0x08
+DEV10_BASE = 0x09
+DEV11_BASE = 0x0A
+DEV12_BASE = 0x0B
+DEV13_BASE = 0x0C
+DEV14_BASE = 0x0D
+DEV15_BASE = 0x0E
+DEV16_BASE = 0x0F
+
+MMU_PAGE8 = MMU_BASE + 0
+MMU_PAGE9 = MMU_BASE + 1
+MMU_PAGE10 = MMU_BASE + 2
+MMU_PAGE11 = MMU_BASE + 3
+MMU_PAGE12 = MMU_BASE + 4
+MMU_PAGE13 = MMU_BASE + 5
+MMU_PAGE14 = MMU_BASE + 6
+MMU_PAGE15 = MMU_BASE + 7
+
+DMA_SRC_HI = DMA_BASE + 0
+DMA_SRC_MI = DMA_BASE + 1
+DMA_SRC_LO = DMA_BASE + 2
+DMA_DST_HI = DMA_BASE + 3
+DMA_DST_MI = DMA_BASE + 4
+DMA_DST_LO = DMA_BASE + 5
+DMA_LEN_HI = DMA_BASE + 6
+DMA_LEN_MI = DMA_BASE + 7
+DMA_LEN_LO = DMA_BASE + 8
+
+VRAM_BASE = 0x0F8000
+VRAM_BITMAP0 = VRAM_BASE + (0 * 1024)
+VRAM_BITMAP1 = VRAM_BASE + (8 * 1024)
+VRAM_TILEMAP = VRAM_BASE + (16 * 1024)
+VRAM_PALETTE = VRAM_BASE + (24 * 1024)

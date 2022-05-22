@@ -692,7 +692,6 @@ _ = ASSEMBLY_TIME_CHECKS()
     tst [{dp: u8}]              => opcode(OP_TST_DP)           @ dp
 
     ; Interrupt Control
-    wai                         => opcode(OP_WAI)
     swi [x]                     => asm {
         sei
         push sr
@@ -705,7 +704,6 @@ _ = ASSEMBLY_TIME_CHECKS()
         load y, [y]
         jsr y
     }
-    rti                         => opcode(OP_RTI)
 
     ; Subroutine Control
     jsr {abs: u16}              => opcode(OP_JSR_ABS)          @ abs
@@ -713,6 +711,7 @@ _ = ASSEMBLY_TIME_CHECKS()
     jsr x                       => opcode(OP_JSR_X)
     jsr y                       => opcode(OP_JSR_Y)
     rts                         => opcode(OP_RTS)
+    rti                         => opcode(OP_RTI)
 
     ; Unconditional Jumps
     jmp {abs: u16}              => opcode(OP_JMP_ABS)          @ abs

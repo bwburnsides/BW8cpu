@@ -6,12 +6,13 @@ Mnemonic                                       | Name
 ---------------------------------------------- | ------------------------------
 [`NOP`](#nop---no-operation)                   | No Operation                   
 [`BRK`](#brk---break-clock)                    | Break Clock                    
-[`EXT`](#ext---extended-mode)                  | Extended Mode                  
 [`CLC`](#clc---clear-carry)                    | Clear Carry                    
-[`CLI`](#cli---enable-interrupts)              | Enable Interrupts              
+[`CLI`](#cli---enable-interrupts)              | Disable Interrupts
 [`CLV`](#clv---clear-overflow)                 | Clear Overflow                 
 [`SEC`](#sec---set-carry-flag)                 | Set Carry                      
-[`SEI`](#sei---disable-interrupts)             | Disable Interrupts             
+[`SEI`](#sei---disable-interrupts)             | Enable Interrupts             
+[`IN`](#in---read-io-port)                     | IO Input
+[`OUT`](#out---write-io-port)                  | IO Output             
 [`MOV`](#mov---move-register)                  | Move Register                  
 [`LOAD`](#load---load-register)                | Load Register                  
 [`STORE`](#store---store-register)             | Store Register                 
@@ -31,10 +32,9 @@ Mnemonic                                       | Name
 [`POP`](#pop---pop-from-stack)                 | Pop from Stack                 
 [`CMP`](#cmp---compare)                        | Compare                       
 [`TST`](#tst---bit-test)                       | Bit Test                       
-[`WAI`](#wai---wait-for-interrupt)             | Wait for Interrupt             
 [`RTI`](#rti---return-from-interrupt)          | Return from Interrupt          
 [`JSR`](#jsr---jump-to-subroutine)             | Jump to Subroutine             
-[`RTS`](#rts---return-from-subroutine)         | Return from Subroutine         
+[`RTS`](#rts---return-from-subroutine)         | Return from Subroutine   
 [`JMP`](#jmp---unconditional-jump)             | Jump                           
 [`JO`](#jo---jump-if-overflow)                 | Jump if Overflow               
 [`JNO`](#jno---jump-if-not-overflow)           | Jump if not Overflow           
@@ -51,7 +51,7 @@ Mnemonic                                       | Name
 [`JLE`](#jle---jump-if-less-or-equal)          | Jump if Less or Equal          
 [`JG`](#jg---jump-if-greater)                  | Jump if Greater                
 
-The BW8 has an 8-bit Instruction Register, so there is some trickery involved to support up to 512 opcodes, rather than just 256. This is done with the `EXT` instruction. This is a 1 byte, 1 cycle instruction which transitions the CPU from normal "`NRM`" mode to extended "`EXT`" mode, and then fetches the next instruction. This next instruction is interpretted differently due to the system being in `EXT` Mode. At the conclusion of these instructions, they return the CPU to `NRM` Mode.
+The BW8 has an 8-bit Instruction Register, so there is some trickery involved to support up to 512 opcodes, rather than just 256. This is done with the `EXT` instruction. This is a 1 byte, 1 cycle instruction which transitions the CPU from normal "`NRM`" mode to extended "`EXT`" mode, and then fetches the next instruction. This next instruction is interpretted differently due to the system being in `EXT` Mode. At the conclusion of these instructions, they return the CPU to `NRM` Mode. Through this mechanism, the CPU can ascribe two different meanings to each 8-bit opcode value, yielding a total of 512 opcodes.
 
 The `NRM` Mode instructions are those which are commonly used, have long cycle counts, or have larger operand counts. The idea is to limit the cycle penalty incurred by `EXT` Mode opcodes to those which already execute quickly, or are not commonly used. In addition, by making sure that large operand count instructions exist in NRM Mode, we limit the maximum instruction size to 3 bytes, thereby keeping the program size penalty down.
 
@@ -64,23 +64,17 @@ The CPU programming model includes four 8-bit General Purpose Registers (GPRs): 
 3. `cd` - 16-bit, a psuedo register constructed with `c` in the high byte and `d` in the low byte
 3. `sp` - 16-bit, the system Stack Pointer
 
-These three registers have limited direct support, and are generally interacted with via `MOV`s. The `ab` and `cd` registers provide a mechanism for constructing 16-bit results that can be loaded into the GPPs or the SP. Additionally, there is the Status Register (SR) which stores the following CPU flags:
+These three registers have limited direct support, and are generally interacted with via `MOV`s. The `ab` and `cd` registers provide a mechanism for constructing 16-bit results that can be loaded into the GPPs or the SP. Additionally, there is the Status Register (`sr`) which stores the following CPU flags:
 
 1. Zero (`Z`)
 2. Carry (`C`)
 3. Negative (`N`)
 4. Overflow (`V`)
-5. Interrupt Inhibit (`I`)
+5. Interrupt Enable (`I`)
 
 The first four of these are primarily set by the result of a recent ALU calculation. The final is used to enable or disable maskable interrupt requests (IRQ), and is managed directly by the programmer via `SEI` and `CLI`.
 
-In the subsequent section, the size of an instruction is given as the total number of bytes required to execute the instruction.
-
-| byte -1  | byte 0 | byte 1   | byte 2   |
-| ------- | ------ | -------- | -------- |
-| `EXT`   | opcode | operand1 | operand2 |
-
-Byte -1 is only present if the instruction is part of the `EXT` Mode set. The theoretical maximum instruction size is thus 4 bytes. However, the current instruction set has been crafted to ensure that no instruction exceeds 3 bytes.
+In the subsequent section, the size of an instruction is given as the total number of bytes required to execute the instruction. This includes the optional prefix `EXT` byte, and any operands following the opcode in the instruction stream.
 
 # Addressing Modes
 
@@ -88,17 +82,17 @@ Byte -1 is only present if the instruction is part of the `EXT` Mode set. The th
 
 - *Register Direct*: There is no effective address; all operands are in registers which are implied by the opcode.
 
-- *Immediate*: Their is no effective address; the operand is the one or two bytes following the opcode in the instruction stream, depending on the context of the instruction.
+- *Immediate*: Their is no effective address; the operand is the one or two bytes following the opcode in the instruction stream, depending on the target of the instruction.
 
-- *Absolute*: The effective address is given as a two-byte absolute address which follows the opcode in the instruction stream in Big Endian format.
+- *Absolute*: The effective address is given as a two-byte absolute address which follows the opcode in Big Endian order.
 
-- *Direct*: The effective address is given as a one-byte direct page address which follows the opcode in the instruction stream.
+- *Direct*: The effective address is given as a one-byte direct page address which follows the opcode.
 
-- *Register Indirect*: The effective address is the value in a pointer register implied by the opcode.
+- *Register Indirect*: The effective address is the address in a pointer register implied by the opcode.
 
-- *Indexed Indirect*: The operand source is specified by the address that is computed by adding a signed 8-bit index to a pointer register's value. Both the pointer register and the index source are implied in the opcode.
+- *Indexed Indirect*: The effective address is computed by adding a signed 8-bit index to a pointer register's contents. Both the pointer register and the index source are implied in the opcode.
 
-- *Relative*: The operand source is specified by the address that is computed by adding a signed 8-bit offset to the Program Counter's value. The offset's source is byte immediately after the opcode in the instruction stream.
+- *Relative*: The effective address is computed by adding a signed 8-bit offset to the Program Counter. The offset source is the byte following the opcode.
 
 # Instruction Details
 
@@ -111,7 +105,10 @@ Size   | 1
 Cycles | 2
 Mode   | Implied
 
+    nop
+
 Does nothing, and then continues.
+
 
 ## `BRK` - Break Clock
 
@@ -122,18 +119,9 @@ Size   | 2
 Cycles | 4
 Mode   | Implied
 
-The clock module which provides the CPU's clock input has three modes: Run, Demo, and Step. The final of which single steps the CPU. This opcode forces the clock mode into Step, and so it acts similarly to a `HLT` instruction.
+    brk
 
-## `EXT` - Extended Mode
-
-Field  | Value
------- | ---
-Type   | `NRM`
-Size   | 1
-Cycles | 2
-Mode   | Implied
-
-`EXT` switches the current CPU mode from `NRM` to `EXT`, and then finishes execution. This allows for the next fetched instruction to be interpretted uniquely.
+The clock module which provides the CPU's clock input has three modes: Run, Demo, and Step. The final of which single steps the CPU. This opcode forces the clock mode into Step, and so it acts similarly to a `HLT` instruction, but is recoverable via the hardware clock control features. This instruction slightly breaks the encapsulation of the CPU's implementation details as it makes assumptions about hardware external to the CPU.
 
 ## `CLC` - Clear Carry
 
@@ -148,9 +136,11 @@ Mode   | Implied
 | --- | --- | --- | --- | ---
 |  -  |  0  |  -  |  -  |  -
 
+    clc
+
 Sets the SR's `C` flag to 0.
 
-## `CLI` - Enable Interrupts
+## `CLI` - Disable Interrupts
 
 Field  | Value
 ------ | ---
@@ -162,6 +152,8 @@ Mode   | Implied
 | `Z` | `C` | `N` | `V` | `I`
 | --- | --- | --- | --- | ---
 |  -  |  -  |  -  |  -  |  0
+
+    cli
 
 Sets the SR's `I` flag to 0.
 
@@ -178,6 +170,8 @@ Mode   | Implied
 | --- | --- | --- | --- | ---
 |  -  |  -  |  -  |  0  |  -
 
+    clv
+
 Sets the SR's `V` flag to 0.
 
 ## `SEC` - Set Carry Flag
@@ -193,9 +187,11 @@ Mode   | Implied
 | --- | --- | --- | --- | ---
 |  -  |  1  |  -  |  -  |  -
 
+    sec
+
 Sets the SR's `C` flag to 1.
 
-## `SEI` - Disable Interrupts
+## `SEI` - Enable Interrupts
 
 Field  | Value
 ------ | ---
@@ -208,7 +204,34 @@ Mode   | Implied
 | --- | --- | --- | --- | ---
 |  -  |  -  |  -  |  -  |  1
 
+    sei
+
 Sets the SR's `I` flag to 1.
+
+## `IN` - Read IO Port
+
+Field | Value
+----- | -----
+Type  | `EXT`
+Size  | varies
+Cycles | varies
+Mode | varies
+
+    in {dst: gpr}, <{port: u8}>
+    in [{dp: u8}], <{port: u8}>
+
+## `OUT` -- Write IO Port
+
+Field | Value
+----- | -----
+Type  | `EXT`
+Size  | varies
+Cycles | varies
+Mode | varies
+
+    out <{port: u8}>, {src: gpr}
+    out <{port: u8}>, [{dp: u8}]
+    out <{port: u8}>, #{imm: i8}
 
 ## `MOV` - Move Register
 
@@ -240,7 +263,7 @@ Extraneous pairs:
     `mov sp x`
 
 Note:
-    `ab` and `cd` being used as a `src`-`dst` (or `dst`-`src`) pair is technically illegal. The assembler should implement these instructions as pseudo instructions consisting of two 8-bit `MOV`s.
+    `ab` and `cd` being used as a `src`-`dst` (or `dst`-`src`) pair is illegal. The assembler should implement these instructions as pseudo instructions consisting of two 8-bit `MOV`s.
 
 ## `LOAD` - Load Register
 
@@ -255,10 +278,19 @@ The `LOAD` instruction has varying specifications for the 8-bit and 16-bit versi
 
 ### 8-bit `LOAD`
 
+    load {dst: gpr}, #{imm: i8}
+    load {dst: gpr}, [{abs: u16}]
+    load {dst: gpr}, [{dp: u8}]
+    load {dst: gpr}, [{ptr: gpp | sp}, #{idx: s8}]
+    load {dst: gpr}, [{ptr: gpp | sp}, {idx: gpr}]
+
 Destinations: GPRs
 Addressing Modes:
 
+
 **Immediate**
+
+    load {dst: gpr}, #{imm: i8}
 
 Size: 2
 Cycles: TBD

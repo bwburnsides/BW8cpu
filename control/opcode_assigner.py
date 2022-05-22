@@ -123,7 +123,6 @@ def main():
             opcodes[0].append(inst_stripped)
             if len(opcodes[0]) > 256:
                 raise RuntimeError("too many instruction zero page opcodes")
-                exit()
             continue
 
         # otherwise, add to ext page
@@ -132,8 +131,9 @@ def main():
             print("too many opcodes")
             exit()
 
-    if not EXT in opcodes[0]:
+    if EXT not in opcodes[0]:
         print(f"{EXT} must be present in the instruction zeropage. Exiting...")
+        exit()
 
     write_output(out_path, opcodes)
 

@@ -168,9 +168,18 @@ class Ctrl:
         )
 
 
+class Mode(Enum):
+    FETCH = 0
+    STALL = 1
+    IRQ = 2
+
+    @classmethod
+    def from_state(cls, mode: int) -> "Mode":
+        return cls.STALL if mode not in {0, 1, 2} else cls(mode)
+
+
 @dataclass
 class Flags:
-    I: bool
     N: bool
     V: bool
     Z: bool
@@ -197,17 +206,21 @@ class Flags:
     def is_not_equal(self) -> bool:
         return not self.Z
 
+    # Opposite carry check from x86 due to carry semantics
     def is_carry(self) -> bool:
-        return self.C
-
-    def is_not_carry(self) -> bool:
         return not self.C
 
-    def is_below_or_equal(self) -> bool:
-        return self.C or self.Z
+    # Opposite carry check from x86 due to carry semantics
+    def is_not_carry(self) -> bool:
+        return self.C
 
+    # Opposite carry check from x86 due to carry semantics
+    def is_below_or_equal(self) -> bool:
+        return not self.C or self.Z
+
+    # Opposite carry check from x86 due to carry semantics
     def is_above(self) -> bool:
-        return not self.C and not self.Z
+        return self.C and not self.Z
 
     def is_less(self) -> bool:
         return self.N != self.V
@@ -394,7 +407,7 @@ FETCH = (
 )
 BASE = [FETCH, 0, 0, 0, 0, 0, 0, 0]
 
-REQ_UOPS = [0, 0, 0, 0, 0, 0, 0, 0]
+STALL_OPS = [0 for i in range(8)]
 IRQ_UOPS = [
     Ctrl.COUNT_DEC_SP,
     Ctrl.ADDR_ASSERT_SP
@@ -1157,20 +1170,22 @@ def jmp_ptr(pred: Callable[[], bool], ptr: GPP) -> list[int]:
     return uops
 
 
-def get_uops(flags: Flags, OP: int, IRQ: bool, REQ: bool) -> list[int]:
-    uops = BASE.copy()
+def get_uops(flags: Flags, OP: int, mode: Mode) -> list[int]:
 
-    if REQ:
-        return REQ_UOPS.copy()
+    if mode == Mode.STALL:
+        return STALL_OPS.copy()
 
-    if IRQ and not flags.I:
+    if mode == Mode.IRQ:
         return IRQ_UOPS.copy()
+
+    uops = BASE.copy()
 
     # Housekeeping / Flag Management
     if OP == Op.NOP:
         uops[1] |= Ctrl.RST_USEQ
     elif OP == Op.BRK:
-        uops[1] |= Ctrl.BRK_CLK | Ctrl.RST_USEQ
+        uops[1] |= Ctrl.BRK_CLK
+        uops[2] |= Ctrl.RST_USEQ
     elif OP == Op.EXT:
         uops[1] |= Ctrl.TOG_EXT | FETCH
     elif OP == Op.CLC:
@@ -1332,11 +1347,11 @@ def get_uops(flags: Flags, OP: int, IRQ: bool, REQ: bool) -> list[int]:
 
     # B Loads
     elif OP == Op.LOAD_B_IMM:
-        return load8_imm(GPR.A)
+        return load8_imm(GPR.B)
     elif OP == Op.LOAD_B_ABS:
-        return load8_abs(GPR.A)
+        return load8_abs(GPR.B)
     elif OP == Op.LOAD_B_DP:
-        return load8_dp(GPR.A)
+        return load8_dp(GPR.B)
     elif OP == Op.LOAD_B_X_IDX:
         return load8_ptr_idx(GPR.B, PTR.X)
     elif OP == Op.LOAD_B_X_A:
@@ -1370,11 +1385,11 @@ def get_uops(flags: Flags, OP: int, IRQ: bool, REQ: bool) -> list[int]:
 
     # C Loads
     elif OP == Op.LOAD_C_IMM:
-        return load8_imm(GPR.A)
+        return load8_imm(GPR.C)
     elif OP == Op.LOAD_C_ABS:
-        return load8_abs(GPR.A)
+        return load8_abs(GPR.C)
     elif OP == Op.LOAD_C_DP:
-        return load8_dp(GPR.A)
+        return load8_dp(GPR.C)
     elif OP == Op.LOAD_C_X_IDX:
         return load8_ptr_idx(GPR.C, PTR.X)
     elif OP == Op.LOAD_C_X_A:
@@ -1408,11 +1423,11 @@ def get_uops(flags: Flags, OP: int, IRQ: bool, REQ: bool) -> list[int]:
 
     # D Loads
     elif OP == Op.LOAD_D_IMM:
-        return load8_imm(GPR.A)
+        return load8_imm(GPR.D)
     elif OP == Op.LOAD_D_ABS:
-        return load8_abs(GPR.A)
+        return load8_abs(GPR.D)
     elif OP == Op.LOAD_D_DP:
-        return load8_dp(GPR.A)
+        return load8_dp(GPR.D)
     elif OP == Op.LOAD_D_X_IDX:
         return load8_ptr_idx(GPR.D, PTR.X)
     elif OP == Op.LOAD_D_X_A:
@@ -2242,39 +2257,6 @@ def get_uops(flags: Flags, OP: int, IRQ: bool, REQ: bool) -> list[int]:
         uops[3] |= Ctrl.DBUS_ASSERT_TH | Ctrl.DBUS_LOAD_TL
         uops[4] |= Ctrl.ALU_AND | Ctrl.XFER_ASSERT_T | Ctrl.RST_USEQ
 
-    # Interrupts
-    elif OP == Op.WAI:
-        if IRQ:
-            if flags.I:
-                for i in range(7):
-                    uops[i + 1] = Ctrl.RST_USEQ
-            else:
-                uops = IRQ_UOPS.copy()
-        else:
-            for i in range(8):
-                uops[i] = Ctrl.RST_USEQ
-    elif OP == Op.RTI:
-        uops[1] |= (
-            Ctrl.ADDR_ASSERT_SP
-            | Ctrl.DBUS_ASSERT_MEM
-            | Ctrl.DBUS_LOAD_SR
-            | Ctrl.COUNT_INC_SP
-        )
-        uops[2] |= (
-            Ctrl.ADDR_ASSERT_SP
-            | Ctrl.DBUS_ASSERT_MEM
-            | Ctrl.DBUS_LOAD_PCH
-            | Ctrl.COUNT_INC_SP
-            | Ctrl.ALU_CLI
-        )
-        uops[3] |= (
-            Ctrl.ADDR_ASSERT_SP
-            | Ctrl.DBUS_ASSERT_MEM
-            | Ctrl.DBUS_LOAD_PCL
-            | Ctrl.COUNT_INC_SP
-            | Ctrl.RST_USEQ
-        )
-
     # Subroutine Control
     elif OP == Op.JSR_ABS:
         uops[1] |= (
@@ -2341,6 +2323,27 @@ def get_uops(flags: Flags, OP: int, IRQ: bool, REQ: bool) -> list[int]:
             | Ctrl.DBUS_ASSERT_MEM
             | Ctrl.DBUS_LOAD_PCH
             | Ctrl.COUNT_INC_SP
+        )
+        uops[3] |= (
+            Ctrl.ADDR_ASSERT_SP
+            | Ctrl.DBUS_ASSERT_MEM
+            | Ctrl.DBUS_LOAD_PCL
+            | Ctrl.COUNT_INC_SP
+            | Ctrl.RST_USEQ
+        )
+    elif OP == Op.RTI:
+        uops[1] |= (
+            Ctrl.ADDR_ASSERT_SP
+            | Ctrl.DBUS_ASSERT_MEM
+            | Ctrl.DBUS_LOAD_SR
+            | Ctrl.COUNT_INC_SP
+        )
+        uops[2] |= (
+            Ctrl.ADDR_ASSERT_SP
+            | Ctrl.DBUS_ASSERT_MEM
+            | Ctrl.DBUS_LOAD_PCH
+            | Ctrl.COUNT_INC_SP
+            | Ctrl.ALU_CLI
         )
         uops[3] |= (
             Ctrl.ADDR_ASSERT_SP
@@ -2529,14 +2532,14 @@ def get_size(uops: list[int]) -> int:
     )
 
 
-def write_ucode(ucode: list[int]) -> None:
-    roms = [[] for i in range(4)]
+def write_ucode(ucode: list[int], file_name_format: str) -> None:
+    roms: list[list[int]] = [[] for _ in range(4)]
     for word in ucode:
         for i in range(4):
             byte = (word & (255 << (8 * i))) >> (8 * i)
             roms[i].append(byte)
 
-    names = [f"microcode{i}.bin" for i in range(4)]
+    names = [file_name_format.format(i) for i in range(4)]
 
     for rom, name in zip(roms, names):
         with open(name, "wb") as f:
@@ -2545,42 +2548,42 @@ def write_ucode(ucode: list[int]) -> None:
 
 
 def main() -> None:
-    # 19b of state input:
-    # 1b REQ, 1b IRQ, 1b EXT, 8b OP, 5b flags, 3b t-state
+    # 18b of state input:
+    # 2b MODE, 1b EXT, 8b OP, 4b flags, 3b t-state
 
     ucode, lens, sizes = [], [], []
-    for addr in range(2**16):
-        flags_packed = (addr >> 0) & 0b11111
-        OP = (addr >> 5) & 0b1111_1111
-        EXT = (addr >> 13) & 0b1
-        IRQ = bool((addr >> 14) & 0b1)
-        REQ = bool((addr >> 15) & 0b1)
+    for addr in range(2**15):
+        flags_packed = (addr >> 0) & 0b1111
+        OP = (addr >> 4) & 0b1111_1111
+        EXT = (addr >> 12) & 0b1
+        MODE = (addr >> 13) & 0b11
 
-        If = bool((flags_packed >> 4) & 16)
         Nf = bool((flags_packed >> 3) & 8)
         Vf = bool((flags_packed >> 2) & 4)
         Zf = bool((flags_packed >> 1) & 2)
         Cf = bool((flags_packed >> 0) & 1)
-        flags = Flags(If, Nf, Vf, Zf, Cf)
 
-        OP |= EXT << 8
+        flags = Flags(Nf, Vf, Zf, Cf)
+        mode = Mode.from_state(MODE)
+        opcode = OP | (EXT << 8)
 
-        uops = get_uops(flags, OP, IRQ, REQ)
-        if not uops[0] == -1:
-            corrected = make_extended(uops, OP)
+        uops = get_uops(flags, opcode, mode)
 
-            if (not REQ) and (not IRQ) and (OP != Op.EXT):
+        if uops[0] == -1:
+            corrected = get_uops(flags, Op.NOP, mode)
+        else:
+            corrected = make_extended(uops, opcode)
+
+            if mode == Mode.FETCH and OP != Op.EXT:
                 lens.append(get_cycles(corrected))
                 sizes.append(get_size(corrected))
-        else:
-            corrected = get_uops(flags, Op.NOP, IRQ, REQ)
 
         ucode.extend(corrected)
 
     print(f"Clocks per Instruction estimate: {sum(lens) / len(lens):.2f}")
     print(f"Bytes per Instruction estimate: {sum(sizes) / len(sizes):.2f}")
 
-    write_ucode(ucode)
+    write_ucode(ucode, "microcode{}.bin")
 
 
 if __name__ == "__main__":
