@@ -1692,6 +1692,50 @@
       </elementAttributes>
       <pos x="420" y="2120"/>
     </visualElement>
+    <visualElement>
+      <elementName>Testcase</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Testdata</string>
+          <testData>
+            <dataString>ALU-OP Sel-Shift-1 Sel-Shift-0 Sel-Logic-3 Sel-Logic-2 Sel-Logic-1 Sel-Logic-0 Sel-Cin-1 Sel-Cin-0 Sel-Cf-2 Sel-Cf-1 Sel-Cf-0 Sel-Zf-1 Sel-Zf-0 Sel-Vf-1 Sel-Vf-0 Sel-Nf-1 Sel-Nf-0 Sel-If-1 Sel-If-0
+# NOP
+0 1 1 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1
+# ADC
+1 0 0 1 1 0 0 0 1 0 1 0 0 1 0 1 0 1 1 1
+# SBC
+2 0 0 0 0 1 1 0 1 0 1 0 0 1 0 1 0 1 1 1
+# INC
+3 1 1 1 1 0 0 1 1 0 1 0 0 1 1 1 0 1 1 1
+# DEC
+4 0 0 1 1 1 1 0 0 0 1 0 0 1 1 1 0 1 1 1
+# AND
+5 1 1 1 0 0 0 0 0 1 1 1 0 1 1 1 0 1 1 1
+# OR
+6 1 1 1 1 1 0 0 0 1 1 1 0 1 1 1 0 1 1 1
+# XOR
+7 1 1 0 1 1 0 0 0 1 1 1 0 1 1 1 0 1 1 1
+# NOT
+8 1 1 0 0 1 1 0 0 1 1 1 0 1 1 1 0 1 1 1
+# SRC
+9 0 1 0 0 0 0 0 0 0 0 1 0 1 1 1 0 1 1 1
+# ASR
+10 1 0 0 0 0 0 0 0 0 0 1 0 1 1 1 0 1 1 1
+# SEI
+11 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0
+# CLI
+12 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1
+# SEC
+13 1 1 1 1 1 1 1 1 0 0 0 1 1 1 1 1 1 1 1
+# CLC
+14 1 1 1 1 1 1 1 1 0 1 1 1 1 1 1 1 1 1 1
+# CLV
+15 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1</dataString>
+          </testData>
+        </entry>
+      </elementAttributes>
+      <pos x="920" y="580"/>
+    </visualElement>
   </visualElements>
   <wires>
     <wire>
@@ -3275,12 +3319,12 @@
       <p2 x="480" y="580"/>
     </wire>
     <wire>
-      <p1 x="480" y="620"/>
-      <p2 x="480" y="660"/>
-    </wire>
-    <wire>
       <p1 x="480" y="380"/>
       <p2 x="480" y="400"/>
+    </wire>
+    <wire>
+      <p1 x="480" y="620"/>
+      <p2 x="480" y="660"/>
     </wire>
     <wire>
       <p1 x="480" y="1060"/>

@@ -2,54 +2,55 @@
 
 The BW8cpu instruction set contains the following instructions. Each instruction has several opcodes that implement various combinations of operands and addressing mode variations on their base behavior. These will be discussed below.
 
-Mnemonic                                       | Name                           
----------------------------------------------- | ------------------------------
-[`NOP`](#nop---no-operation)                   | No Operation                   
-[`BRK`](#brk---break-clock)                    | Break Clock                    
-[`CLC`](#clc---clear-carry)                    | Clear Carry                    
-[`CLI`](#cli---enable-interrupts)              | Disable Interrupts
-[`CLV`](#clv---clear-overflow)                 | Clear Overflow                 
-[`SEC`](#sec---set-carry-flag)                 | Set Carry                      
-[`SEI`](#sei---disable-interrupts)             | Enable Interrupts             
-[`IN`](#in---read-io-port)                     | IO Input
-[`OUT`](#out---write-io-port)                  | IO Output             
-[`MOV`](#mov---move-register)                  | Move Register                  
-[`LOAD`](#load---load-register)                | Load Register                  
-[`STORE`](#store---store-register)             | Store Register                 
-[`LEA`](#lea---load-effective-address)         | Load Effective Address         
-[`ADC`](#adc---add-with-carry)                 | Add with Carry                 
-[`SBB`](#sbb---subtract-with-borrow)           | Subtract with Borrow           
-[`AND`](#and---bitwise-and)                    | Bitwise AND                    
-[`OR`](#or---bitwise-or)                       | Bitwise OR                     
-[`XOR`](#xor---bitwise-xor)                    | Bitwise XOR                    
-[`NOT`](#not---bitwise-inversion)              | Bitwise NOT                    
-[`NEG`](#neg---2s-complement-negation)         | 2s Complement Negation         
-[`SRC`](#shr---logical-shift-right-with-carry) | Logical Shift Right with Carry 
-[`ASR`](#asr---arithmetic-shift-right)         | Arithmetic Shift Right         
-[`INC`](#inc---increment)                      | Increment                      
-[`DEC`](#dec---decrement)                      | Decrement                      
-[`PUSH`](#push---push-to-stack)                | Push to Stack                  
-[`POP`](#pop---pop-from-stack)                 | Pop from Stack                 
-[`CMP`](#cmp---compare)                        | Compare                       
-[`TST`](#tst---bit-test)                       | Bit Test                       
-[`RTI`](#rti---return-from-interrupt)          | Return from Interrupt          
-[`JSR`](#jsr---jump-to-subroutine)             | Jump to Subroutine             
-[`RTS`](#rts---return-from-subroutine)         | Return from Subroutine   
-[`JMP`](#jmp---unconditional-jump)             | Jump                           
-[`JO`](#jo---jump-if-overflow)                 | Jump if Overflow               
-[`JNO`](#jno---jump-if-not-overflow)           | Jump if not Overflow           
-[`JS`](#js---jump-if-sign)                     | Jump if Sign                   
-[`JNS`](#jns---jump-if-not-sign)               | Jump if not Sign               
-[`JE`](#je---jump-if-equal)                    | Jump if Equal                  
-[`JNE`](#jne---jump-if-not-equal)              | Jump if not Equal              
-[`JC`](#jc---jump-if-carry)                    | Jump if Carry                  
-[`JNC`](#jnc---jump-if-not-carry)              | Jump if not Carry              
-[`JBE`](#jbe---jump-if-below-or-equal)         | Jump if Below or Equal         
-[`JA`](#ja---jump-if-above)                    | Jump if Above                  
-[`JL`](#jl---jump-if-less)                     | Jump if Less                   
-[`JGE`](#jge---jump-if-greater-or-equal)       | Jump if Greater or Equal       
-[`JLE`](#jle---jump-if-less-or-equal)          | Jump if Less or Equal          
-[`JG`](#jg---jump-if-greater)                  | Jump if Greater                
+Mnemonic                                        | Name                           
+----------------------------------------------- | ------------------------------
+[`NOP`](#nop---no-operation)                    | No Operation                   
+[`CLC`](#clc---clear-carry)                     | Clear Carry                    
+[`CLI`](#cli---enable-interrupts)               | Disable Interrupts
+[`CLV`](#clv---clear-overflow)                  | Clear Overflow                 
+[`SEC`](#sec---set-carry-flag)                  | Set Carry                      
+[`SEI`](#sei---disable-interrupts)              | Enable Interrupts             
+[`UBR`](#ubr---enable-user-bank-register)       | Enable User Bank Register
+[`SBR`](#sbr---enable-supervisor-bank-register) | Enable Supervisor Bank Register     
+[`IN`](#in---read-io-port)                      | IO Input
+[`OUT`](#out---write-io-port)                   | IO Output             
+[`MOV`](#mov---move-register)                   | Move Register                  
+[`LOAD`](#load---load-register)                 | Load Register                  
+[`STORE`](#store---store-register)              | Store Register                 
+[`LEA`](#lea---load-effective-address)          | Load Effective Address         
+[`ADC`](#adc---add-with-carry)                  | Add with Carry                 
+[`SBB`](#sbb---subtract-with-borrow)            | Subtract with Borrow           
+[`AND`](#and---bitwise-and)                     | Bitwise AND                    
+[`OR`](#or---bitwise-or)                        | Bitwise OR                     
+[`XOR`](#xor---bitwise-xor)                     | Bitwise XOR                    
+[`NOT`](#not---bitwise-inversion)               | Bitwise NOT                    
+[`NEG`](#neg---2s-complement-negation)          | 2s Complement Negation         
+[`SRC`](#shr---logical-shift-right-with-carry)  | Logical Shift Right with Carry 
+[`ASR`](#asr---arithmetic-shift-right)          | Arithmetic Shift Right         
+[`INC`](#inc---increment)                       | Increment                      
+[`DEC`](#dec---decrement)                       | Decrement                      
+[`PUSH`](#push---push-to-stack)                 | Push to Stack                  
+[`POP`](#pop---pop-from-stack)                  | Pop from Stack                 
+[`CMP`](#cmp---compare)                         | Compare                       
+[`TST`](#tst---bit-test)                        | Bit Test                       
+[`RTI`](#rti---return-from-interrupt)           | Return from Interrupt          
+[`JSR`](#jsr---jump-to-subroutine)              | Jump to Subroutine             
+[`RTS`](#rts---return-from-subroutine)          | Return from Subroutine   
+[`JMP`](#jmp---unconditional-jump)              | Jump                           
+[`JO`](#jo---jump-if-overflow)                  | Jump if Overflow               
+[`JNO`](#jno---jump-if-not-overflow)            | Jump if not Overflow           
+[`JS`](#js---jump-if-sign)                      | Jump if Sign                   
+[`JNS`](#jns---jump-if-not-sign)                | Jump if not Sign               
+[`JE`](#je---jump-if-equal)                     | Jump if Equal                  
+[`JNE`](#jne---jump-if-not-equal)               | Jump if not Equal              
+[`JC`](#jc---jump-if-carry)                     | Jump if Carry                  
+[`JNC`](#jnc---jump-if-not-carry)               | Jump if not Carry              
+[`JBE`](#jbe---jump-if-below-or-equal)          | Jump if Below or Equal         
+[`JA`](#ja---jump-if-above)                     | Jump if Above                  
+[`JL`](#jl---jump-if-less)                      | Jump if Less                   
+[`JGE`](#jge---jump-if-greater-or-equal)        | Jump if Greater or Equal       
+[`JLE`](#jle---jump-if-less-or-equal)           | Jump if Less or Equal          
+[`JG`](#jg---jump-if-greater)                   | Jump if Greater                
 
 The BW8 has an 8-bit Instruction Register, so there is some trickery involved to support up to 512 opcodes, rather than just 256. This is done with the `EXT` instruction. This is a 1 byte, 1 cycle instruction which transitions the CPU from normal "`NRM`" mode to extended "`EXT`" mode, and then fetches the next instruction. This next instruction is interpretted differently due to the system being in `EXT` Mode. At the conclusion of these instructions, they return the CPU to `NRM` Mode. Through this mechanism, the CPU can ascribe two different meanings to each 8-bit opcode value, yielding a total of 512 opcodes.
 
@@ -57,24 +58,28 @@ The `NRM` Mode instructions are those which are commonly used, have long cycle c
 
 # Programming Model
 
-The CPU programming model includes four 8-bit General Purpose Registers (GPRs): `a`, `b`, `c`, `d`, and two 16-bit General Purpose Pointers (GPPs): `x`, `y`. There are four special purpose programmer facing registers:
+The CPU programming model includes four 8-bit General Purpose Registers (`gpr`): `a`, `b`, `c`, `d`, and two 16-bit General Purpose Pointers (`gpp`): `x`, `y`. There are five special purpose programmer facing registers:
 
 1. `dp` - 8-bit, the location of the Direct Page
 2. `ab` - 16-bit, a pseudo register constructed with `a` in the high byte and `b` in the low byte
 3. `cd` - 16-bit, a psuedo register constructed with `c` in the high byte and `d` in the low byte
-3. `sp` - 16-bit, the system Stack Pointer
+4. `sp` - 16-bit, the system Stack Pointer
+5. `br` - 4-bit, the user Bank Register
 
-These three registers have limited direct support, and are generally interacted with via `MOV`s. The `ab` and `cd` registers provide a mechanism for constructing 16-bit results that can be loaded into the GPPs or the SP. Additionally, there is the Status Register (`sr`) which stores the following CPU flags:
+These registers have limited direct instruction support, and are generally interacted with via `MOV`s. The `ab` and `cd` registers provide a mechanism for constructing 16-bit results that can be loaded into the GPPs or the SP. The combination of `gpp` and `sp` is known as the pointers (`ptr`).
+
+Additionally, there is the Status Register (`sr`) which stores the following CPU flags:
 
 1. Zero (`Z`)
 2. Carry (`C`)
 3. Negative (`N`)
 4. Overflow (`V`)
 5. Interrupt Enable (`I`)
+6. User Data Source (`U`)
 
-The first four of these are primarily set by the result of a recent ALU calculation. The final is used to enable or disable maskable interrupt requests (IRQ), and is managed directly by the programmer via `SEI` and `CLI`.
+The first four of these are primarily set by the result of a recent ALU calculation. The Interrupt Enable flag is used to enable or disable maskable interrupt requests (IRQ), and is managed directly by the programmer via `SEI` and `CLI`. Finally, the `U` flag is intended for use within supervisor code, in order to give access to user address space.
 
-In the subsequent section, the size of an instruction is given as the total number of bytes required to execute the instruction. This includes the optional prefix `EXT` byte, and any operands following the opcode in the instruction stream.
+In the subsequent section, the size of an instruction is given as the total number of bytes required to execute the instruction. This includes the optional prefix `EXT` byte, the opcode itself, and any operands following the opcode in the instruction stream.
 
 # Addressing Modes
 
@@ -105,23 +110,13 @@ Size   | 1
 Cycles | 2
 Mode   | Implied
 
+Perform no operation.
+
+Assembly:
+
     nop
 
 Does nothing, and then continues.
-
-
-## `BRK` - Break Clock
-
-Field  | Value
------- | ---
-Type   | `EXT`
-Size   | 2
-Cycles | 4
-Mode   | Implied
-
-    brk
-
-The clock module which provides the CPU's clock input has three modes: Run, Demo, and Step. The final of which single steps the CPU. This opcode forces the clock mode into Step, and so it acts similarly to a `HLT` instruction, but is recoverable via the hardware clock control features. This instruction slightly breaks the encapsulation of the CPU's implementation details as it makes assumptions about hardware external to the CPU.
 
 ## `CLC` - Clear Carry
 
@@ -135,6 +130,10 @@ Mode   | Implied
 | `Z` | `C` | `N` | `V` | `I`
 | --- | --- | --- | --- | ---
 |  -  |  0  |  -  |  -  |  -
+
+Clears the Carry Flag.
+
+Assembly:
 
     clc
 
@@ -153,6 +152,10 @@ Mode   | Implied
 | --- | --- | --- | --- | ---
 |  -  |  -  |  -  |  -  |  0
 
+Disable maskable interrupts, set the Interrupt Enable flag `I` to 0.
+
+Assembly:
+
     cli
 
 Sets the SR's `I` flag to 0.
@@ -169,6 +172,10 @@ Mode   | Implied
 | `Z` | `C` | `N` | `V` | `I`
 | --- | --- | --- | --- | ---
 |  -  |  -  |  -  |  0  |  -
+
+Clear the Overflow Flag `V` to 0. 
+
+Assembly:
 
     clv
 
@@ -187,9 +194,11 @@ Mode   | Implied
 | --- | --- | --- | --- | ---
 |  -  |  1  |  -  |  -  |  -
 
-    sec
+Set the Carry Flag `C` to 1.
 
-Sets the SR's `C` flag to 1.
+Assembly:
+
+    sec
 
 ## `SEI` - Enable Interrupts
 
@@ -217,8 +226,12 @@ Size  | varies
 Cycles | varies
 Mode | varies
 
+Input one byte of data from the specified IO port.
+
+Assembly:
+
     in {dst: gpr}, <{port: u8}>
-    in [{dp: u8}], <{port: u8}>
+    in [!{dp: u8}], <{port: u8}>
 
 ## `OUT` -- Write IO Port
 
@@ -228,6 +241,10 @@ Type  | `EXT`
 Size  | varies
 Cycles | varies
 Mode | varies
+
+Output one byte of data to the specified IO port.
+
+Assembly:
 
     out <{port: u8}>, {src: gpr}
     out <{port: u8}>, [{dp: u8}]
@@ -242,16 +259,18 @@ Size   | 1
 Cycles | 2
 Mode   | Implied
 
-The `MOV` instruction has both 8-bit and 16-bit versions. These versions have separate sets of allowed destinations and sources. The format of the `MOV` instruction is: `mov dst src`. It is illegal for `dst` to match `src`.
+The `MOV` instruction has both 8-bit and 16-bit versions. These versions have separate sets of allowed destinations and sources. The format of the `MOV` instruction is: `mov dst, src`. It is illegal for `dst` to match `src`.
 
 ### 8-bit `MOV`
 
-Source: `a`, `b`, `c`, `d`
-Destination: `a`, `b`, `c`, `d`
+Source: `gpr`
+Destination: `gpr`
 
 Extraneous pairs:
-    `mov a dp`
-    `mov dp a`
+    `mov a, dp`
+    `mov dp, a`
+    `mov a, br`
+    `mov br, a`
 
 ### 16-bit `MOV`
 

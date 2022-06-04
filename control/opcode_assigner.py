@@ -127,7 +127,7 @@ def main():
 
         # otherwise, add to ext page
         opcodes[ext_page].append(inst)
-        if len(opcodes[ext_page]) == 256:
+        if len(opcodes[ext_page]) > 256:
             print("too many opcodes")
             exit()
 

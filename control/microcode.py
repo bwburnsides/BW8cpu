@@ -1,238 +1,7 @@
 from enum import Enum
 from typing import Callable
-from dataclasses import dataclass
+from control import Ctrl, Mode, State
 from opcodes import Op
-
-
-class Ctrl:
-    # 4 bits for DBUS Assert
-    DBUS_ASSERT_ALU = 0 << 0
-    DBUS_ASSERT_A = 1 << 0
-    DBUS_ASSERT_B = 2 << 0
-    DBUS_ASSERT_C = 3 << 0
-    DBUS_ASSERT_D = 4 << 0
-    DBUS_ASSERT_DP = 5 << 0
-    DBUS_ASSERT_DA = 6 << 0
-    DBUS_ASSERT_TH = 7 << 0
-    DBUS_ASSERT_TL = 8 << 0
-    DBUS_ASSERT_SR = 9 << 0
-    DBUS_ASSERT_MEM = 10 << 0
-    DBUS_ASSERT_MSB = 11 << 0
-    DBUS_ASSERT_LSB = 12 << 0
-
-    # 5 bits for DBUS Load
-    DBUS_LOAD_NULL = 0 << 4
-    DBUS_LOAD_A = 1 << 4
-    DBUS_LOAD_B = 2 << 4
-    DBUS_LOAD_C = 3 << 4
-    DBUS_LOAD_D = 4 << 4
-    DBUS_LOAD_DP = 5 << 4
-    DBUS_LOAD_DA = 6 << 4
-    DBUS_LOAD_TH = 7 << 4
-    DBUS_LOAD_TL = 8 << 4
-    DBUS_LOAD_SR = 9 << 4
-    DBUS_LOAD_MEM = 10 << 4
-    DBUS_LOAD_IR = 11 << 4
-    DBUS_LOAD_OFF = 12 << 4
-    DBUS_LOAD_PCH = 13 << 4
-    DBUS_LOAD_PCL = 14 << 4
-    DBUS_LOAD_SPH = 15 << 4
-    DBUS_LOAD_SPL = 16 << 4
-    DBUS_LOAD_XH = 17 << 4
-    DBUS_LOAD_XL = 18 << 4
-    DBUS_LOAD_YH = 19 << 4
-    DBUS_LOAD_YL = 20 << 4
-
-    DBUS_LOAD_PORT = DBUS_LOAD_TL
-
-    # 4 bits for ALU OP
-    ALU_NOP = 0 << 9
-    ALU_ADC = 1 << 9
-    ALU_SBC = 2 << 9
-    ALU_INC = 3 << 9
-    ALU_DEC = 4 << 9
-    ALU_AND = 5 << 9
-    ALU_OR = 6 << 9
-    ALU_XOR = 7 << 9
-    ALU_NOT = 8 << 9
-    ALU_SRC = 9 << 9
-    ALU_ASR = 10 << 9
-    ALU_SEI = 11 << 9
-    ALU_CLI = 12 << 9
-    ALU_SEC = 13 << 9
-    ALU_CLC = 14 << 9
-    ALU_CLV = 15 << 9
-
-    # 5 bits for XFER Assert
-    XFER_ASSERT_PC = 0 << 13
-    XFER_ASSERT_SP = 1 << 13
-    XFER_ASSERT_X = 2 << 13
-    XFER_ASSERT_Y = 3 << 13
-    XFER_ASSERT_ISR = 4 << 13
-    XFER_ASSERT_ADDR = 5 << 13
-    XFER_ASSERT_A_A = 6 << 13
-    XFER_ASSERT_A_B = 7 << 13
-    XFER_ASSERT_A_C = 8 << 13
-    XFER_ASSERT_A_D = 9 << 13
-    XFER_ASSERT_A_TL = 10 << 13
-    XFER_ASSERT_B_A = 11 << 13
-    XFER_ASSERT_B_B = 12 << 13
-    XFER_ASSERT_B_C = 13 << 13
-    XFER_ASSERT_B_D = 14 << 13
-    XFER_ASSERT_B_TL = 15 << 13
-    XFER_ASSERT_C_A = 16 << 13
-    XFER_ASSERT_C_B = 17 << 13
-    XFER_ASSERT_C_C = 18 << 13
-    XFER_ASSERT_C_D = 19 << 13
-    XFER_ASSERT_C_TL = 20 << 13
-    XFER_ASSERT_D_A = 21 << 13
-    XFER_ASSERT_D_B = 22 << 13
-    XFER_ASSERT_D_C = 23 << 13
-    XFER_ASSERT_D_D = 24 << 13
-    XFER_ASSERT_D_TL = 25 << 13
-    XFER_ASSERT_TH_A = 26 << 13
-    XFER_ASSERT_TH_B = 27 << 13
-    XFER_ASSERT_TH_C = 28 << 13
-    XFER_ASSERT_TH_D = 29 << 13
-    XFER_ASSERT_T = 30 << 13
-
-    # 3 bits for XFER Load
-    XFER_LOAD_NULL = 0 << 18
-    XFER_LOAD_PC = 1 << 18
-    XFER_LOAD_SP = 2 << 18
-    XFER_LOAD_X = 3 << 18
-    XFER_LOAD_Y = 4 << 18
-    XFER_LOAD_AB = 5 << 18
-    XFER_LOAD_CD = 6 << 18
-
-    # 3 bits for ADDR Assert
-    ADDR_ASSERT_ACK = 0 << 21
-    ADDR_ASSERT_PC = 1 << 21
-    ADDR_ASSERT_SP = 2 << 21
-    ADDR_ASSERT_X = 3 << 21
-    ADDR_ASSERT_Y = 4 << 21
-    ADDR_ASSERT_DP = 5 << 21
-    ADDR_ASSERT_T = 6 << 21
-    ADDR_ASSERT_IO = 7 << 21
-
-    # 3 bits for Counter Inc/Decs
-    COUNT_NULL = 0 << 24
-    COUNT_INC_PC = 1 << 24
-    COUNT_INC_SP = 2 << 24
-    COUNT_INC_X = 3 << 24
-    COUNT_INC_Y = 4 << 24
-    COUNT_INC_ADDR = 5 << 24
-    COUNT_DEC_X = 6 << 24
-    COUNT_DEC_Y = 7 << 24
-
-    # 1 bit for SP Dec
-    # (Allows SP to be prepped for push while operand is being fetched)
-    COUNT_DEC_SP = 1 << 27
-
-    # 4 bit fields for CPU CTRL
-    RST_USEQ = 1 << 28
-    TOG_EXT = 1 << 29
-    OFFSET = 1 << 30
-    BRK_CLK = 1 << 31
-
-    @staticmethod
-    def decode(word: int) -> str:
-        DBUS_ASSERT = (word >> 0) & (2**4 - 1)
-        DBUS_LOAD = (word >> 4) & (2**5 - 1)
-        ALU_OP = (word >> 9) & (2**4 - 1)
-        XFER_ASSERT = (word >> 13) & (2**5 - 1)
-        XFER_LOAD = (word >> 18) & (2**3 - 1)
-        ADDR_ASSERT = (word >> 21) & (2**3 - 1)
-        COUNT = (word >> 24) & (2**3 - 1)
-        DEC_SP = (word >> 27) & (2**1 - 1)
-        RST_USEQ = (word >> 28) & (2**1 - 1)
-        TOG_EXT = (word >> 29) & (2**1 - 1)
-        OFFSET = (word >> 30) & (2**1 - 1)
-        BRK_CLK = (word >> 31) & (2**1 - 1)
-
-        return "\n".join(
-            [
-                f"DBUS_ASSERT: {DBUS_ASSERT}",
-                f"DBUS_LOAD: {DBUS_LOAD}",
-                f"ALU_OP: {ALU_OP}",
-                f"XFER_ASSERT: {XFER_ASSERT}",
-                f"XFER_LOAD: {XFER_LOAD}",
-                f"ADDR_ASSERT: {ADDR_ASSERT}",
-                f"COUNT: {COUNT}",
-                f"DEC_SP: {DEC_SP}",
-                f"RST_USEQ: {RST_USEQ}",
-                f"TOG_EXT: {TOG_EXT}",
-                f"OFFSET: {OFFSET}",
-                f"BRK_CLK: {BRK_CLK}\n",
-            ]
-        )
-
-
-class Mode(Enum):
-    FETCH = 0
-    STALL = 1
-    IRQ = 2
-
-    @classmethod
-    def from_state(cls, mode: int) -> "Mode":
-        return cls.STALL if mode not in {0, 1, 2} else cls(mode)
-
-
-@dataclass
-class Flags:
-    N: bool
-    V: bool
-    Z: bool
-    C: bool
-
-    def unconditional(self) -> bool:
-        return True
-
-    def is_overflow(self) -> bool:
-        return self.V
-
-    def is_not_overflow(self) -> bool:
-        return not self.V
-
-    def is_negative(self) -> bool:
-        return self.N
-
-    def is_not_negative(self) -> bool:
-        return not self.N
-
-    def is_equal(self) -> bool:
-        return self.Z
-
-    def is_not_equal(self) -> bool:
-        return not self.Z
-
-    # Opposite carry check from x86 due to carry semantics
-    def is_carry(self) -> bool:
-        return not self.C
-
-    # Opposite carry check from x86 due to carry semantics
-    def is_not_carry(self) -> bool:
-        return self.C
-
-    # Opposite carry check from x86 due to carry semantics
-    def is_below_or_equal(self) -> bool:
-        return not self.C or self.Z
-
-    # Opposite carry check from x86 due to carry semantics
-    def is_above(self) -> bool:
-        return self.C and not self.Z
-
-    def is_less(self) -> bool:
-        return self.N != self.V
-
-    def is_greater_or_equal(self) -> bool:
-        return self.N == self.V
-
-    def is_less_or_equal(self) -> bool:
-        return self.Z or (self.N != self.V)
-
-    def is_greater(self) -> bool:
-        return not self.Z and self.N == self.V
 
 
 class GPR(Enum):
@@ -295,12 +64,12 @@ class GPR(Enum):
     ):
         self.DBUS_LOAD = dbus_load
         self.DBUS_ASSERT = dbus_assert
-        self.XFER_ASSERT_TL = xfer_assert_tl
-        self.XFER_ASSERT_TH = xfer_assert_th
-        self.xfer_assert_gpr = xfer_assert_gpr
+        self._xfer_ASSERT_TL = xfer_assert_tl
+        self._xfer_ASSERT_TH = xfer_assert_th
+        self._xfer_assert_gpr = xfer_assert_gpr
 
     def xfer_assert(self, rhs: "GPR") -> int:
-        return self.xfer_assert_gpr[rhs.name]
+        return self._xfer_assert_gpr[rhs.name]
 
 
 class MOV16(Enum):
@@ -310,8 +79,8 @@ class MOV16(Enum):
     CD = Ctrl.XFER_LOAD_CD, Ctrl.XFER_ASSERT_C_D
 
     def __init__(self, xfer_load: int, xfer_assert: int):
-        self.XFER_LOAD = xfer_load
-        self.XFER_ASSERT = xfer_assert
+        self._xfer_LOAD = xfer_load
+        self._xfer_ASSERT = xfer_assert
 
 
 class GPP(Enum):
@@ -338,8 +107,8 @@ class GPP(Enum):
         dbus_load_hi: int,
         dbus_load_lo: int,
     ):
-        self.XFER_LOAD = xfer_load
-        self.XFER_ASSERT = xfer_assert
+        self._xfer_LOAD = xfer_load
+        self._xfer_ASSERT = xfer_assert
         self.ADDR_ASSERT = addr_assert
         self.DBUS_LOAD_HI = dbus_load_hi
         self.DBUS_LOAD_LO = dbus_load_lo
@@ -352,7 +121,7 @@ class PTR(Enum):
 
     def __init__(self, addr_assert: int, xfer_load: int):
         self.ADDR_ASSERT = addr_assert
-        self.XFER_LOAD = xfer_load
+        self._xfer_LOAD = xfer_load
 
 
 class BinOp(Enum):
@@ -397,7 +166,7 @@ class StackOperable16(Enum):
     Y = Ctrl.XFER_ASSERT_Y, Ctrl.DBUS_LOAD_YH, Ctrl.DBUS_LOAD_YL
 
     def __init__(self, xfer_assert: int, dbus_load_hi: int, dbus_load_lo: int):
-        self.XFER_ASSERT = xfer_assert
+        self._xfer_ASSERT = xfer_assert
         self.DBUS_LOAD_HI = dbus_load_hi
         self.DBUS_LOAD_LO = dbus_load_lo
 
@@ -407,30 +176,51 @@ FETCH = (
 )
 BASE = [FETCH, 0, 0, 0, 0, 0, 0, 0]
 
-STALL_OPS = [0 for i in range(8)]
+STALL_OPS = [Ctrl.ADDR_ASSERT_ACK for _ in range(8)]
+
 IRQ_UOPS = [
-    Ctrl.COUNT_DEC_SP,
+    Ctrl.COUNT_DEC_SP | Ctrl.ALU_CLI,
     Ctrl.ADDR_ASSERT_SP
-    | Ctrl.DBUS_LOAD_MEM
     | Ctrl.XFER_ASSERT_PC
     | Ctrl.DBUS_ASSERT_LSB
+    | Ctrl.DBUS_LOAD_MEM
     | Ctrl.COUNT_DEC_SP,
     Ctrl.ADDR_ASSERT_SP
-    | Ctrl.DBUS_LOAD_MEM
     | Ctrl.XFER_ASSERT_PC
     | Ctrl.DBUS_ASSERT_MSB
+    | Ctrl.DBUS_LOAD_MEM
     | Ctrl.COUNT_DEC_SP,
     Ctrl.ADDR_ASSERT_SP
-    | Ctrl.DBUS_LOAD_MEM
     | Ctrl.DBUS_ASSERT_SR
-    | Ctrl.XFER_ASSERT_ISR
+    | Ctrl.DBUS_LOAD_MEM
+    | Ctrl.XFER_ASSERT_IRQ
     | Ctrl.XFER_LOAD_PC,
-    Ctrl.ADDR_ASSERT_PC | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_TH | Ctrl.ALU_SEI,
-    Ctrl.ADDR_ASSERT_PC
-    | Ctrl.COUNT_INC_ADDR
-    | Ctrl.DBUS_ASSERT_MEM
-    | Ctrl.DBUS_LOAD_TL,
-    Ctrl.XFER_ASSERT_T | Ctrl.XFER_LOAD_PC | Ctrl.RST_USEQ,
+    Ctrl.SET_SUPER_MODE | Ctrl.RST_USEQ,
+    0,
+    0,
+    0,
+]
+
+NMI_UOPS = [
+    Ctrl.COUNT_DEC_SP | Ctrl.ALU_CLI | Ctrl.SET_NMI_MASK,
+    Ctrl.ADDR_ASSERT_SP
+    | Ctrl.XFER_ASSERT_PC
+    | Ctrl.DBUS_ASSERT_LSB
+    | Ctrl.DBUS_LOAD_MEM
+    | Ctrl.COUNT_DEC_SP,
+    Ctrl.ADDR_ASSERT_SP
+    | Ctrl.XFER_ASSERT_PC
+    | Ctrl.DBUS_ASSERT_MSB
+    | Ctrl.DBUS_LOAD_MEM
+    | Ctrl.COUNT_DEC_SP,
+    Ctrl.ADDR_ASSERT_SP
+    | Ctrl.DBUS_ASSERT_SR
+    | Ctrl.DBUS_LOAD_MEM
+    | Ctrl.XFER_ASSERT_NMI
+    | Ctrl.XFER_LOAD_PC,
+    Ctrl.SET_SUPER_MODE | Ctrl.RST_USEQ,
+    0,
+    0,
     0,
 ]
 
@@ -1170,13 +960,19 @@ def jmp_ptr(pred: Callable[[], bool], ptr: GPP) -> list[int]:
     return uops
 
 
-def get_uops(flags: Flags, OP: int, mode: Mode) -> list[int]:
+def get_uops(state: State) -> list[int]:
+    flags = state.flags
+    OP = state.opcode
+    mode = state.mode
 
     if mode == Mode.STALL:
         return STALL_OPS.copy()
 
     if mode == Mode.IRQ:
         return IRQ_UOPS.copy()
+
+    if mode == Mode.NMI:
+        return NMI_UOPS.copy()
 
     uops = BASE.copy()
 
@@ -1198,6 +994,11 @@ def get_uops(flags: Flags, OP: int, mode: Mode) -> list[int]:
         uops[1] |= Ctrl.ALU_SEC | Ctrl.RST_USEQ
     elif OP == Op.SEI:
         uops[1] |= Ctrl.ALU_SEI | Ctrl.RST_USEQ
+
+    elif OP == Op.UBR:
+        uops[1] |= Ctrl.SET_USE_BR | Ctrl.RST_USEQ
+    elif OP == Op.KBR:
+        uops[1] |= Ctrl.CLR_USE_BR | Ctrl.RST_USEQ
 
     # 8-bit Moves
     elif OP == Op.MOV_A_B:
@@ -1224,10 +1025,17 @@ def get_uops(flags: Flags, OP: int, mode: Mode) -> list[int]:
         return mov8(GPR.D, GPR.B)
     elif OP == Op.MOV_D_C:
         return mov8(GPR.D, GPR.C)
+
     elif OP == Op.MOV_A_DP:
         uops[1] |= Ctrl.DBUS_ASSERT_DP | Ctrl.DBUS_LOAD_A | Ctrl.RST_USEQ
     elif OP == Op.MOV_DP_A:
         uops[1] |= Ctrl.DBUS_ASSERT_A | Ctrl.DBUS_LOAD_DP | Ctrl.RST_USEQ
+    elif OP == Op.MOV_BR_A:
+        uops[1] |= Ctrl.DBUS_ASSERT_A | Ctrl.DBUS_LOAD_BR | Ctrl.RST_USEQ
+    elif OP == Op.MOV_A_BR:
+        uops[1] |= Ctrl.DBUS_ASSERT_BR | Ctrl.DBUS_LOAD_A | Ctrl.RST_USEQ
+    elif OP == Op.MOV_A_SR:
+        uops[1] |= Ctrl.DBUS_ASSERT_SR | Ctrl.DBUS_LOAD_A | Ctrl.RST_USEQ
 
     # IO Operations
     elif OP == Op.IN_A:
@@ -2332,26 +2140,28 @@ def get_uops(flags: Flags, OP: int, mode: Mode) -> list[int]:
             | Ctrl.RST_USEQ
         )
     elif OP == Op.RTI:
-        uops[1] |= (
+        uops[1] |= Ctrl.CLR_SUPER_MODE
+        uops[2] |= (
             Ctrl.ADDR_ASSERT_SP
             | Ctrl.DBUS_ASSERT_MEM
             | Ctrl.DBUS_LOAD_SR
             | Ctrl.COUNT_INC_SP
         )
-        uops[2] |= (
+        uops[3] |= (
             Ctrl.ADDR_ASSERT_SP
             | Ctrl.DBUS_ASSERT_MEM
             | Ctrl.DBUS_LOAD_PCH
             | Ctrl.COUNT_INC_SP
-            | Ctrl.ALU_CLI
         )
-        uops[3] |= (
+        uops[4] |= (
             Ctrl.ADDR_ASSERT_SP
             | Ctrl.DBUS_ASSERT_MEM
             | Ctrl.DBUS_LOAD_PCL
             | Ctrl.COUNT_INC_SP
-            | Ctrl.RST_USEQ
+            | Ctrl.ALU_SEI
         )
+        uops[5] |= Ctrl.CLR_NMI_MASK
+        uops[6] |= Ctrl.CLR_USE_BR | Ctrl.RST_USEQ
 
     elif OP == Op.JMP_ABS:
         return jmp_abs(flags.unconditional)
@@ -2501,7 +2311,11 @@ def make_extended(uops: list[int], OP: int) -> list[int]:
     corrected = BASE.copy()
 
     for i in range(2, 8):
-        corrected[i] = uops[i - 1]
+        try:
+            corrected[i] = uops[i - 1]
+        except IndexError:
+            print(hex(OP))
+            exit()
 
     if all(corrected[2:]):
         corrected[-1] |= Ctrl.TOG_EXT
@@ -2533,14 +2347,21 @@ def get_size(uops: list[int]) -> int:
 
 
 def write_ucode(ucode: list[int], file_name_format: str) -> None:
-    roms: list[list[int]] = [[] for _ in range(4)]
-    for word in ucode:
+    roms: list[list[int]] = [[], [], [], []]
+
+    # Split the 32b words into 4x 8b words
+    for addr, word in enumerate(ucode):
         for i in range(4):
             byte = (word & (255 << (8 * i))) >> (8 * i)
+
+            if addr == 0b000001010010000001:
+                print(byte)
+
             roms[i].append(byte)
 
-    names = [file_name_format.format(i) for i in range(4)]
+    names = (file_name_format.format(i) for i in range(4))
 
+    # Write each ROM list to disk
     for rom, name in zip(roms, names):
         with open(name, "wb") as f:
             for uop in rom:
@@ -2548,33 +2369,19 @@ def write_ucode(ucode: list[int], file_name_format: str) -> None:
 
 
 def main() -> None:
-    # 18b of state input:
-    # 2b MODE, 1b EXT, 8b OP, 4b flags, 3b t-state
-
-    ucode, lens, sizes = [], [], []
+    lens, sizes = [], []
     for addr in range(2**15):
-        flags_packed = (addr >> 0) & 0b1111
-        OP = (addr >> 4) & 0b1111_1111
-        EXT = (addr >> 12) & 0b1
-        MODE = (addr >> 13) & 0b11
-
-        Nf = bool((flags_packed >> 3) & 8)
-        Vf = bool((flags_packed >> 2) & 4)
-        Zf = bool((flags_packed >> 1) & 2)
-        Cf = bool((flags_packed >> 0) & 1)
-
-        flags = Flags(Nf, Vf, Zf, Cf)
-        mode = Mode.from_state(MODE)
-        opcode = OP | (EXT << 8)
-
-        uops = get_uops(flags, opcode, mode)
+        state = State.from_packed(addr)
+        uops = get_uops(state)
 
         if uops[0] == -1:
-            corrected = get_uops(flags, Op.NOP, mode)
+            mode, flags, nop = state.mode, state.flags, Op.NOP
+            corrected = get_uops(State(state.mode, state.flags, Op.NOP))
+            if corrected[0] == -1:
+                raise RuntimeError(mode, flags, nop)
         else:
-            corrected = make_extended(uops, opcode)
-
-            if mode == Mode.FETCH and OP != Op.EXT:
+            corrected = make_extended(uops, state.opcode)
+            if state.mode == Mode.FETCH and state.opcode != Op.EXT:
                 lens.append(get_cycles(corrected))
                 sizes.append(get_size(corrected))
 
@@ -2585,6 +2392,10 @@ def main() -> None:
 
     write_ucode(ucode, "microcode{}.bin")
 
-
 if __name__ == "__main__":
+    ucode = []
     main()
+
+    addr = 0
+    print(bin(ucode[addr]))
+    print(Ctrl.decode(ucode[addr]))

@@ -1,3 +1,4 @@
+
 NOP*
 BRK*
 EXT*
@@ -7,6 +8,9 @@ CLI*
 CLV*
 SEC*
 SEI*
+
+UBR
+KBR
 
 MOV_A_B*
 MOV_A_C*
@@ -26,6 +30,11 @@ MOV_D_C*
 
 MOV_A_DP
 MOV_DP_A
+
+MOV_BR_A
+MOV_A_BR
+
+MOV_A_SR
 
 IN_A
 IN_B

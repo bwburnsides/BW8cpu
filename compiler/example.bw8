@@ -12,3 +12,13 @@ fn main() {
 
     my_str: char* = "Hello, World!";
 }
+
+struct Ctx {
+    uint RegA,
+    uint RegB,
+    uint RegC,
+    uint RegD,
+    ulong PtrX,
+    ulong PtrY,
+    ulong PtrSP,
+}

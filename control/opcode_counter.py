@@ -1,7 +1,7 @@
 from pprint import pprint
 
 lines = []
-with open("new_isa_reduced.txt") as f:
+with open("bw8_instruction_set.txt") as f:
     for line in f:
         stripped = line.strip()
         if stripped and not stripped.startswith("#"):

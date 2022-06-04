@@ -2,6 +2,9 @@
 #include "bw8cpu.h"
 
 int main() {
-	printf("Hello, world\n");
-	BW8cpu cpu("../ucode.bin");
+	BW8cpu cpu;
+	cpu.reset();
+	cpu.rising();
+
+
 }
