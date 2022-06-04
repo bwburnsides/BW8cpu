@@ -7,8 +7,4 @@
     #fill
 }
 
-load x, #0x6809
-load a, #255
-load b, #1
-adc a, b
-jmp_abs 0x000
+sec

@@ -64,12 +64,12 @@ class GPR(Enum):
     ):
         self.DBUS_LOAD = dbus_load
         self.DBUS_ASSERT = dbus_assert
-        self._xfer_ASSERT_TL = xfer_assert_tl
-        self._xfer_ASSERT_TH = xfer_assert_th
-        self._xfer_assert_gpr = xfer_assert_gpr
+        self.XFER_ASSERT_TL = xfer_assert_tl
+        self.XFER_ASSERT_TH = xfer_assert_th
+        self.XFER_assert_gpr = xfer_assert_gpr
 
     def xfer_assert(self, rhs: "GPR") -> int:
-        return self._xfer_assert_gpr[rhs.name]
+        return self.XFER_assert_gpr[rhs.name]
 
 
 class MOV16(Enum):
@@ -79,8 +79,8 @@ class MOV16(Enum):
     CD = Ctrl.XFER_LOAD_CD, Ctrl.XFER_ASSERT_C_D
 
     def __init__(self, xfer_load: int, xfer_assert: int):
-        self._xfer_LOAD = xfer_load
-        self._xfer_ASSERT = xfer_assert
+        self.XFER_LOAD = xfer_load
+        self.XFER_ASSERT = xfer_assert
 
 
 class GPP(Enum):
@@ -107,8 +107,8 @@ class GPP(Enum):
         dbus_load_hi: int,
         dbus_load_lo: int,
     ):
-        self._xfer_LOAD = xfer_load
-        self._xfer_ASSERT = xfer_assert
+        self.XFER_LOAD = xfer_load
+        self.XFER_ASSERT = xfer_assert
         self.ADDR_ASSERT = addr_assert
         self.DBUS_LOAD_HI = dbus_load_hi
         self.DBUS_LOAD_LO = dbus_load_lo
@@ -121,7 +121,7 @@ class PTR(Enum):
 
     def __init__(self, addr_assert: int, xfer_load: int):
         self.ADDR_ASSERT = addr_assert
-        self._xfer_LOAD = xfer_load
+        self.XFER_LOAD = xfer_load
 
 
 class BinOp(Enum):
@@ -166,7 +166,7 @@ class StackOperable16(Enum):
     Y = Ctrl.XFER_ASSERT_Y, Ctrl.DBUS_LOAD_YH, Ctrl.DBUS_LOAD_YL
 
     def __init__(self, xfer_assert: int, dbus_load_hi: int, dbus_load_lo: int):
-        self._xfer_ASSERT = xfer_assert
+        self.XFER_ASSERT = xfer_assert
         self.DBUS_LOAD_HI = dbus_load_hi
         self.DBUS_LOAD_LO = dbus_load_lo
 
@@ -2396,6 +2396,4 @@ if __name__ == "__main__":
     ucode = []
     main()
 
-    addr = 0
-    print(bin(ucode[addr]))
-    print(Ctrl.decode(ucode[addr]))
+    print(Ctrl.decode(ucode[0]))

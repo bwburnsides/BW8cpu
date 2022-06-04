@@ -3,7 +3,7 @@ from os import PathLike
 from pathlib import Path
 import textwrap
 
-from .system_bus import ISystemBus
+# from .system_bus import ISystemBus
 from .cpu_enums import *
 
 
@@ -15,8 +15,10 @@ def mask_shift(value: int, mask: int, shift: int, to_bool: bool = False):
 
 
 class BW8cpu:
-    _irq_vector = 0x03
-    _nmi_vector = 0x06
+    _irq_addr = 0x03
+    _nmi_addr = 0x06
+
+    _supervisor_bank = 0x0
 
     _diode_matrix = [
         0,
@@ -40,7 +42,6 @@ class BW8cpu:
     def __init__(
         self,
         ucode_path: PathLike,
-        system_bus: ISystemBus,
     ) -> None:
         # Initialize random values within range for General Purpose
         # Registers, Internal Registers, and Address Registers
@@ -63,11 +64,9 @@ class BW8cpu:
         self._ctrl_latch = random.randint(0x00, 0xFFFF_FFFF)
         self._ext = random.choice([True, False])
 
-        self._system_bus = system_bus
-        self._system_bus.memory = random.choice([True, False])
-        self._system_bus.read = random.choice([True, False])
-        self._system_bus.supervisor = random.choice([True, False])
-        self._system_bus.data = random.choice([True, False])
+        self.supervisor_mode = random.choice([True, False])
+        self.use_bank_register = random.choice([True, False])
+        self.nmi_mask = random.choice([True, False])
 
         self._dbus = 0
         self._xfer = 0
@@ -75,13 +74,19 @@ class BW8cpu:
 
         self._bank = random.randint(0x0, 0xF)
 
-        self._resolve_dbus()
+        self.code_data = random.choice([True, False])
+
+        self._alu_result = 0
+
         self._resolve_xfer_bus()
+        self._alu_calculate()
+        self._resolve_dbus()
+
         self._resolve_addr_bus()
 
         # Update the ALU result to be based off of these new values
-        self._alu_result = 0
-        self._alu_calculate()
+
+
 
     def reset(self, state: bool) -> None:
         self._rst = state
@@ -90,24 +95,24 @@ class BW8cpu:
             self._gpr = [0 for _ in GenPurpReg]
             self._inr = [0 for _ in IntReg]
             self._adr = [0 for _ in AddrReg]
-            self._sequencer = 0
-            self._ctrl_latch = 0
-            self._ext = False
+
+            self.bank = 0
 
             self._irq = False
             self._nmi = False
             self._req = False
 
-            self._system_bus.memory = True
-            self._system_bus.read = True
-            self._system_bus.supervisor = True
-            self._system_bus.data = True
+            self._sequencer = 0
+            self._ctrl_latch = 0
+            self._ext = False
+
+            self.supervisor_mode = True, False
+            self.use_bank_register = False
+            self.nmi_mask = False
 
             self._resolve_dbus()
             self._resolve_xfer_bus()
             self._resolve_addr_bus()
-
-            self._bank = 0x00
 
             # Update the ALU Result to be based on these new values
             self._alu_calculate()
@@ -159,16 +164,12 @@ class BW8cpu:
         )
         self._ctrl_latch = self._ucode[state]
 
-        alu_op = mask_shift(self._ctrl_latch, 0b1111, 9)
         offset = mask_shift(self._ctrl_latch, 0b1, 30, to_bool=True)
-
-        self._system_bus.memory = True
 
         self._resolve_addr_bus()
         self._resolve_xfer_bus()
-        self._resolve_dbus()
-
         self._alu_calculate()
+        self._resolve_dbus()
 
     def falling(self) -> None:
         if self._rst:
@@ -206,7 +207,13 @@ class BW8cpu:
             case DbusLoad.SR:
                 self._inr[IntReg.SR] = self._dbus
             case DbusLoad.MEM:
-                pass
+                bank = self._inr[IntReg.BR]
+                if self.supervisor_mode:
+                    bank = self._supervisor_bank
+                if self.use_bank_register and self.data_code is True:
+                    bank = self._inr[IntReg.BR]
+
+                bus_write(bank, self._addr, self._dbus)
             case DbusLoad.IR:
                 self._inr[IntReg.IR] = self._dbus
             case DbusLoad.OFF:
@@ -298,25 +305,26 @@ class BW8cpu:
     def _resolve_addr_bus(self):
         addr_assert = mask_shift(self._ctrl_latch, 0b111, 21)
 
-        self._system_bus.addr_bank = self._inr[IntReg.BR]
+        self.data_code = True
         match AddrAssert(addr_assert):
             case AddrAssert.ACK:
-                pass
+                self._addr = 0
             case AddrAssert.PC:
-                self._system_bus.addr_bus = self._adr[AddrReg.PC]
+                self.data_code = False
+                self._addr = self._adr[AddrReg.PC]
             case AddrAssert.SP:
-                self._system_bus.addr_bus = self._adr[AddrReg.SP]
+                self._addr = self._adr[AddrReg.SP]
             case AddrAssert.X:
-                self._system_bus.addr_bus = self._adr[AddrReg.X]
+                self._addr = self._adr[AddrReg.X]
             case AddrAssert.Y:
-                self._system_bus.addr_bus = self._adr[AddrReg.Y]
+                self._addr = self._adr[AddrReg.Y]
             case AddrAssert.DP:
-                self._system_bus.addr_bus = (self._inr[IntReg.DP] << 8) | self._inr[IntReg.DA]
+                self._addr = (self._inr[IntReg.DP] << 8) | self._inr[IntReg.DA]
             case AddrAssert.T:
-                self._system_bus.addr_bus = (self._inr[IntReg.TH] << 8) | self._inr[IntReg.TL] 
+                self._addr = (self._inr[IntReg.TH] << 8) | self._inr[IntReg.TL] 
             case AddrAssert.IO:
-                self._system_bus.io = True
-                self._system_bus.addr_bus = (self._inr[IntReg.TH] << 8) | self._inr[IntReg.TL]
+                self.mem_io = False
+                self._addr = (self._inr[IntReg.TH] << 8) | self._inr[IntReg.TL]
 
     def _resolve_xfer_bus(self):
         xfer_assert = mask_shift(self._ctrl_latch, 0b11111, 13)
@@ -331,7 +339,7 @@ class BW8cpu:
             case XferAssert.Y:
                 self._xfer = self._adr[AddrReg.Y]
             case XferAssert.IRQ:
-                self._xfer = self._irq_vector
+                self._xfer = self._irq_addr
             case XferAssert.ADDR:
                 self._xfer = self._addr
                 # TODO: include + offset here
@@ -386,14 +394,14 @@ class BW8cpu:
             case XferAssert.T:
                 self._xfer = (self._inr[IntReg.TH] << 8) | self._inr[IntReg.TL]
             case XferAssert.NMI:
-                self._xfer = self._nmi_vector
+                self._xfer = self._nmi_addr
 
     def _resolve_dbus(self):
         dbus_assert = mask_shift(self._ctrl_latch, 0b1111, 0)
 
         match DbusAssert(dbus_assert):
             case DbusAssert.ALU:
-                pass
+                self._dbus = self.alu_result
             case DbusAssert.A:
                 self._dbus = self._gpr[GenPurpReg.A]
             case DbusAssert.B:
@@ -413,13 +421,15 @@ class BW8cpu:
             case DbusAssert.SR:
                 self._dbus = self._inr[IntReg.SR]
             case DbusAssert.MEM:
-                self._dbus = self._system_bus.data_bus
+                self._dbus = bus_read(self.bank, self._addr)
             case DbusAssert.MSB:
                 self._dbus = mask_shift(self._xfer, 0b1111_1111, 8)
             case DbusAssert.LSB:
                 self._dbus = self._xfer & 0b1111_1111
             case DbusAssert.BR:
                 self._dbus = self._inr[IntReg.BR]
+            case _:
+                self._dbus = 0
 
     def _alu_calculate(self) -> None:
         alu_op = mask_shift(self._ctrl_latch, 0b1111, 9)
@@ -615,3 +625,18 @@ class BW8cpu:
             RST: {self._rst}\tREQ: {self._req}
             IRQ: {self._irq}\tNMI: {self._nmi}
         """)
+
+def bus_write(bank: int, ptr: int, data: int) -> None:
+    addr = (bank << 16) | ptr
+    ram[addr] = data
+
+def bus_read(bank: int, ptr: int) -> int:
+    addr = (bank << 16) | ptr
+    return ram[addr]
+
+ram = [0 for _ in range(1024 ** 2)]
+with open("C:\\Users\\brady\\projects\\BW8cpu\\assembler\\test.bin", "rb") as f:
+    idx = 0
+    while (byte := f.read(1)):
+        ram[idx] = int.from_bytes(byte, "big")
+        idx += 1

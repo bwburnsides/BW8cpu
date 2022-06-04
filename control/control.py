@@ -3,6 +3,11 @@ from enum import Enum
 
 
 class Ctrl:
+    # Ctrl Latch 0: DBUS_ASSERT, ALU_OP
+    # Ctrl Latch 1: DBUS_LOAD, ADDR_ASSERT
+    # Ctrl Latch 2: XFER_ASSERT, XFER_LOAD
+    # Ctrl Latch 3: COUNT, RST_USEQ, SET_EXT, OFFSET, BRK_CLK
+
     # 4 bits for DBUS Assert
     DBUS_ASSERT_ALU = 0 << 0
     DBUS_ASSERT_A = 1 << 0
@@ -19,109 +24,107 @@ class Ctrl:
     DBUS_ASSERT_LSB = 12 << 0
     DBUS_ASSERT_BR = 13 << 0
 
-    # 5 bits for DBUS Load
-    DBUS_LOAD_NULL = 0 << 4
-    DBUS_LOAD_A = 1 << 4
-    DBUS_LOAD_B = 2 << 4
-    DBUS_LOAD_C = 3 << 4
-    DBUS_LOAD_D = 4 << 4
-    DBUS_LOAD_DP = 5 << 4
-    DBUS_LOAD_DA = 6 << 4
-    DBUS_LOAD_TH = 7 << 4
-    DBUS_LOAD_TL = 8 << 4
-    DBUS_LOAD_SR = 9 << 4
-    DBUS_LOAD_MEM = 10 << 4
-    DBUS_LOAD_IR = 11 << 4
-    DBUS_LOAD_OFF = 12 << 4
-    DBUS_LOAD_PCH = 13 << 4
-    DBUS_LOAD_PCL = 14 << 4
-    DBUS_LOAD_SPH = 15 << 4
-    DBUS_LOAD_SPL = 16 << 4
-    DBUS_LOAD_XH = 17 << 4
-    DBUS_LOAD_XL = 18 << 4
-    DBUS_LOAD_YH = 19 << 4
-    DBUS_LOAD_YL = 20 << 4
-    DBUS_LOAD_BR = 21 << 4
+    # 4 bits for ALU OP
+    ALU_NOP = 0 << 4
+    ALU_ADC = 1 << 4
+    ALU_SBC = 2 << 4
+    ALU_INC = 3 << 4
+    ALU_DEC = 4 << 4
+    ALU_AND = 5 << 4
+    ALU_OR = 6 << 4
+    ALU_XOR = 7 << 4
+    ALU_NOT = 8 << 4
+    ALU_SRC = 9 << 4
+    ALU_ASR = 10 << 4
+    ALU_SEI = 11 << 4
+    ALU_CLI = 12 << 4
+    ALU_SEC = 13 << 4
+    ALU_CLC = 14 << 4
+    ALU_CLV = 15 << 4
 
+    # 5 bits for DBUS Load
+    DBUS_LOAD_NULL = 0 << 8
+    DBUS_LOAD_A = 1 << 8
+    DBUS_LOAD_B = 2 << 8
+    DBUS_LOAD_C = 3 << 8
+    DBUS_LOAD_D = 4 << 8
+    DBUS_LOAD_DP = 5 << 8
+    DBUS_LOAD_DA = 6 << 8
+    DBUS_LOAD_TH = 7 << 8
+    DBUS_LOAD_TL = 8 << 8
+    DBUS_LOAD_SR = 9 << 8
+    DBUS_LOAD_MEM = 10 << 8
+    DBUS_LOAD_IR = 11 << 8
+    DBUS_LOAD_OFF = 12 << 8
+    DBUS_LOAD_PCH = 13 << 8
+    DBUS_LOAD_PCL = 14 << 8
+    DBUS_LOAD_SPH = 15 << 8
+    DBUS_LOAD_SPL = 16 << 8
+    DBUS_LOAD_XH = 17 << 8
+    DBUS_LOAD_XL = 18 << 8
+    DBUS_LOAD_YH = 19 << 8
+    DBUS_LOAD_YL = 20 << 8
+    DBUS_LOAD_BR = 21 << 8
+    SET_USE_BR = 22 << 8
+    CLR_USE_BR = 23 << 8
+    SET_SUPER_MODE = 24 << 8
+    CLR_SUPER_MODE = 25 << 8
+    SET_NMI_MASK = 26 << 8
+    CLR_NMI_MASK = 27 << 8
     DBUS_LOAD_PORT = DBUS_LOAD_TL
 
-    SET_USE_BR = 22 << 4
-    CLR_USE_BR = 23 << 4
-    SET_SUPER_MODE = 24 << 4
-    CLR_SUPER_MODE = 25 << 4
-    SET_NMI_MASK = 26 << 4
-    CLR_NMI_MASK = 27 << 4
-
-    # 4 bits for ALU OP
-    ALU_NOP = 0 << 9
-    ALU_ADC = 1 << 9
-    ALU_SBC = 2 << 9
-    ALU_INC = 3 << 9
-    ALU_DEC = 4 << 9
-    ALU_AND = 5 << 9
-    ALU_OR = 6 << 9
-    ALU_XOR = 7 << 9
-    ALU_NOT = 8 << 9
-    ALU_SRC = 9 << 9
-    ALU_ASR = 10 << 9
-    ALU_SEI = 11 << 9
-    ALU_CLI = 12 << 9
-    ALU_SEC = 13 << 9
-    ALU_CLC = 14 << 9
-    ALU_CLV = 15 << 9
+    # 3 bits for ADDR Assert
+    ADDR_ASSERT_ACK = 0 << 13
+    ADDR_ASSERT_PC = 1 << 13
+    ADDR_ASSERT_SP = 2 << 13
+    ADDR_ASSERT_X = 3 << 13
+    ADDR_ASSERT_Y = 4 << 13
+    ADDR_ASSERT_DP = 5 << 13
+    ADDR_ASSERT_T = 6 << 13
+    ADDR_ASSERT_IO = 7 << 13
 
     # 5 bits for XFER Assert
-    XFER_ASSERT_PC = 0 << 13
-    XFER_ASSERT_SP = 1 << 13
-    XFER_ASSERT_X = 2 << 13
-    XFER_ASSERT_Y = 3 << 13
-    XFER_ASSERT_IRQ = 4 << 13
-    XFER_ASSERT_ADDR = 5 << 13
-    XFER_ASSERT_A_A = 6 << 13
-    XFER_ASSERT_A_B = 7 << 13
-    XFER_ASSERT_A_C = 8 << 13
-    XFER_ASSERT_A_D = 9 << 13
-    XFER_ASSERT_A_TL = 10 << 13
-    XFER_ASSERT_B_A = 11 << 13
-    XFER_ASSERT_B_B = 12 << 13
-    XFER_ASSERT_B_C = 13 << 13
-    XFER_ASSERT_B_D = 14 << 13
-    XFER_ASSERT_B_TL = 15 << 13
-    XFER_ASSERT_C_A = 16 << 13
-    XFER_ASSERT_C_B = 17 << 13
-    XFER_ASSERT_C_C = 18 << 13
-    XFER_ASSERT_C_D = 19 << 13
-    XFER_ASSERT_C_TL = 20 << 13
-    XFER_ASSERT_D_A = 21 << 13
-    XFER_ASSERT_D_B = 22 << 13
-    XFER_ASSERT_D_C = 23 << 13
-    XFER_ASSERT_D_D = 24 << 13
-    XFER_ASSERT_D_TL = 25 << 13
-    XFER_ASSERT_TH_A = 26 << 13
-    XFER_ASSERT_TH_B = 27 << 13
-    XFER_ASSERT_TH_C = 28 << 13
-    XFER_ASSERT_TH_D = 29 << 13
-    XFER_ASSERT_T = 30 << 13
-    XFER_ASSERT_NMI = 31 << 13
+    XFER_ASSERT_PC = 0 << 16
+    XFER_ASSERT_SP = 1 << 16
+    XFER_ASSERT_X = 2 << 16
+    XFER_ASSERT_Y = 3 << 16
+    XFER_ASSERT_IRQ = 4 << 16
+    XFER_ASSERT_ADDR = 5 << 16
+    XFER_ASSERT_A_A = 6 << 16
+    XFER_ASSERT_A_B = 7 << 16
+    XFER_ASSERT_A_C = 8 << 16
+    XFER_ASSERT_A_D = 9 << 16
+    XFER_ASSERT_A_TL = 10 << 16
+    XFER_ASSERT_B_A = 11 << 16
+    XFER_ASSERT_B_B = 12 << 16
+    XFER_ASSERT_B_C = 13 << 16
+    XFER_ASSERT_B_D = 14 << 16
+    XFER_ASSERT_B_TL = 15 << 16
+    XFER_ASSERT_C_A = 16 << 16
+    XFER_ASSERT_C_B = 17 << 16
+    XFER_ASSERT_C_C = 18 << 16
+    XFER_ASSERT_C_D = 19 << 16
+    XFER_ASSERT_C_TL = 20 << 16
+    XFER_ASSERT_D_A = 21 << 16
+    XFER_ASSERT_D_B = 22 << 16
+    XFER_ASSERT_D_C = 23 << 16
+    XFER_ASSERT_D_D = 24 << 16
+    XFER_ASSERT_D_TL = 25 << 16
+    XFER_ASSERT_TH_A = 26 << 16
+    XFER_ASSERT_TH_B = 27 << 16
+    XFER_ASSERT_TH_C = 28 << 16
+    XFER_ASSERT_TH_D = 29 << 16
+    XFER_ASSERT_T = 30 << 16
+    XFER_ASSERT_NMI = 31 << 16
 
     # 3 bits for XFER Load
-    XFER_LOAD_NULL = 0 << 18
-    XFER_LOAD_PC = 1 << 18
-    XFER_LOAD_SP = 2 << 18
-    XFER_LOAD_X = 3 << 18
-    XFER_LOAD_Y = 4 << 18
-    XFER_LOAD_AB = 5 << 18
-    XFER_LOAD_CD = 6 << 18
-
-    # 3 bits for ADDR Assert
-    ADDR_ASSERT_ACK = 0 << 21
-    ADDR_ASSERT_PC = 1 << 21
-    ADDR_ASSERT_SP = 2 << 21
-    ADDR_ASSERT_X = 3 << 21
-    ADDR_ASSERT_Y = 4 << 21
-    ADDR_ASSERT_DP = 5 << 21
-    ADDR_ASSERT_T = 6 << 21
-    ADDR_ASSERT_IO = 7 << 21
+    XFER_LOAD_NULL = 0 << 21
+    XFER_LOAD_PC = 1 << 21
+    XFER_LOAD_SP = 2 << 21
+    XFER_LOAD_X = 3 << 21
+    XFER_LOAD_Y = 4 << 21
+    XFER_LOAD_AB = 5 << 21
+    XFER_LOAD_CD = 6 << 21
 
     # 3 bits for Counter Inc/Decs
     COUNT_NULL = 0 << 24
