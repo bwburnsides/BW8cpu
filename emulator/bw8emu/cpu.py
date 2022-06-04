@@ -298,24 +298,25 @@ class BW8cpu:
     def _resolve_addr_bus(self):
         addr_assert = mask_shift(self._ctrl_latch, 0b111, 21)
 
+        self._system_bus.addr_bank = self._inr[IntReg.BR]
         match AddrAssert(addr_assert):
             case AddrAssert.ACK:
                 pass
             case AddrAssert.PC:
-                self._addr = self._adr[AddrReg.PC]
+                self._system_bus.addr_bus = self._adr[AddrReg.PC]
             case AddrAssert.SP:
-                self._addr = self._adr[AddrReg.SP]
+                self._system_bus.addr_bus = self._adr[AddrReg.SP]
             case AddrAssert.X:
-                self._addr = self._adr[AddrReg.X]
+                self._system_bus.addr_bus = self._adr[AddrReg.X]
             case AddrAssert.Y:
-                self._addr = self._adr[AddrReg.Y]
+                self._system_bus.addr_bus = self._adr[AddrReg.Y]
             case AddrAssert.DP:
-                self._addr = (self._inr[IntReg.DP] << 8) | self._inr[IntReg.DA]
+                self._system_bus.addr_bus = (self._inr[IntReg.DP] << 8) | self._inr[IntReg.DA]
             case AddrAssert.T:
-                self._addr = (self._inr[IntReg.TH] << 8) | self._inr[IntReg.TL] 
+                self._system_bus.addr_bus = (self._inr[IntReg.TH] << 8) | self._inr[IntReg.TL] 
             case AddrAssert.IO:
                 self._system_bus.io = True
-                self._addr = (self._inr[IntReg.TH] << 8) | self._inr[IntReg.TL]
+                self._system_bus.addr_bus = (self._inr[IntReg.TH] << 8) | self._inr[IntReg.TL]
 
     def _resolve_xfer_bus(self):
         xfer_assert = mask_shift(self._ctrl_latch, 0b11111, 13)

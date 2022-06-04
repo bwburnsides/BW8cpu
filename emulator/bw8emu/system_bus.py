@@ -63,6 +63,7 @@ class SystemBus(ISystemBus):
                 idx += 1
 
         # Initialize bus values to reasonable defaults
+        self.addr_bank = 0x0
         self.data_bus = 0x00
         self.addr_bus = 0x00000
         self.read = True
