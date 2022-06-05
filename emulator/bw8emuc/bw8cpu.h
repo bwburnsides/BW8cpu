@@ -12,9 +12,9 @@
 "+----------------------------------------------------+\n"\
 "| Status: %sC %sZ %sV %sN %sI %sK %sU    %sRST %sREQ %sNMI %sIRQ\033[0m    %6s |\n"\
 "| PC:  $%04X     SP: $%04X     X: $%04X     Y: $%04X |\n"\
-"| A:   $%02X       DP: $%02X       IR: $%02X               |\n"\
-"| B:   $%02X       DA: $%02X       OF: $%02X               |\n"\
-"| C:   $%02X       TH: $%02X       BR: $%02X               |\n"\
+"| A:   $%02X       DP: $%02X       IR: $%02X   ADDR: $%04X |\n"\
+"| B:   $%02X       DA: $%02X       OF: $%02X   XFER: $%04X |\n"\
+"| C:   $%02X       TH: $%02X       BR: $%02X   DBUS: $%04X |\n"\
 "| D:   $%02X       TL: $%02X                             |\n"\
 "+----------------------------------------------------+\n"\
 
@@ -65,6 +65,67 @@ namespace BW8cpu {
 		NMI,
 	};
 
+	enum class XferLoad {
+		NONE,
+		PC,
+		SP,
+		X,
+		Y,
+		AB,
+		CD,
+	};
+
+	enum class DbusAssert {
+		ALU,
+		A,
+		B,
+		C,
+		D,
+		DP,
+		DA,
+		TH,
+		TL,
+		SR,
+		MEM,
+		MSB,
+		LSB,
+		BR,
+		PLACEHOLDER14,
+		PLACEHOLDER15,
+	};
+
+	enum class DbusLoad {
+		NONE,
+		A,
+		B,
+		C,
+		D,
+		DP,
+		DA,
+		TH,
+		TL,
+		SR,
+		MEM,
+		IR,
+		OFF,
+		PCH,
+		PCL,
+		SPH,
+		SPL,
+		XH,
+		XL,
+		YH,
+		YL,
+		BR,
+
+		SET_USE_BR,
+		CLR_USE_BR,
+		SET_SUPER_MODE,
+		CLR_SUPER_MODE,
+		SET_NMI_MASK,
+		CLR_NMI_MASK,
+	};
+
 	enum class Count {
 		NONE,
 		INC_PC,
@@ -83,8 +144,75 @@ namespace BW8cpu {
 		STALL,
 	};
 
+	enum class SumFunc {
+		ZERO,
+		CF,
+		ONE,
+	};
+
+	enum class ShiftFunc {
+		LHS,
+		SRC,
+		ASR,
+		ZERO,
+	};
+
+	enum class LogicFunc {
+		ZERO,
+		MAX,
+		LHS,
+		RHS,
+		notLHS,
+		notRHS,
+		OR,
+		AND,
+		XOR,
+	};
+
+	enum class CfFunc {
+		ONE,
+		C_SHIFT,
+		C_SUM,
+		ZERO,
+		NO_CHANGE,
+	};
+
+	enum class ZfFunc {
+		ONE,
+		NEW,
+		ZERO,
+		NO_CHANGE,
+	};
+
+	typedef ZfFunc VfFunc;
+	typedef ZfFunc NfFunc;
+
+	enum class IfFunc {
+		ONE,
+		ZERO,
+		NO_CHANGE,
+	};
+
 	static uint16_t IRQ_ADDR = 0x0003;
 	static uint16_t NMI_ADDR = 0x0006;
+	static uint32_t DIODE_MATRIX[16] = {
+		0b1111111111100001100,
+		0b1101010101011000001,
+		0b1101010101000110001,
+		0b1101110101011001111,
+		0b1101110101011110000,
+		0b1101110111110001100,
+		0b1101110111111101100,
+		0b1101110111101101100,
+		0b1101110111100111100,
+		0b1101110100100001100,
+		0b1101110100100000000,
+		0b0011111111111111111,
+		0b0111111111111111111,
+		0b1111111100011111111,
+		0b1111111101111111111,
+		0b1111101111111111111,
+	};
 
 	typedef struct BW8cpu {
 		uint64_t clocks;
@@ -105,6 +233,7 @@ namespace BW8cpu {
 		uint8_t BR;
 
 		uint8_t ALU;
+		uint8_t ALU_FLAGS;
 
 		// Address Registers
 		uint16_t PC;
@@ -158,6 +287,7 @@ namespace BW8cpu {
 	void addr_assert(BW8cpu* cpu);
 	void xfer_assert(BW8cpu* cpu);
 	void alu_calculate(BW8cpu* cpu);
+	void dbus_assert(BW8cpu* cpu);
 
 	uint16_t concatenate_bytes(uint8_t left, uint8_t right);
 } // namespace BW8cpu

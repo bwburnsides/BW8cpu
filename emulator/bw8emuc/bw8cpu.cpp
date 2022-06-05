@@ -44,7 +44,8 @@ namespace BW8cpu {
 		cpu->OF = randrange(0, 0xff);
 		cpu->BR = randrange(0, 0xf);	// 4b register not 8b
 
-		cpu->ALU = randrange(0, 0xff);	// TODO: is this accurate?
+		cpu->ALU = randrange(0, 0xff);  // TODO: base off of ctrl_latch
+		cpu->ALU_FLAGS = randrange(0, 0xff);  // TODO: base off of ctrl_latch
 
 		cpu->PC = randrange(0, 0xffff);
 		cpu->SP = randrange(0, 0xffff);
@@ -108,7 +109,8 @@ namespace BW8cpu {
 		cpu->OF = 0x00;
 		cpu->BR = 0x0;		// 4b register not 8b
 
-		cpu->ALU = 0x00;	// TODO: is this accurate?
+		cpu->ALU = 0x00;	// TODO: base off of ctrl_latch
+		cpu->ALU_FLAGS = 0x00;  // TODO: base off of ctrl_latch
 
 		cpu->PC = 0x0000;
 		cpu->SP = 0x0000;
@@ -169,13 +171,140 @@ namespace BW8cpu {
 
 		addr_assert(cpu);
 		xfer_assert(cpu);
-
-
+		alu_calculate(cpu);
+		dbus_assert(cpu);
 	}
 
 	void falling(BW8cpu* cpu) {
 		cpu->sequencer++;
 		cpu->sequencer %= 8;
+
+		if (cpu->ctrl_latch[3] >> 3) {
+			cpu->sequencer = 0;
+		}
+
+		uint8_t count = cpu->ctrl_latch[3] & 0b111;
+		uint8_t dbus_load = cpu->ctrl_latch[1] & 0b11111;
+		uint8_t xfer_load = (cpu->ctrl_latch[2] >> 5) & 0b111; 
+
+		uint16_t temp;
+
+		switch (Count(count)) {
+			case Count::NONE:
+				break;
+			case Count::INC_PC:
+				cpu->PC++;
+				break;
+			case Count::INC_SP:
+				cpu->SP++;
+				break;
+			case Count::INC_X:
+				cpu->X++;
+				break;
+			case Count::INC_Y:
+				cpu->Y++;
+				break;
+			case Count::OFFSET_INC:
+				break;
+			case Count::DEC_X:
+				cpu->X--;
+			case Count::DEC_Y:
+				cpu->Y--;
+		}
+
+		switch (DbusLoad(dbus_load)) {
+			case DbusLoad::A:
+				cpu->A = cpu->dbus;
+				break;
+			case DbusLoad::B:
+				cpu->B = cpu->dbus;
+				break;
+			case DbusLoad::C:
+				cpu->C = cpu->dbus;
+				break;
+			case DbusLoad::D:
+				cpu->D = cpu->dbus;
+				break;
+			case DbusLoad::DP:
+				cpu->DP = cpu->dbus;
+				break;
+			case DbusLoad::DA:
+				cpu->DA = cpu->dbus;
+				break;
+			case DbusLoad::TH:
+				cpu->TH = cpu->dbus;
+				break;
+			case DbusLoad::TL:
+				cpu->TL = cpu->dbus;
+				break;
+			case DbusLoad::SR:
+				// TODO: loading flags from bus
+				break;
+			case DbusLoad::MEM:
+				// TODO: memory writes
+				break;
+			case DbusLoad::IR:
+				cpu->IR = cpu->dbus;
+				break;
+			case DbusLoad::OFF:
+				cpu->OF = cpu->dbus;
+				break;
+			case DbusLoad::PCH:
+				cpu->PC = (cpu->dbus << 8) | (cpu->PC & 0xff);
+				break;
+			case DbusLoad::PCL:
+				cpu->PC = (cpu->PC & (0xff << 8)) | cpu->dbus;
+				break;
+			case DbusLoad::SPH:
+				cpu->SP = (cpu->dbus << 8) | (cpu->SP & 0xff);
+				break;
+			case DbusLoad::SPL:
+				cpu->SP = (cpu->SP & (0xff << 8)) | cpu->dbus;
+				break;
+			case DbusLoad::XH:
+				cpu->X = (cpu->dbus << 8) | (cpu->X & 0xff);
+				break;
+			case DbusLoad::XL:
+				cpu->X = (cpu->X & (0xff << 8)) | cpu->dbus;
+				break;
+			case DbusLoad::YH:
+				cpu->Y = (cpu->dbus << 8) | (cpu->Y & 0xff);
+				break;
+			case DbusLoad::YL:
+				cpu->Y = (cpu->Y & (0xff << 8)) | cpu->dbus;
+				break;
+			case DbusLoad::BR:
+				cpu->BR = cpu->dbus & 0xf;
+				break;
+			default:
+				break;
+		}
+
+		switch (XferLoad(xfer_load)) {
+
+			case XferLoad::PC:
+				cpu->PC = cpu->xfer;
+				break;
+			case XferLoad::SP:
+				cpu->SP = cpu->xfer;
+				break;
+			case XferLoad::X:
+				cpu->X = cpu->xfer;
+				break;
+			case XferLoad::Y:
+				cpu->Y = cpu->xfer;
+				break;
+			case XferLoad::AB:
+				cpu->A = cpu->xfer >> 8;
+				cpu->B = cpu->xfer & 0xff;
+				break;
+			case XferLoad::CD:
+				cpu->C = cpu->xfer >> 8;
+				cpu->D = cpu->xfer & 0xff;
+				break;
+			default:
+				break;
+		}
 
 		cpu->clocks += 1;
 	}
@@ -205,12 +334,15 @@ namespace BW8cpu {
 			cpu->A,
 			cpu->DP,
 			cpu->IR,
+			cpu->addr,
 			cpu->B,
 			cpu->DA,
 			cpu->OF,
+			cpu->xfer,
 			cpu->C,
 			cpu->TH,
 			cpu->BR,
+			cpu->dbus,
 			cpu->D,
 			cpu->TL
 		);
@@ -277,6 +409,7 @@ namespace BW8cpu {
 
 	void xfer_assert(BW8cpu* cpu) {
 		uint8_t xfer_assert = (cpu->ctrl_latch[1] >> 0) & 0b11111;
+
 		switch (XferAssert(xfer_assert)) {
 			case XferAssert::PC:
 				cpu->xfer = cpu->PC;
@@ -377,7 +510,264 @@ namespace BW8cpu {
 	}
 
 	void alu_calculate(BW8cpu* cpu) {
+		uint8_t alu_op = (cpu->ctrl_latch[0] >> 4) & 0b1111;
 
+		uint8_t sum_func	= (alu_op >> 0) & 0b11;
+		uint8_t shift_func	= (alu_op >> 2) & 0b11;
+		uint8_t logic_func	= (alu_op >> 4) & 0b1111;
+		uint8_t cf_func		= (alu_op >> 8) & 0b111;
+		uint8_t zf_func		= (alu_op >> 11) & 0b11;
+		uint8_t vf_func		= (alu_op >> 13) & 0b11;
+		uint8_t nf_func		= (alu_op >> 15) & 0b11;
+		uint8_t if_func		= (alu_op >> 17) & 0b11;
+
+		uint8_t lhs = cpu->xfer >> 8;
+		uint8_t rhs = cpu->xfer & 0xff;
+
+		uint8_t left = 0;
+		uint8_t right = 0;
+		uint16_t sum = 0;
+		uint8_t result = 0;
+		uint8_t flags_result = 0;
+
+		bool c_shift = false;
+		bool c_sum = false;
+		bool c_new = false;
+		bool z_new = false;
+		bool v_new = false;
+		bool n_new = false;
+		bool i_new = false;
+
+		// 1. Compute both Shift and Logic stage outputs
+		// 2. Compute Sum stage outputs
+		// 3. Compute flags
+		// 4. Select and pack flags
+
+		switch (ShiftFunc(shift_func)) {
+			case ShiftFunc::LHS:
+				left = lhs;
+				break;
+			case ShiftFunc::SRC:
+				left = lhs >> 1;
+				if (cpu->carry_flag) {
+					left & 0b10000000;
+				}
+				break;
+			case ShiftFunc::ASR:
+				left = (uint8_t)(((int8_t)lhs) >> 1);
+				break;
+			case ShiftFunc::ZERO:
+				left = 0;
+				break;
+		}
+
+		if (lhs & 0b00000001) {
+			c_shift = true;
+		}
+
+		switch (LogicFunc(logic_func)) {
+			case LogicFunc::ZERO:
+				right = 0;
+				break;
+			case LogicFunc::MAX:
+				right = 0xff;
+				break;
+			case LogicFunc::LHS:
+				right = lhs;
+				break;
+			case LogicFunc::RHS:
+				right = rhs;
+				break;
+			case LogicFunc::notLHS:
+				right = ~lhs;
+				break;
+			case LogicFunc::notRHS:
+				right = ~rhs;
+				break;
+			case LogicFunc::OR:
+				right = lhs | rhs;
+				break;
+			case LogicFunc::AND:
+				right = lhs & rhs;
+				break;
+			case LogicFunc::XOR:
+				right = lhs ^ rhs;
+				break;
+		}
+
+		switch (SumFunc(sum_func)) {
+			case SumFunc::ZERO:
+				sum = left + right + 0;
+				break;
+			case SumFunc::CF:
+				sum = left + right + (uint8_t)cpu->carry_flag;
+				break;
+			case SumFunc::ONE:
+				sum = left + right + 1;
+				break;
+		}
+
+		if (sum > 0xff) {
+			c_sum = true;
+		}
+
+		result = (uint8_t)(sum & 0xff);
+
+		if (result == 0) {
+			z_new = true;
+		}
+
+		if (
+			((left & 0b10000000) == (right & 0b10000000))
+			&& ((result & 0b10000000) != (left & 0b10000000))
+		) {
+			v_new = true;
+		}
+
+		if (result & 0b10000000) {
+			n_new = true;
+		}
+
+		switch (CfFunc(cf_func)) {
+			case CfFunc::ONE:
+				c_new = true;
+				break;
+			case CfFunc::C_SHIFT:
+				c_new = c_shift;
+				break;
+			case CfFunc::C_SUM:
+				c_new = c_sum;
+				break;
+			case CfFunc::ZERO:
+				c_new = false;
+				break;
+			case CfFunc::NO_CHANGE:
+				c_new = cpu->carry_flag;
+				break;
+		}
+
+		switch (ZfFunc(zf_func)) {
+			case ZfFunc::ONE:
+				z_new = true;
+				break;
+			case ZfFunc::NEW:
+				break;
+			case ZfFunc::ZERO:
+				z_new = false;
+				break;
+			case ZfFunc::NO_CHANGE:
+				z_new = cpu->zero_flag;
+				break;
+		}
+
+		switch (VfFunc(vf_func)) {
+			case VfFunc::ONE:
+				v_new = true;
+				break;
+			case VfFunc::NEW:
+				break;
+			case VfFunc::ZERO:
+				v_new = false;
+				break;
+			case VfFunc::NO_CHANGE:
+				v_new = cpu->zero_flag;
+				break;
+		}
+
+		switch (NfFunc(nf_func)) {
+			case NfFunc::ONE:
+				n_new = true;
+				break;
+			case NfFunc::NEW:
+				break;
+			case NfFunc::ZERO:
+				n_new = false;
+				break;
+			case NfFunc::NO_CHANGE:
+				n_new = cpu->zero_flag;
+				break;
+		}
+
+		switch (IfFunc(if_func)) {
+		case IfFunc::ONE:
+			i_new = true;
+			break;
+		case IfFunc::ZERO:
+			i_new = false;
+			break;
+		case IfFunc::NO_CHANGE:
+			i_new = cpu->interrupt_enable;
+			break;
+		}
+
+		flags_result |= (
+			(i_new & 0b1) >> 0,
+			(n_new & 0b1) >> 1,
+			(v_new & 0b1) >> 2,
+			(z_new & 0b1) >> 3,
+			(c_new & 0b1) >> 4
+		);
+
+		cpu->ALU = result;
+		cpu->ALU_FLAGS = flags_result;
+	}
+
+	void dbus_assert(BW8cpu* cpu) {
+		uint8_t dbus_assert = cpu->ctrl_latch[0] & 0b1111;
+
+		switch (DbusAssert(dbus_assert))
+		{
+		case DbusAssert::ALU:
+			cpu->dbus = cpu->ALU;
+			break;
+		case DbusAssert::A:
+			cpu->dbus = cpu->A;
+			break;
+		case DbusAssert::B:
+			cpu->dbus = cpu->B;
+			break;
+		case DbusAssert::C:
+			cpu->dbus = cpu->C;
+			break;
+		case DbusAssert::D:
+			cpu->dbus = cpu->D;
+			break;
+		case DbusAssert::DP:
+			cpu->dbus = cpu->DP;
+			break;
+		case DbusAssert::DA:
+			cpu->dbus = cpu->DA;
+			break;
+		case DbusAssert::TH:
+			cpu->dbus = cpu->TH;
+			break;
+		case DbusAssert::TL:
+			cpu->dbus = cpu->TL;
+			break;
+		case DbusAssert::SR:
+			cpu->dbus = (
+				(cpu->interrupt_enable & 0b1) >> 0,
+				(cpu->negative_flag & 0b1) >> 1,
+				(cpu->overflow_flag & 0b1) >> 2,
+				(cpu->zero_flag & 0b1) >> 3,
+				(cpu->carry_flag & 0b1) >> 4
+			);
+			break;
+		case DbusAssert::MEM:
+			// TODO! Memory Reads!
+			break;
+		case DbusAssert::MSB:
+			cpu->dbus = cpu->xfer >> 8;
+			break;
+		case DbusAssert::LSB:
+			cpu->dbus = cpu->xfer & 0xff;
+			break;
+		case DbusAssert::BR:
+			cpu->dbus = cpu->BR & 0b1111;
+			break;
+		default:
+			cpu->dbus = 0;
+		}
 	}
 
 	void update_mode(BW8cpu* cpu) {
