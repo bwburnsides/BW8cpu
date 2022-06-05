@@ -193,6 +193,9 @@ namespace BW8cpu {
 		NO_CHANGE,
 	};
 
+	typedef uint8_t (* BusRead)(uint8_t bank, uint16_t ptr, bool mem_io, bool super_user, bool data_code);
+	typedef void (* BusWrite)(uint8_t bank, uint16_t ptr, uint8_t data, bool mem_io, bool super_user, bool data_code);
+
 	static uint16_t IRQ_ADDR = 0x0003;
 	static uint16_t NMI_ADDR = 0x0006;
 	static uint32_t DIODE_MATRIX[16] = {
@@ -216,6 +219,10 @@ namespace BW8cpu {
 
 	typedef struct BW8cpu {
 		uint64_t clocks;
+
+		// Function pointers for doing bus operations
+		BusRead read;
+		BusWrite write;
 
 		// General Purpose Registers
 		uint8_t A;
@@ -273,7 +280,7 @@ namespace BW8cpu {
 
 
 	// Public functions
-	BW8cpu* malloc_cpu();
+	BW8cpu* malloc_cpu(BusRead read, BusWrite write);
 	void free_cpu(BW8cpu* cpu);
 	void reset(BW8cpu* cpu, bool state);
 	void rising(BW8cpu* cpu);

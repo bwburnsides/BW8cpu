@@ -10,7 +10,7 @@
 
 namespace BW8cpu {
 
-	BW8cpu* malloc_cpu() {
+	BW8cpu* malloc_cpu(BusRead read, BusWrite write) {
 		BW8cpu* cpu = (BW8cpu*)malloc(sizeof(BW8cpu) * 1);
 
 		if (cpu == NULL) {
@@ -27,6 +27,8 @@ namespace BW8cpu {
 			}
 		}
 
+		cpu->read = read;
+		cpu->write = write;
 		cpu->clocks = 0;
 
 		srand(time(NULL));
@@ -187,7 +189,11 @@ namespace BW8cpu {
 		uint8_t dbus_load = cpu->ctrl_latch[1] & 0b11111;
 		uint8_t xfer_load = (cpu->ctrl_latch[2] >> 5) & 0b111; 
 
-		uint16_t temp;
+		uint8_t addr_assert = (cpu->ctrl_latch[1] >> 5) & 0b111;
+		bool mem_io = true;
+		bool data_code = true;
+
+		uint8_t flags = cpu->ALU_FLAGS;
 
 		switch (Count(count)) {
 			case Count::NONE:
@@ -238,10 +244,25 @@ namespace BW8cpu {
 				cpu->TL = cpu->dbus;
 				break;
 			case DbusLoad::SR:
-				// TODO: loading flags from bus
+				flags |= (
+					(cpu->dbus & 0b1) >> 0,
+					(cpu->dbus & 0b1) >> 1,
+					(cpu->dbus & 0b1) >> 2,
+					(cpu->dbus & 0b1) >> 3,
+					(cpu->dbus & 0b1) >> 4
+				);
 				break;
 			case DbusLoad::MEM:
-				// TODO: memory writes
+				if (AddrAssert(addr_assert) == AddrAssert::IO) {
+					mem_io = false;
+				}
+
+				if (AddrAssert(addr_assert) == AddrAssert::PC) {
+					data_code = false;
+				}
+
+				cpu->write(cpu->BR, cpu->addr_out, cpu->dbus, mem_io, cpu->supervisor_mode, data_code);
+
 				break;
 			case DbusLoad::IR:
 				cpu->IR = cpu->dbus;
@@ -279,6 +300,12 @@ namespace BW8cpu {
 			default:
 				break;
 		}
+
+		cpu->interrupt_enable = (bool) ((flags >> 0) & 0b1);
+		cpu->negative_flag = (bool) ((flags >> 1) & 0b1);
+		cpu->overflow_flag = (bool) ((flags >> 2) & 0b1);
+		cpu->zero_flag = (bool) ((flags >> 3) & 0b1);
+		cpu->carry_flag = (bool) ((flags >> 4) & 0b1);
 
 		switch (XferLoad(xfer_load)) {
 
@@ -715,6 +742,10 @@ namespace BW8cpu {
 	void dbus_assert(BW8cpu* cpu) {
 		uint8_t dbus_assert = cpu->ctrl_latch[0] & 0b1111;
 
+		uint8_t addr_assert = (cpu->ctrl_latch[1] >> 5) & 0b111;
+		bool mem_io = true;
+		bool data_code = true;
+
 		switch (DbusAssert(dbus_assert))
 		{
 		case DbusAssert::ALU:
@@ -754,7 +785,14 @@ namespace BW8cpu {
 			);
 			break;
 		case DbusAssert::MEM:
-			// TODO! Memory Reads!
+			if (AddrAssert(addr_assert) == AddrAssert::IO) {
+				mem_io = false;
+			}
+			if (AddrAssert(addr_assert) == AddrAssert::PC) {
+				data_code = false;
+			}
+
+			cpu->dbus = cpu->read(cpu->BR, cpu->addr_out, mem_io, cpu->supervisor_mode, data_code);
 			break;
 		case DbusAssert::MSB:
 			cpu->dbus = cpu->xfer >> 8;
@@ -797,7 +835,6 @@ namespace BW8cpu {
 			"C:/Users/brady/projects/BW8cpu/control/microcode3.bin",
 		};
 		FILE* fp;
-
 
 		for (int i = 0; i < 4; i++) {
 			fp = fopen(fname[i], "rb");
