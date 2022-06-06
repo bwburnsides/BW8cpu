@@ -7,7 +7,7 @@
     #fill
 }
 
-load a, #0x69
+load b, #0x69
 load b, #0x70
 load c, #0x71
 load d, #0x72

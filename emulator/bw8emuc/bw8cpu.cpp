@@ -94,7 +94,7 @@ namespace BW8cpu {
 	void reset(BW8cpu* cpu, bool state) {
 		cpu->reset = state;
 
-		if (cpu->reset == false) {
+		if (!cpu->reset) {
 			return;
 		}
 
@@ -171,13 +171,6 @@ namespace BW8cpu {
 			(cpu->sequencer & 0b111)
 		);
 
-		// printf("State: %d\n", state);
-		// printf("Mode: %d\n", (((int)cpu->mode << 16) & 0b11));
-		// printf("Extended: %d\n", (((int)cpu->extended << 15) & 0b1));
-		// printf("Opcode: %d\n", cpu->IR << 7);
-		// printf("Flags: %d\n", flags << 3);
-		// printf("Tstate: %d\n\n", (cpu->sequencer & 0b111));
-
 		for (int i = 0; i < 4; i++) {
 			cpu->ctrl_latch[i] = cpu->ucode[i][state];
 		}
@@ -189,6 +182,8 @@ namespace BW8cpu {
 	}
 
 	void falling(BW8cpu* cpu) {
+		CtrlLines lines = decode_ctrl(cpu);
+
 		cpu->clocks += 1;
 
 		if (cpu->reset) {
@@ -198,7 +193,7 @@ namespace BW8cpu {
 		cpu->sequencer++;
 		cpu->sequencer %= 8;
 
-		if (cpu->ctrl_latch[3] >> 3) {
+		if (lines.rst_useq) {
 			cpu->sequencer = 0;
 		}
 
@@ -206,20 +201,14 @@ namespace BW8cpu {
 			cpu->extended = false;
 		}
 
-		uint8_t count = decode_ctrl(cpu, CtrlField::COUNT);
-		uint8_t dbus_load = decode_ctrl(cpu, CtrlField::DBUS_LOAD);
-		uint8_t xfer_load = decode_ctrl(cpu, CtrlField::XFER_LOAD);
-		uint8_t extended = decode_ctrl(cpu, CtrlField::TOG_EXT);
+		cpu->extended = lines.tog_ext;
 
-		cpu->extended = (bool)extended;
-
-		uint8_t addr_assert = (cpu->ctrl_latch[1] >> 5) & 0b111;
 		bool mem_io = true;
 		bool data_code = true;
 
 		uint8_t flags = cpu->ALU_FLAGS;
 
-		switch (Count(count)) {
+		switch (lines.count) {
 			case Count::NONE:
 				break;
 			case Count::INC_PC:
@@ -238,11 +227,13 @@ namespace BW8cpu {
 				break;
 			case Count::DEC_X:
 				cpu->X--;
+				break;
 			case Count::DEC_Y:
 				cpu->Y--;
+				break;
 		}
 
-		switch (DbusLoad(dbus_load)) {
+		switch (lines.dbus_load) {
 			case DbusLoad::A:
 				cpu->A = cpu->dbus;
 				break;
@@ -277,11 +268,11 @@ namespace BW8cpu {
 				);
 				break;
 			case DbusLoad::MEM:
-				if (AddrAssert(addr_assert) == AddrAssert::IO) {
+				if (lines.addr_assert == AddrAssert::IO) {
 					mem_io = false;
 				}
 
-				if (AddrAssert(addr_assert) == AddrAssert::PC) {
+				if (lines.addr_assert == AddrAssert::PC) {
 					data_code = false;
 				}
 
@@ -331,8 +322,7 @@ namespace BW8cpu {
 		cpu->zero_flag = (bool) ((flags >> 3) & 0b1);
 		cpu->carry_flag = (bool) ((flags >> 4) & 0b1);
 
-		switch (XferLoad(xfer_load)) {
-
+		switch (lines.xfer_load) {
 			case XferLoad::PC:
 				cpu->PC = cpu->xfer;
 				break;
@@ -358,60 +348,21 @@ namespace BW8cpu {
 		}
 	}
 
-	void dump(BW8cpu *cpu, FILE* fout) {
-		fprintf(
-			fout,
-			STATE_FMT,
-			cpu->clocks,
-			cpu->sequencer,
-			cpu->carry_flag ? GREEN_TXT : RED_TXT,
-			cpu->zero_flag ? GREEN_TXT : RED_TXT,
-			cpu->overflow_flag ? GREEN_TXT : RED_TXT,
-			cpu->negative_flag ? GREEN_TXT : RED_TXT,
-			cpu->interrupt_enable ? GREEN_TXT : RED_TXT,
-			cpu->supervisor_mode ? GREEN_TXT : RED_TXT,
-			cpu->use_bank_reg ? GREEN_TXT : RED_TXT,
-			cpu->reset ? GREEN_TXT : RED_TXT,
-			cpu->bus_request ? GREEN_TXT : RED_TXT,
-			cpu->nonmaskable_interrupt ? GREEN_TXT : RED_TXT,
-			cpu->interrupt_request ? GREEN_TXT : RED_TXT,
-			"TODO",
-			cpu->PC,
-			cpu->SP,
-			cpu->X,
-			cpu->Y,
-			cpu->A,
-			cpu->DP,
-			cpu->IR,
-			cpu->addr,
-			cpu->B,
-			cpu->DA,
-			cpu->OF,
-			cpu->xfer,
-			cpu->C,
-			cpu->TH,
-			cpu->BR,
-			cpu->dbus,
-			cpu->D,
-			cpu->TL
-		);
-	}
-
 	void addr_assert(BW8cpu* cpu) {
-		uint8_t addr_assert = decode_ctrl(cpu, CtrlField::ADDR_ASSERT);
-		uint8_t offset_en = decode_ctrl(cpu, CtrlField::OFFSET);
-		uint8_t offset_inc = decode_ctrl(cpu, CtrlField::COUNT);
+		CtrlLines lines = decode_ctrl(cpu);
+
+		uint8_t offset_inc;
 		uint16_t offset;
 		uint8_t offset_hi;
 
-		if ((Count)offset_inc == Count::OFFSET_INC) {
+		if (lines.count == Count::OFFSET_INC) {
 			offset_inc = 1;
 		}
 		else {
 			offset_inc = 0;
 		}
 
-		switch (AddrAssert(addr_assert)) {
+		switch (lines.addr_assert) {
 			case AddrAssert::ACK:
 				cpu->addr = 0x0000;
 				break;
@@ -439,7 +390,7 @@ namespace BW8cpu {
 		}
 
 		// Calculate the offset-applied address, if applicable
-		if (!offset_en) {
+		if (!lines.offset) {
 			cpu->addr_out = cpu->addr;
 		}
 		else {
@@ -457,9 +408,9 @@ namespace BW8cpu {
 	}
 
 	void xfer_assert(BW8cpu* cpu) {
-		uint8_t xfer_assert = decode_ctrl(cpu, CtrlField::XFER_ASSERT);
+		CtrlLines lines = decode_ctrl(cpu);
 
-		switch (XferAssert(xfer_assert)) {
+		switch (lines.xfer_assert) {
 			case XferAssert::PC:
 				cpu->xfer = cpu->PC;
 				break;
@@ -555,11 +506,12 @@ namespace BW8cpu {
 				break;
 			case XferAssert::NMI:
 				cpu->xfer = NMI_ADDR;
+				break;
 		}
 	}
 
 	void alu_calculate(BW8cpu* cpu) {
-		uint8_t alu_op = decode_ctrl(cpu, CtrlField::ALU_OP);
+		uint8_t alu_op = (uint8_t)(decode_ctrl(cpu).alu_op);
 
 		uint8_t sum_func	= (alu_op >> 0) & 0b11;
 		uint8_t shift_func	= (alu_op >> 2) & 0b11;
@@ -762,70 +714,69 @@ namespace BW8cpu {
 	}
 
 	void dbus_assert(BW8cpu* cpu) {
-		uint8_t dbus_assert = decode_ctrl(cpu, CtrlField::DBUS_ASSERT);
-		uint8_t addr_assert = decode_ctrl(cpu, CtrlField::ADDR_ASSERT);
+		CtrlLines lines = decode_ctrl(cpu);
+
 		bool mem_io = true;
 		bool data_code = true;
 
-		switch (DbusAssert(dbus_assert))
-		{
-		case DbusAssert::ALU:
-			cpu->dbus = cpu->ALU;
-			break;
-		case DbusAssert::A:
-			cpu->dbus = cpu->A;
-			break;
-		case DbusAssert::B:
-			cpu->dbus = cpu->B;
-			break;
-		case DbusAssert::C:
-			cpu->dbus = cpu->C;
-			break;
-		case DbusAssert::D:
-			cpu->dbus = cpu->D;
-			break;
-		case DbusAssert::DP:
-			cpu->dbus = cpu->DP;
-			break;
-		case DbusAssert::DA:
-			cpu->dbus = cpu->DA;
-			break;
-		case DbusAssert::TH:
-			cpu->dbus = cpu->TH;
-			break;
-		case DbusAssert::TL:
-			cpu->dbus = cpu->TL;
-			break;
-		case DbusAssert::SR:
-			cpu->dbus = (
-				(cpu->interrupt_enable & 0b1) >> 0,
-				(cpu->negative_flag & 0b1) >> 1,
-				(cpu->overflow_flag & 0b1) >> 2,
-				(cpu->zero_flag & 0b1) >> 3,
-				(cpu->carry_flag & 0b1) >> 4
-			);
-			break;
-		case DbusAssert::MEM:
-			if (AddrAssert(addr_assert) == AddrAssert::IO) {
-				mem_io = false;
-			}
-			if (AddrAssert(addr_assert) == AddrAssert::PC) {
-				data_code = false;
-			}
+		switch (lines.dbus_assert) {
+			case DbusAssert::ALU:
+				cpu->dbus = cpu->ALU;
+				break;
+			case DbusAssert::A:
+				cpu->dbus = cpu->A;
+				break;
+			case DbusAssert::B:
+				cpu->dbus = cpu->B;
+				break;
+			case DbusAssert::C:
+				cpu->dbus = cpu->C;
+				break;
+			case DbusAssert::D:
+				cpu->dbus = cpu->D;
+				break;
+			case DbusAssert::DP:
+				cpu->dbus = cpu->DP;
+				break;
+			case DbusAssert::DA:
+				cpu->dbus = cpu->DA;
+				break;
+			case DbusAssert::TH:
+				cpu->dbus = cpu->TH;
+				break;
+			case DbusAssert::TL:
+				cpu->dbus = cpu->TL;
+				break;
+			case DbusAssert::SR:
+				cpu->dbus = (
+					(cpu->interrupt_enable & 0b1) >> 0,
+					(cpu->negative_flag & 0b1) >> 1,
+					(cpu->overflow_flag & 0b1) >> 2,
+					(cpu->zero_flag & 0b1) >> 3,
+					(cpu->carry_flag & 0b1) >> 4
+				);
+				break;
+			case DbusAssert::MEM:
+				if (lines.addr_assert == AddrAssert::IO) {
+					mem_io = false;
+				}
+				if (lines.addr_assert == AddrAssert::PC) {
+					data_code = false;
+				}
 
-			cpu->dbus = cpu->read(cpu->BR, cpu->addr_out, mem_io, cpu->supervisor_mode, data_code);
-			break;
-		case DbusAssert::MSB:
-			cpu->dbus = cpu->xfer >> 8;
-			break;
-		case DbusAssert::LSB:
-			cpu->dbus = cpu->xfer & 0xff;
-			break;
-		case DbusAssert::BR:
-			cpu->dbus = cpu->BR & 0b1111;
-			break;
-		default:
-			cpu->dbus = 0;
+				cpu->dbus = cpu->read(cpu->BR, cpu->addr_out, mem_io, cpu->supervisor_mode, data_code);
+				break;
+			case DbusAssert::MSB:
+				cpu->dbus = cpu->xfer >> 8;
+				break;
+			case DbusAssert::LSB:
+				cpu->dbus = cpu->xfer & 0xff;
+				break;
+			case DbusAssert::BR:
+				cpu->dbus = cpu->BR & 0b1111;
+				break;
+			default:
+				cpu->dbus = 0;
 		}
 	}
 
@@ -848,52 +799,82 @@ namespace BW8cpu {
 		return (left << 8) | right;
 	}
 
-	void dump_ctrl(BW8cpu *cpu, FILE* fout) {
+	void dump(BW8cpu *cpu, FILE* fout) {
 		fprintf(
 			fout,
-			CTRL_FMT,
-			decode_ctrl(cpu, CtrlField::DBUS_ASSERT),
-			decode_ctrl(cpu, CtrlField::ALU_OP),
-			decode_ctrl(cpu, CtrlField::DBUS_LOAD),
-			decode_ctrl(cpu, CtrlField::ADDR_ASSERT),
-			decode_ctrl(cpu, CtrlField::XFER_ASSERT),
-			decode_ctrl(cpu, CtrlField::XFER_LOAD),
-			decode_ctrl(cpu, CtrlField::COUNT),
-			decode_ctrl(cpu, CtrlField::DEC_SP),
-			decode_ctrl(cpu, CtrlField::RST_USEQ),
-			decode_ctrl(cpu, CtrlField::TOG_EXT),
-			decode_ctrl(cpu, CtrlField::OFFSET),
-			decode_ctrl(cpu, CtrlField::UNUSED)
+			STATE_FMT,
+			cpu->clocks,
+			cpu->sequencer,
+			cpu->carry_flag ? GREEN_TXT : RED_TXT,
+			cpu->zero_flag ? GREEN_TXT : RED_TXT,
+			cpu->overflow_flag ? GREEN_TXT : RED_TXT,
+			cpu->negative_flag ? GREEN_TXT : RED_TXT,
+			cpu->interrupt_enable ? GREEN_TXT : RED_TXT,
+			cpu->supervisor_mode ? GREEN_TXT : RED_TXT,
+			cpu->use_bank_reg ? GREEN_TXT : RED_TXT,
+			cpu->reset ? GREEN_TXT : RED_TXT,
+			cpu->bus_request ? GREEN_TXT : RED_TXT,
+			cpu->nonmaskable_interrupt ? GREEN_TXT : RED_TXT,
+			cpu->interrupt_request ? GREEN_TXT : RED_TXT,
+			"TODO",
+			cpu->PC,
+			cpu->SP,
+			cpu->X,
+			cpu->Y,
+			cpu->A,
+			cpu->DP,
+			cpu->IR,
+			cpu->addr,
+			cpu->B,
+			cpu->DA,
+			cpu->OF,
+			cpu->xfer,
+			cpu->C,
+			cpu->TH,
+			cpu->BR,
+			cpu->dbus,
+			cpu->D,
+			cpu->TL
 		);
 	}
 
-	uint8_t decode_ctrl(BW8cpu* cpu, CtrlField field) {
-		switch (field) {
-			case CtrlField::DBUS_ASSERT:
-				return (cpu->ctrl_latch[0] >> 0) & 0b1111;
-			case CtrlField::ALU_OP:
-				return (cpu->ctrl_latch[0] >> 4) & 0b1111;
-			case CtrlField::DBUS_LOAD:
-				return (cpu->ctrl_latch[1] >> 0) & 0b11111;
-			case CtrlField::ADDR_ASSERT:
-				return (cpu->ctrl_latch[1] >> 5) & 0b111;
-			case CtrlField::XFER_ASSERT:
-				return (cpu->ctrl_latch[2] >> 0) & 0b11111;
-			case CtrlField::XFER_LOAD:
-				return (cpu->ctrl_latch[2] >> 5) & 0b111;
-			case CtrlField::COUNT:
-				return (cpu->ctrl_latch[3] >> 0) & 0b111;
-			case CtrlField::DEC_SP:
-				return (cpu->ctrl_latch[3] >> 3) & 0b1;
-			case CtrlField::RST_USEQ:
-				return (cpu->ctrl_latch[3] >> 4) & 0b1;
-			case CtrlField::TOG_EXT:
-				return (cpu->ctrl_latch[3] >> 5) & 0b1;
-			case CtrlField::OFFSET:
-				return (cpu->ctrl_latch[3] >> 6) & 0b1;
-			case CtrlField::UNUSED:
-				return (cpu->ctrl_latch[3] >> 7) & 0b1;
-		}
+	void dump_ctrl(BW8cpu *cpu, FILE* fout) {
+		CtrlLines lines = decode_ctrl(cpu);
+		fprintf(
+			fout,
+			CTRL_FMT,
+			lines.dbus_assert,
+			lines.alu_op,
+			lines.dbus_load,
+			lines.addr_assert,
+			lines.xfer_assert,
+			lines.xfer_load,
+			lines.count,
+			lines.dec_sp,
+			lines.rst_useq,
+			lines.tog_ext,
+			lines.offset,
+			lines.unused
+		);
+	}
+
+	CtrlLines decode_ctrl(BW8cpu* cpu) {
+		CtrlLines lines;
+
+		lines.dbus_assert	= DbusAssert((cpu->ctrl_latch[0] >> 0) & 0b1111);
+		lines.alu_op 		= AluOp((cpu->ctrl_latch[0] >> 4) & 0b1111);
+		lines.dbus_load 	= DbusLoad((cpu->ctrl_latch[1] >> 0) & 0b11111);
+		lines.addr_assert 	= AddrAssert((cpu->ctrl_latch[1] >> 5) & 0b111);
+		lines.xfer_assert	= XferAssert((cpu->ctrl_latch[2] >> 0) & 0b11111);
+		lines.xfer_load 	= XferLoad((cpu->ctrl_latch[2] >> 5) & 0b111);
+		lines.count 		= Count((cpu->ctrl_latch[3] >> 0) & 0b111);
+		lines.dec_sp 		= (bool)((cpu->ctrl_latch[3] >> 3) & 0b1);
+		lines.rst_useq 		= (bool)((cpu->ctrl_latch[3] >> 4) & 0b1);
+		lines.tog_ext 		= (bool)((cpu->ctrl_latch[3] >> 5) & 0b1);
+		lines.offset 		= (bool)((cpu->ctrl_latch[3] >> 6) & 0b1);
+		lines.unused 		= (bool)((cpu->ctrl_latch[3] >> 7) & 0b1);
+
+		return lines;
 	}
 
 	void read_ucode(BW8cpu* cpu) {

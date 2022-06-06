@@ -158,6 +158,25 @@ namespace BW8cpu {
 		STALL,
 	};
 
+	enum class AluOp {
+		NOP,
+		ADC,
+		SBC,
+		INC,
+		DEC,
+		AND,
+		OR,
+		XOR,
+		NOT,
+		SRC,
+		ASR,
+		SEI,
+		CLI,
+		SEC,
+		CLC,
+		CLV,
+	};
+
 	enum class SumFunc {
 		ZERO,
 		CF,
@@ -221,6 +240,22 @@ namespace BW8cpu {
 		OFFSET,
 		UNUSED,
 	};
+
+	typedef struct CtrlLines {
+		DbusAssert dbus_assert;
+		AluOp alu_op;
+		DbusLoad dbus_load;
+		AddrAssert addr_assert;
+		XferAssert xfer_assert;
+		XferLoad xfer_load;
+		Count count;
+		bool dec_sp;
+		bool rst_useq;
+		bool tog_ext;
+		bool offset;
+		bool unused;
+
+	} CtrlLines;
 
 	typedef uint8_t (* BusRead)(uint8_t bank, uint16_t ptr, bool mem_io, bool super_user, bool data_code);
 	typedef void (* BusWrite)(uint8_t bank, uint16_t ptr, uint8_t data, bool mem_io, bool super_user, bool data_code);
@@ -324,7 +359,7 @@ namespace BW8cpu {
 	void xfer_assert(BW8cpu* cpu);
 	void alu_calculate(BW8cpu* cpu);
 	void dbus_assert(BW8cpu* cpu);
-	uint8_t decode_ctrl(BW8cpu* cpu, CtrlField field);
+	CtrlLines decode_ctrl(BW8cpu* cpu);
 
 	// Private (utils)
 	uint16_t concatenate_bytes(uint8_t left, uint8_t right);

@@ -30,7 +30,6 @@ int main() {
 		BW8cpu::dump(cpu, stdout);
 		BW8cpu::rising(cpu);
 		BW8cpu::dump_ctrl(cpu, stdout);
-		printf("\n\n");
 		BW8cpu::falling(cpu);
 		Sleep(1500);
 	}
