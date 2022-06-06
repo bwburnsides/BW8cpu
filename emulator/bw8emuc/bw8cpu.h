@@ -14,9 +14,23 @@
 "| PC:  $%04X     SP: $%04X     X: $%04X     Y: $%04X |\n"\
 "| A:   $%02X       DP: $%02X       IR: $%02X   ADDR: $%04X |\n"\
 "| B:   $%02X       DA: $%02X       OF: $%02X   XFER: $%04X |\n"\
-"| C:   $%02X       TH: $%02X       BR: $%02X   DBUS: $%04X |\n"\
+"| C:   $%02X       TH: $%02X       BR: $%02X   DBUS: $%02X   |\n"\
 "| D:   $%02X       TL: $%02X                             |\n"\
 "+----------------------------------------------------+\n"\
+
+#define CTRL_FMT ""\
+"DBUS_ASSERT: %d\n"\
+"ALU_OP: %d\n"\
+"DBUS_LOAD: %d\n"\
+"ADDR_ASSERT: %d\n"\
+"XFER_ASSERT: %d\n"\
+"XFER_LOAD: %d\n"\
+"COUNT: %d\n"\
+"DEC_SP: %d\n"\
+"RST_USEQ: %d\n"\
+"TOG_EXT: %d\n"\
+"OFFSET: %d\n"\
+"UNUSED: %d\n"\
 
 namespace BW8cpu {
 	enum class AddrAssert {
@@ -193,6 +207,21 @@ namespace BW8cpu {
 		NO_CHANGE,
 	};
 
+	enum class CtrlField {
+		DBUS_ASSERT,
+		ALU_OP,
+		DBUS_LOAD,
+		ADDR_ASSERT,
+		XFER_ASSERT,
+		XFER_LOAD,
+		COUNT,
+		DEC_SP,
+		RST_USEQ,
+		TOG_EXT,
+		OFFSET,
+		UNUSED,
+	};
+
 	typedef uint8_t (* BusRead)(uint8_t bank, uint16_t ptr, bool mem_io, bool super_user, bool data_code);
 	typedef void (* BusWrite)(uint8_t bank, uint16_t ptr, uint8_t data, bool mem_io, bool super_user, bool data_code);
 
@@ -295,6 +324,9 @@ namespace BW8cpu {
 	void xfer_assert(BW8cpu* cpu);
 	void alu_calculate(BW8cpu* cpu);
 	void dbus_assert(BW8cpu* cpu);
+	uint8_t decode_ctrl(BW8cpu* cpu, CtrlField field);
 
+	// Private (utils)
 	uint16_t concatenate_bytes(uint8_t left, uint8_t right);
+	void dump_ctrl(BW8cpu *cpu, FILE* fout);
 } // namespace BW8cpu

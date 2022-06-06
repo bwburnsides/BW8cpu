@@ -94,7 +94,7 @@ namespace BW8cpu {
 	void reset(BW8cpu* cpu, bool state) {
 		cpu->reset = state;
 
-		if (!cpu->reset) {
+		if (cpu->reset == false) {
 			return;
 		}
 
@@ -147,6 +147,10 @@ namespace BW8cpu {
 		uint32_t state = 0;
 		uint8_t flags = 0;
 
+		if (cpu->reset) {
+			return;
+		}
+
 		if (cpu->sequencer == 0) {
 			update_mode(cpu);
 		}
@@ -160,12 +164,19 @@ namespace BW8cpu {
 		) & 0b00011111;
 
 		state |= (
-			(int)cpu->mode << 16 |
-			(int)cpu->extended << 15 |
+			(((int)cpu->mode << 16) & 0b11) |
+			(((int)cpu->extended << 15) & 0b1) |
 			cpu->IR << 7 |
 			flags << 3 |
 			(cpu->sequencer & 0b111)
 		);
+
+		// printf("State: %d\n", state);
+		// printf("Mode: %d\n", (((int)cpu->mode << 16) & 0b11));
+		// printf("Extended: %d\n", (((int)cpu->extended << 15) & 0b1));
+		// printf("Opcode: %d\n", cpu->IR << 7);
+		// printf("Flags: %d\n", flags << 3);
+		// printf("Tstate: %d\n\n", (cpu->sequencer & 0b111));
 
 		for (int i = 0; i < 4; i++) {
 			cpu->ctrl_latch[i] = cpu->ucode[i][state];
@@ -178,6 +189,12 @@ namespace BW8cpu {
 	}
 
 	void falling(BW8cpu* cpu) {
+		cpu->clocks += 1;
+
+		if (cpu->reset) {
+			return;
+		}
+
 		cpu->sequencer++;
 		cpu->sequencer %= 8;
 
@@ -185,9 +202,16 @@ namespace BW8cpu {
 			cpu->sequencer = 0;
 		}
 
-		uint8_t count = cpu->ctrl_latch[3] & 0b111;
-		uint8_t dbus_load = cpu->ctrl_latch[1] & 0b11111;
-		uint8_t xfer_load = (cpu->ctrl_latch[2] >> 5) & 0b111; 
+		if (cpu->sequencer == 0) {
+			cpu->extended = false;
+		}
+
+		uint8_t count = decode_ctrl(cpu, CtrlField::COUNT);
+		uint8_t dbus_load = decode_ctrl(cpu, CtrlField::DBUS_LOAD);
+		uint8_t xfer_load = decode_ctrl(cpu, CtrlField::XFER_LOAD);
+		uint8_t extended = decode_ctrl(cpu, CtrlField::TOG_EXT);
+
+		cpu->extended = (bool)extended;
 
 		uint8_t addr_assert = (cpu->ctrl_latch[1] >> 5) & 0b111;
 		bool mem_io = true;
@@ -332,8 +356,6 @@ namespace BW8cpu {
 			default:
 				break;
 		}
-
-		cpu->clocks += 1;
 	}
 
 	void dump(BW8cpu *cpu, FILE* fout) {
@@ -376,9 +398,9 @@ namespace BW8cpu {
 	}
 
 	void addr_assert(BW8cpu* cpu) {
-		uint8_t addr_assert = (cpu->ctrl_latch[1] >> 5) & 0b111;
-		uint8_t offset_en = (cpu->ctrl_latch[3] >> 6) & 0b1;
-		uint8_t offset_inc = (cpu->ctrl_latch[3] >> 0) & 0b111;
+		uint8_t addr_assert = decode_ctrl(cpu, CtrlField::ADDR_ASSERT);
+		uint8_t offset_en = decode_ctrl(cpu, CtrlField::OFFSET);
+		uint8_t offset_inc = decode_ctrl(cpu, CtrlField::COUNT);
 		uint16_t offset;
 		uint8_t offset_hi;
 
@@ -435,7 +457,7 @@ namespace BW8cpu {
 	}
 
 	void xfer_assert(BW8cpu* cpu) {
-		uint8_t xfer_assert = (cpu->ctrl_latch[1] >> 0) & 0b11111;
+		uint8_t xfer_assert = decode_ctrl(cpu, CtrlField::XFER_ASSERT);
 
 		switch (XferAssert(xfer_assert)) {
 			case XferAssert::PC:
@@ -537,7 +559,7 @@ namespace BW8cpu {
 	}
 
 	void alu_calculate(BW8cpu* cpu) {
-		uint8_t alu_op = (cpu->ctrl_latch[0] >> 4) & 0b1111;
+		uint8_t alu_op = decode_ctrl(cpu, CtrlField::ALU_OP);
 
 		uint8_t sum_func	= (alu_op >> 0) & 0b11;
 		uint8_t shift_func	= (alu_op >> 2) & 0b11;
@@ -740,9 +762,8 @@ namespace BW8cpu {
 	}
 
 	void dbus_assert(BW8cpu* cpu) {
-		uint8_t dbus_assert = cpu->ctrl_latch[0] & 0b1111;
-
-		uint8_t addr_assert = (cpu->ctrl_latch[1] >> 5) & 0b111;
+		uint8_t dbus_assert = decode_ctrl(cpu, CtrlField::DBUS_ASSERT);
+		uint8_t addr_assert = decode_ctrl(cpu, CtrlField::ADDR_ASSERT);
 		bool mem_io = true;
 		bool data_code = true;
 
@@ -825,6 +846,54 @@ namespace BW8cpu {
 
 	uint16_t concatenate_bytes(uint8_t left, uint8_t right) {
 		return (left << 8) | right;
+	}
+
+	void dump_ctrl(BW8cpu *cpu, FILE* fout) {
+		fprintf(
+			fout,
+			CTRL_FMT,
+			decode_ctrl(cpu, CtrlField::DBUS_ASSERT),
+			decode_ctrl(cpu, CtrlField::ALU_OP),
+			decode_ctrl(cpu, CtrlField::DBUS_LOAD),
+			decode_ctrl(cpu, CtrlField::ADDR_ASSERT),
+			decode_ctrl(cpu, CtrlField::XFER_ASSERT),
+			decode_ctrl(cpu, CtrlField::XFER_LOAD),
+			decode_ctrl(cpu, CtrlField::COUNT),
+			decode_ctrl(cpu, CtrlField::DEC_SP),
+			decode_ctrl(cpu, CtrlField::RST_USEQ),
+			decode_ctrl(cpu, CtrlField::TOG_EXT),
+			decode_ctrl(cpu, CtrlField::OFFSET),
+			decode_ctrl(cpu, CtrlField::UNUSED)
+		);
+	}
+
+	uint8_t decode_ctrl(BW8cpu* cpu, CtrlField field) {
+		switch (field) {
+			case CtrlField::DBUS_ASSERT:
+				return (cpu->ctrl_latch[0] >> 0) & 0b1111;
+			case CtrlField::ALU_OP:
+				return (cpu->ctrl_latch[0] >> 4) & 0b1111;
+			case CtrlField::DBUS_LOAD:
+				return (cpu->ctrl_latch[1] >> 0) & 0b11111;
+			case CtrlField::ADDR_ASSERT:
+				return (cpu->ctrl_latch[1] >> 5) & 0b111;
+			case CtrlField::XFER_ASSERT:
+				return (cpu->ctrl_latch[2] >> 0) & 0b11111;
+			case CtrlField::XFER_LOAD:
+				return (cpu->ctrl_latch[2] >> 5) & 0b111;
+			case CtrlField::COUNT:
+				return (cpu->ctrl_latch[3] >> 0) & 0b111;
+			case CtrlField::DEC_SP:
+				return (cpu->ctrl_latch[3] >> 3) & 0b1;
+			case CtrlField::RST_USEQ:
+				return (cpu->ctrl_latch[3] >> 4) & 0b1;
+			case CtrlField::TOG_EXT:
+				return (cpu->ctrl_latch[3] >> 5) & 0b1;
+			case CtrlField::OFFSET:
+				return (cpu->ctrl_latch[3] >> 6) & 0b1;
+			case CtrlField::UNUSED:
+				return (cpu->ctrl_latch[3] >> 7) & 0b1;
+		}
 	}
 
 	void read_ucode(BW8cpu* cpu) {

@@ -144,37 +144,40 @@ class Ctrl:
     RST_USEQ = 1 << 28
     TOG_EXT = 1 << 29
     OFFSET = 1 << 30
-    BRK_CLK = 1 << 31
+    UNUSED = 1 << 31
 
     @staticmethod
     def decode(word: int) -> str:
-        DBUS_ASSERT = (word >> 0) & (2**4 - 1)
-        DBUS_LOAD = (word >> 4) & (2**5 - 1)
-        ALU_OP = (word >> 9) & (2**4 - 1)
-        XFER_ASSERT = (word >> 13) & (2**5 - 1)
-        XFER_LOAD = (word >> 18) & (2**3 - 1)
-        ADDR_ASSERT = (word >> 21) & (2**3 - 1)
-        COUNT = (word >> 24) & (2**3 - 1)
-        DEC_SP = (word >> 27) & (2**1 - 1)
-        RST_USEQ = (word >> 28) & (2**1 - 1)
-        TOG_EXT = (word >> 29) & (2**1 - 1)
-        OFFSET = (word >> 30) & (2**1 - 1)
-        BRK_CLK = (word >> 31) & (2**1 - 1)
+        DBUS_ASSERT = (word >> (0 + 0)) & (0b1111)
+        ALU_OP = (word >> (4 + 0)) & (0b1111)
+
+        DBUS_LOAD = (word >> (0 + 8)) & (0b11111)
+        ADDR_ASSERT = (word >> (5 + 8)) & (0b111)
+
+        XFER_ASSERT = (word >> (0 + 16)) & (0b11111)
+        XFER_LOAD = (word >> (5 + 16)) & (0b111)
+
+        COUNT = (word >> (0 + 24)) & (0b111)
+        DEC_SP = (word >> (3 + 24)) & (2**1 - 1)
+        RST_USEQ = (word >> (4 + 24)) & (2**1 - 1)
+        TOG_EXT = (word >> (5 + 24)) & (2**1 - 1)
+        OFFSET = (word >> (6 + 24)) & (2**1 - 1)
+        UNUSED = (word >> (7 + 24)) & (2**1 - 1)
 
         return "\n".join(
             [
                 f"DBUS_ASSERT: {DBUS_ASSERT}",
-                f"DBUS_LOAD: {DBUS_LOAD}",
                 f"ALU_OP: {ALU_OP}",
+                f"DBUS_LOAD: {DBUS_LOAD}",
+                f"ADDR_ASSERT: {ADDR_ASSERT}",
                 f"XFER_ASSERT: {XFER_ASSERT}",
                 f"XFER_LOAD: {XFER_LOAD}",
-                f"ADDR_ASSERT: {ADDR_ASSERT}",
                 f"COUNT: {COUNT}",
                 f"DEC_SP: {DEC_SP}",
                 f"RST_USEQ: {RST_USEQ}",
                 f"TOG_EXT: {TOG_EXT}",
                 f"OFFSET: {OFFSET}",
-                f"BRK_CLK: {BRK_CLK}\n",
+                f"UNUSED: {UNUSED}\n",
             ]
         )
 

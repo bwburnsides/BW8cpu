@@ -1,6 +1,5 @@
 
 NOP*
-BRK*
 EXT*
 
 CLC*
@@ -9,7 +8,7 @@ CLV*
 SEC*
 SEI*
 
-UBR
+UBR*
 KBR
 
 MOV_A_B*
@@ -33,8 +32,6 @@ MOV_DP_A
 
 MOV_BR_A
 MOV_A_BR
-
-MOV_A_SR
 
 IN_A
 IN_B
@@ -468,7 +465,6 @@ PUSH_C
 PUSH_D
 PUSH_X
 PUSH_Y
-PUSH_SR
 
 POP_A
 POP_B
@@ -476,7 +472,6 @@ POP_C
 POP_D
 POP_X
 POP_Y
-POP_SR
 
 CMP_A_A
 CMP_A_B

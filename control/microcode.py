@@ -979,9 +979,6 @@ def get_uops(state: State) -> list[int]:
     # Housekeeping / Flag Management
     if OP == Op.NOP:
         uops[1] |= Ctrl.RST_USEQ
-    elif OP == Op.BRK:
-        uops[1] |= Ctrl.BRK_CLK
-        uops[2] |= Ctrl.RST_USEQ
     elif OP == Op.EXT:
         uops[1] |= Ctrl.TOG_EXT | FETCH
     elif OP == Op.CLC:
@@ -1034,8 +1031,6 @@ def get_uops(state: State) -> list[int]:
         uops[1] |= Ctrl.DBUS_ASSERT_A | Ctrl.DBUS_LOAD_BR | Ctrl.RST_USEQ
     elif OP == Op.MOV_A_BR:
         uops[1] |= Ctrl.DBUS_ASSERT_BR | Ctrl.DBUS_LOAD_A | Ctrl.RST_USEQ
-    elif OP == Op.MOV_A_SR:
-        uops[1] |= Ctrl.DBUS_ASSERT_SR | Ctrl.DBUS_LOAD_A | Ctrl.RST_USEQ
 
     # IO Operations
     elif OP == Op.IN_A:
@@ -1944,8 +1939,6 @@ def get_uops(state: State) -> list[int]:
         return push16(StackOperable16.X)
     elif OP == Op.PUSH_Y:
         return push16(StackOperable16.Y)
-    elif OP == Op.PUSH_SR:
-        return push8(StackOperable8.SR)
 
     # Stack Pops
     elif OP == Op.POP_A:
@@ -1960,8 +1953,6 @@ def get_uops(state: State) -> list[int]:
         return pop16(StackOperable16.X)
     elif OP == Op.POP_Y:
         return pop16(StackOperable16.Y)
-    elif OP == Op.POP_SR:
-        return pop8(StackOperable8.SR)
 
     # Compares
     elif OP == Op.CMP_A_A:
@@ -2353,10 +2344,6 @@ def write_ucode(ucode: list[int], file_name_format: str) -> None:
     for addr, word in enumerate(ucode):
         for i in range(4):
             byte = (word & (255 << (8 * i))) >> (8 * i)
-
-            if addr == 0b000001010010000001:
-                print(byte)
-
             roms[i].append(byte)
 
     names = (file_name_format.format(i) for i in range(4))
@@ -2369,7 +2356,7 @@ def write_ucode(ucode: list[int], file_name_format: str) -> None:
 
 
 def main() -> None:
-    lens, sizes = [], []
+    ucode, lens, sizes = [], [], []
     for addr in range(2**15):
         state = State.from_packed(addr)
         uops = get_uops(state)
@@ -2392,8 +2379,13 @@ def main() -> None:
 
     write_ucode(ucode, "microcode{}.bin")
 
-if __name__ == "__main__":
-    ucode = []
-    main()
 
-    print(Ctrl.decode(ucode[0]))
+    state = State.from_packed(2560 >> 3)
+    uops = get_uops(state) 
+
+    for uop in uops:
+        print(Ctrl.decode(uop))
+        print()
+
+if __name__ == "__main__":
+    main()

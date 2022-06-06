@@ -30,7 +30,44 @@ nmi_handler:
     rti
 
 irq_handler:
-    jsr store_context
+    ; write the original register values to the Direct Page for safe keeping
+    store [!SWAP_A], a
+    store [!SWAP_B], b
+    store [!SWAP_X], x
+
+    ; compute pointer to userspace’s context struct
+    mov a, br
+    mov b, a
+    load a, #CTX_PAGE
+    mov x, ab
+
+    ; store unmolested values to Ctx struct
+    store [x, #CTX_Y], y
+    store [x, #CTX_C], c
+    store [x, #CTX_D], d
+
+    ; retrieve unmolested values and then write to Ctx struct
+    load a, [!SWAP_A]
+    load b, [!SWAP_B]
+    load y, [!SWAP_X]
+
+    store [x, #CTX_A], a
+    store [x, #CTX_B], b
+    store [x, #CTX_X], y
+
+    mov y, x
+    mov x, sp
+
+    ; finally save user stack pointer
+    store [y, #CTX_SP], x
+
+    load b, #KERNEL_CTX
+    load a, #CTX_PAGE
+    mov y, ab
+
+    ; only after this point can the kernel start using the stack
+    load x, [y, #CTX_SP]
+    mov sp, x
 
     in a, <IRQ_SOURCE>
     clc
@@ -166,46 +203,6 @@ sys_close:
 sys_read:
 sys_write:
     brk
-
-store_context:
-    ; write the original register values to the Direct Page for safe keeping
-    store [!SWAP_A], a
-    store [!SWAP_B], b
-    store [!SWAP_X], x
-
-    ; compute pointer to userspace’s context struct
-    mov a, br
-    mov b, a
-    load a, #CTX_PAGE
-    mov x, ab
-
-    ; store unmolested values to Ctx struct
-    store [x, #CTX_Y], y
-    store [x, #CTX_C], c
-    store [x, #CTX_D], d
-
-    ; retrieve unmolested values and then write to Ctx struct
-    load a, [!SWAP_A]
-    load b, [!SWAP_B]
-    load y, [!SWAP_X]
-
-    store [x, #CTX_A], a
-    store [x, #CTX_B], b
-    store [x, #CTX_X], y
-
-    mov y, x
-    mov x, sp
-
-    ; finally save user stack pointer
-    store [y, #CTX_SP], x
-
-    load b, #KERNEL_CTX
-    load a, #CTX_PAGE
-    mov y, ab
-
-    ; only after this point can the kernel start using the stack
-    load x, [y, #CTX_SP]
-    mov sp, x
 
 restore_context:
     mov a, br
