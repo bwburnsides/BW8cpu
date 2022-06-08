@@ -5,7 +5,7 @@
 #define RED_TXT "\033[0;31m"
 #define GREEN_TXT "\033[0;32m"
 #define RESET_TXT "\033[0m"
-#define STATE_FMT "\033[1;1H"\
+#define STATE_FMT ""\
 "+----------------------------------------------------+\n"\
 "| BW8cpu Emulator                          June 2022 |\n"\
 "| Clock Cycles: %-20lld       Tstate: %1d |\n"\
@@ -257,6 +257,21 @@ namespace BW8cpu {
 
 	} CtrlLines;
 
+	typedef struct Flags {
+		bool Cf;
+		bool Zf;
+		bool Vf;
+		bool Nf;
+	} Flags;
+
+	typedef struct CtrlState {
+		Mode mode;
+		bool extended;
+		uint8_t opcode;
+		Flags flags;
+		uint8_t step;
+	} CtrlState;
+
 	typedef uint8_t (* BusRead)(uint8_t bank, uint16_t ptr, bool mem_io, bool super_user, bool data_code);
 	typedef void (* BusWrite)(uint8_t bank, uint16_t ptr, uint8_t data, bool mem_io, bool super_user, bool data_code);
 
@@ -360,8 +375,10 @@ namespace BW8cpu {
 	void alu_calculate(BW8cpu* cpu);
 	void dbus_assert(BW8cpu* cpu);
 	CtrlLines decode_ctrl(BW8cpu* cpu);
+	void decode_flags(BW8cpu* cpu, uint8_t flags);
 
 	// Private (utils)
 	uint16_t concatenate_bytes(uint8_t left, uint8_t right);
 	void dump_ctrl(BW8cpu *cpu, FILE* fout);
+	void dump_state(BW8cpu* cpu, FILE* fout);
 } // namespace BW8cpu

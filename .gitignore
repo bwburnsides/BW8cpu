@@ -10,4 +10,11 @@ Debug/
 *.vcxproj
 *.filters
 *.user
+*.obj
+*.ipdb
+*.log
+*.tlog
+*.pdb
+*.iobj
+*.vcxproj*
 james_sharman/

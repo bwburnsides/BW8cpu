@@ -26,13 +26,28 @@ int main() {
 	BW8cpu::reset(cpu, true);
 	BW8cpu::reset(cpu, false);
 
-	while (true) {
-		BW8cpu::dump(cpu, stdout);
-		BW8cpu::rising(cpu);
-		BW8cpu::dump_ctrl(cpu, stdout);
-		BW8cpu::falling(cpu);
-		Sleep(1500);
-	}
+	// CLOCK CYCLE 1
+	BW8cpu::rising(cpu);
+	BW8cpu::dump(cpu, stdout);
+	BW8cpu::dump_ctrl(cpu, stdout);
+
+	BW8cpu::falling(cpu);
+	BW8cpu::dump(cpu, stdout);
+	BW8cpu::dump_ctrl(cpu, stdout);
+
+	// CLOCK CYCLE 2
+	BW8cpu::rising(cpu);
+	BW8cpu::dump(cpu, stdout);
+	BW8cpu::dump_ctrl(cpu, stdout);
+
+	BW8cpu::falling(cpu);
+	BW8cpu::dump(cpu, stdout);
+	BW8cpu::dump_ctrl(cpu, stdout);
+
+	// CLOCK CYCLE 3
+	BW8cpu::rising(cpu);
+	BW8cpu::dump(cpu, stdout);
+	BW8cpu::dump_ctrl(cpu, stdout);
 }
 
 void initialize_memory(const char* rom_path) {

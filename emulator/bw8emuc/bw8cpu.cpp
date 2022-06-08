@@ -316,11 +316,7 @@ namespace BW8cpu {
 				break;
 		}
 
-		cpu->interrupt_enable = (bool) ((flags >> 0) & 0b1);
-		cpu->negative_flag = (bool) ((flags >> 1) & 0b1);
-		cpu->overflow_flag = (bool) ((flags >> 2) & 0b1);
-		cpu->zero_flag = (bool) ((flags >> 3) & 0b1);
-		cpu->carry_flag = (bool) ((flags >> 4) & 0b1);
+		decode_flags(cpu, flags);
 
 		switch (lines.xfer_load) {
 			case XferLoad::PC:
@@ -877,6 +873,14 @@ namespace BW8cpu {
 		return lines;
 	}
 
+	void dump_state(BW8cpu* cpu, FILE* fout) {
+		// state.mode		=;
+		// state.extended	=;
+		// state.opcode	=;
+		// state.flags		=;
+		// state.step		=;
+	}
+
 	void read_ucode(BW8cpu* cpu) {
 		const char* fname[4] = {
 			"C:/Users/brady/projects/BW8cpu/control/microcode0.bin",
@@ -895,5 +899,13 @@ namespace BW8cpu {
 			fread(cpu->ucode[i], sizeof(uint8_t), 256 * 1024, fp);
 			fclose(fp);
 		}
+	}
+
+	void decode_flags(BW8cpu* cpu, uint8_t flags) {
+		cpu->interrupt_enable = (bool) ((flags >> 0) & 0b1);
+		cpu->negative_flag = (bool) ((flags >> 1) & 0b1);
+		cpu->overflow_flag = (bool) ((flags >> 2) & 0b1);
+		cpu->zero_flag = (bool) ((flags >> 3) & 0b1);
+		cpu->carry_flag = (bool) ((flags >> 4) & 0b1);
 	}
 }
