@@ -68,11 +68,11 @@ void initialize_memory(const char* rom_path) {
 }
 
 uint8_t bus_read(uint8_t bank, uint16_t ptr, bool mem_io, bool super_user, bool data_code) {
-	uint32_t addr = ((bank & 0xf) << 16) & ptr;
+	uint32_t addr = ((bank & 0xf) << 16) | ptr;
 	return memory[addr];
 }
 
 void bus_write(uint8_t bank, uint16_t ptr, uint8_t data, bool mem_io, bool super_user, bool data_code) {
-	uint32_t addr = ((bank & 0xf) << 16) & ptr;
+	uint32_t addr = ((bank & 0xf) << 16) | ptr;
 	memory[addr] = data;
 }
