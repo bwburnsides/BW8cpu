@@ -126,10 +126,13 @@ namespace BW8cpu {
                 cpu->A = cpu->dbus;
                 break;
             case DbusLoad::B:
+                cpu->B = cpu->dbus;
                 break;
             case DbusLoad::C:
+                cpu->C = cpu->dbus;
                 break;
             case DbusLoad::D:
+                cpu->D = cpu->dbus;
                 break;
             case DbusLoad::DP:
                 break;
@@ -144,6 +147,7 @@ namespace BW8cpu {
             case DbusLoad::MEM:
                 break;
             case DbusLoad::IR:
+                cpu->IR = cpu->dbus;
                 break;
             case DbusLoad::OFF:
                 break;
@@ -316,6 +320,7 @@ namespace BW8cpu {
     }
 
     void cpu_dump(BW8cpu* cpu, FILE* stream) {
+        CtrlLines lines = decode_ctrl(cpu);
         fprintf(
             stream,
             DUMP_TEMPLATE,
@@ -334,7 +339,10 @@ namespace BW8cpu {
             cpu->state,
             cpu->addr,
             cpu->dbus,
-            cpu->xfer
+            cpu->xfer,
+            lines.dbus_load,
+            lines.dbus_assert
+
         );
     }
 
@@ -407,7 +415,45 @@ namespace BW8cpu {
     }
 
     void assert_dbus(BW8cpu* cpu) {
+        CtrlLines lines = decode_ctrl(cpu);
 
+        switch (lines.dbus_assert) {
+            case DbusAssert::ALU:
+                break;
+            case DbusAssert::A:
+                break;
+            case DbusAssert::B:
+                break;
+            case DbusAssert::C:
+                break;
+            case DbusAssert::D:
+                break;
+            case DbusAssert::DP:
+                break;
+            case DbusAssert::DA:
+                break;
+            case DbusAssert::TH:
+                break;
+            case DbusAssert::TL:
+                break;
+            case DbusAssert::SR:
+                break;
+            case DbusAssert::MEM:
+                cpu->dbus = cpu->read(
+                    cpu->BR,
+                    cpu->addr,
+                    cpu->bus_flags.mem_io,
+                    cpu->bus_flags.super_user,
+                    cpu->bus_flags.data_code
+                );
+                break;
+            case DbusAssert::MSB:
+                break;
+            case DbusAssert::LSB:
+                break;
+            case DbusAssert::BR:
+                break;
+        }
     }
 
     void read_ucode(BW8cpu* cpu) {
@@ -428,5 +474,10 @@ namespace BW8cpu {
 			fread(cpu->ucode[i], sizeof(uint8_t), 256 * 1024, fp);
 			fclose(fp);
 		}
+    }
+
+    void clock(BW8cpu* cpu) {
+        rising(cpu);
+        falling(cpu);
     }
 }

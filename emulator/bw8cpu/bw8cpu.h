@@ -10,8 +10,10 @@
 "Tstate: %d\n"\
 "State: %d\n"\
 "ADDR: %d\n"\
-"DDBUS: %d\n"\
-"XFER: %d\n\n\n\n"
+"DBUS: %d\n"\
+"XFER: %d\n"\
+"DBUS_LOAD: %d\n"\
+"DBUS_ASSERT: %d\n"
 
 namespace BW8cpu {
 	typedef uint8_t (* BusRead)(
@@ -233,4 +235,5 @@ namespace BW8cpu {
     void assert_xfer(BW8cpu* cpu);
     void assert_dbus(BW8cpu* cpu);
     void read_ucode(BW8cpu* cpu);
+    void clock(BW8cpu* cpu);
 }  // namespace BW8cpu

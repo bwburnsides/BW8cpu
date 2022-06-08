@@ -7,6 +7,7 @@
     #fill
 }
 
-nop
-clc
-nop
+load a, #1
+load b, #2
+load c, #3
+load d, #4
