@@ -102,6 +102,11 @@ namespace BW8cpu {
             cpu->ctrl[i] = cpu->ucode[i][cpu->state];
         }
 
+        CtrlLines lines = decode_ctrl(cpu);
+        if (lines.tog_ext) {
+            cpu->ctrl_flags.ext = true;
+        }
+
         // Finally, perform the bus assertions
         assert_addr(cpu);
         assert_xfer(cpu);
@@ -117,6 +122,10 @@ namespace BW8cpu {
 
         if (lines.rst_useq) {
             cpu->tstate = 0;
+        }
+
+        if (cpu->tstate == 0) {
+            cpu->ctrl_flags.ext = false;
         }
 
         switch (lines.dbus_load) {
@@ -135,39 +144,61 @@ namespace BW8cpu {
                 cpu->D = cpu->dbus;
                 break;
             case DbusLoad::DP:
+                cpu->DP = cpu->dbus;
                 break;
             case DbusLoad::DA:
+                cpu->DA = cpu->dbus;
                 break;
             case DbusLoad::TH:
+                cpu->TH = cpu->dbus;
                 break;
             case DbusLoad::TL:
+                cpu->TL = cpu->dbus;
                 break;
             case DbusLoad::SR:
                 break;
             case DbusLoad::MEM:
+                cpu->write(
+                    cpu->BR,
+                    cpu->addr_out,
+                    cpu->dbus,
+                    cpu->bus_flags.mem_io,
+                    cpu->bus_flags.super_user,
+                    cpu->bus_flags.data_code
+                );
                 break;
             case DbusLoad::IR:
                 cpu->IR = cpu->dbus;
                 break;
             case DbusLoad::OFF:
+                cpu->OF = cpu->dbus;
                 break;
             case DbusLoad::PCH:
+                cpu->PC = (cpu->dbus << 8) | (cpu->PC & 0xFF);
                 break;
             case DbusLoad::PCL:
+                cpu->PC = (cpu->PC & 0xFF00) | (cpu->dbus);
                 break;
             case DbusLoad::SPH:
+                cpu->SP = (cpu->dbus << 8) | (cpu->SP & 0xFF);
                 break;
             case DbusLoad::SPL:
+                cpu->SP = (cpu->SP & 0xFF00) | (cpu->dbus);
                 break;
             case DbusLoad::XH:
+                cpu->X = (cpu->dbus << 8) | (cpu->X & 0xFF);
                 break;
             case DbusLoad::XL:
+                cpu->X = (cpu->X & 0xFF00) | (cpu->dbus);
                 break;
             case DbusLoad::YH:
+                cpu->Y = (cpu->dbus << 8) | (cpu->Y & 0xFF);
                 break;
             case DbusLoad::YL:
+                cpu->Y = (cpu->Y & 0xFF00) | (cpu->dbus);
                 break;
             case DbusLoad::BR:
+                cpu->BR = cpu->dbus;
                 break;
             case DbusLoad::SET_UBR:
                 break;
@@ -199,13 +230,41 @@ namespace BW8cpu {
                 cpu->Y++;
                 break;
             case Count::ADDR_INC:
-                // todo
                 break;
             case Count::X_DEC:
                 cpu->X--;
                 break;
             case Count::Y_DEC:
                 cpu->Y--;
+                break;
+        }
+
+        if (lines.dec_sp) {
+            cpu->SP--;
+        }
+
+        switch (lines.xfer_load) {
+            case XferLoad::NONE:
+                break;
+            case XferLoad::PC:
+                cpu->PC = cpu->xfer;
+                break;
+            case XferLoad::SP:
+                cpu->SP = cpu->xfer;
+                break;
+            case XferLoad::X:
+                cpu->X = cpu->xfer;
+                break;
+            case XferLoad::Y:
+                cpu->Y = cpu->xfer;
+                break;
+            case XferLoad::AB:
+                cpu->A = cpu->xfer >> 8;
+                cpu->B = cpu->xfer & 0xFF;
+                break;
+            case XferLoad::CD:
+                cpu->C = cpu->xfer >> 8;
+                cpu->D = cpu->xfer & 0xFF;
                 break;
         }
     }
@@ -323,26 +382,26 @@ namespace BW8cpu {
         CtrlLines lines = decode_ctrl(cpu);
         fprintf(
             stream,
-            DUMP_TEMPLATE,
-            cpu->PC,
-            cpu->SP,
-            cpu->X,
-            cpu->Y,
-            cpu->A,
-            cpu->B,
-            cpu->C,
-            cpu->D,
-            cpu->IR,
-            cpu->BR,
-            cpu->OF,
+            STATE_FORMAT,
+            cpu->clocks,
             cpu->tstate,
-            cpu->state,
-            cpu->addr,
-            cpu->dbus,
-            cpu->xfer,
-            lines.dbus_load,
-            lines.dbus_assert
-
+            bool_colored(cpu->status_flags.Cf),
+            bool_colored(cpu->status_flags.Zf),
+            bool_colored(cpu->status_flags.Vf),
+            bool_colored(cpu->status_flags.Nf),
+            bool_colored(cpu->status_flags.If),
+            bool_colored(cpu->ctrl_flags.sup),
+            bool_colored(cpu->ctrl_flags.ubr),
+            bool_colored(cpu->interrupts.rst),
+            bool_colored(cpu->interrupts.req),
+            bool_colored(cpu->interrupts.nmi),
+            bool_colored(cpu->interrupts.irq),
+            "FETCH",
+            cpu->dbus, cpu->addr, cpu->xfer, cpu->addr_out,
+            cpu->PC, cpu->SP, cpu->X, cpu->Y,
+            cpu->A, cpu->B, cpu->C, cpu->D,
+            cpu->DP, cpu->DA, cpu->TH, cpu->TL,
+            cpu->BR, cpu->OF, cpu->IR
         );
     }
 
@@ -364,8 +423,8 @@ namespace BW8cpu {
 		lines.dbus_load 	    = DbusLoad((cpu->ctrl[1] >> 0) & 0b11111);
 		lines.addr_assert 	    = AddrAssert((cpu->ctrl[1] >> 5) & 0b111);
 
-		// lines.xfer_assert	= XferAssert((cpu->ctrl[2] >> 0) & 0b11111);
-		// lines.xfer_load 	    = XferLoad((cpu->ctrl[2] >> 5) & 0b111);
+		lines.xfer_assert	    = XferAssert((cpu->ctrl[2] >> 0) & 0b11111);
+		lines.xfer_load 	    = XferLoad((cpu->ctrl[2] >> 5) & 0b111);
 
 		lines.count 		    = Count((cpu->ctrl[3] >> 0) & 0b111);
 		lines.dec_sp 		    = (bool)((cpu->ctrl[3] >> 3) & 0b1);
@@ -408,10 +467,118 @@ namespace BW8cpu {
                 cpu->bus_flags.mem_io = false;
                 break;
         }
+
+        int16_t sign_ex_offset = (int16_t)((int8_t)(cpu->OF));
+        cpu->addr_out = cpu->addr;
+        if (lines.offset) {
+            cpu->addr_out += sign_ex_offset;
+            if (lines.count == Count::ADDR_INC) {
+                cpu->addr_out += 1;
+            }
+        }
     }
 
     void assert_xfer(BW8cpu* cpu) {
+        CtrlLines lines = decode_ctrl(cpu);
 
+        switch (lines.xfer_assert) {
+            case XferAssert::PC:
+                cpu->xfer = cpu->PC;
+                break;
+            case XferAssert::SP:
+                cpu->xfer = cpu->SP;
+                break;
+            case XferAssert::X:
+                cpu->xfer = cpu->X;
+                break;
+            case XferAssert::Y:
+                cpu->xfer = cpu->Y;
+                break;
+            case XferAssert::IRQ:
+                cpu->xfer = IRQ_ADDR;
+                break;
+            case XferAssert::ADDR:
+                cpu->xfer = cpu->addr_out;
+                break;
+            case XferAssert::A_A:
+                cpu->xfer = (cpu->A << 8) | (cpu->A << 0);
+                break;
+            case XferAssert::A_B:
+                cpu->xfer = (cpu->A << 8) | (cpu->B << 0);
+                break;
+            case XferAssert::A_C:
+                cpu->xfer = (cpu->A << 8) | (cpu->C << 0);
+                break;
+            case XferAssert::A_D:
+                cpu->xfer = (cpu->A << 8) | (cpu->D << 0);
+                break;
+            case XferAssert::A_TL:
+                cpu->xfer = (cpu->A << 8) | (cpu->TL << 0);
+                break;
+            case XferAssert::B_A:
+                cpu->xfer = (cpu->B << 8) | (cpu->A << 0);
+                break;
+            case XferAssert::B_B:
+                cpu->xfer = (cpu->B << 8) | (cpu->B << 0);
+                break;
+            case XferAssert::B_C:
+                cpu->xfer = (cpu->B << 8) | (cpu->C << 0);
+                break;
+            case XferAssert::B_D:
+                cpu->xfer = (cpu->B << 8) | (cpu->D << 0);
+                break;
+            case XferAssert::B_TL:
+                cpu->xfer = (cpu->B << 8) | (cpu->TL << 0);
+                break;
+            case XferAssert::C_A:
+                cpu->xfer = (cpu->C << 8) | (cpu->A << 0);
+                break;
+            case XferAssert::C_B:
+                cpu->xfer = (cpu->C << 8) | (cpu->B << 0);
+                break;
+            case XferAssert::C_C:
+                cpu->xfer = (cpu->C << 8) | (cpu->C << 0);
+                break;
+            case XferAssert::C_D:
+                cpu->xfer = (cpu->C << 8) | (cpu->D << 0);
+                break;
+            case XferAssert::C_TL:
+                cpu->xfer = (cpu->C << 8) | (cpu->TL << 0);
+                break;
+            case XferAssert::D_A:
+                cpu->xfer = (cpu->D << 8) | (cpu->A << 0);
+                break;
+            case XferAssert::D_B:
+                cpu->xfer = (cpu->D << 8) | (cpu->B << 0);
+                break;
+            case XferAssert::D_C:
+                cpu->xfer = (cpu->D << 8) | (cpu->C << 0);
+                break;
+            case XferAssert::D_D:
+                cpu->xfer = (cpu->D << 8) | (cpu->D << 0);
+                break;
+            case XferAssert::D_TL:
+                cpu->xfer = (cpu->D << 8) | (cpu->TL << 0);
+                break;
+            case XferAssert::TH_A:
+                cpu->xfer = (cpu->TH << 8) | (cpu->A << 0);
+                break;
+            case XferAssert::TH_B:
+                cpu->xfer = (cpu->TH << 8) | (cpu->B << 0);
+                break;
+            case XferAssert::TH_C:
+                cpu->xfer = (cpu->TH << 8) | (cpu->C << 0);
+                break;
+            case XferAssert::TH_D:
+                cpu->xfer = (cpu->TH << 8) | (cpu->D << 0);
+                break;
+            case XferAssert::T:
+                cpu->xfer = (cpu->TH << 8) | (cpu->TL << 0);
+                break;
+            case XferAssert::NMI:
+                cpu->xfer = NMI_ADDR;
+                break;
+        }
     }
 
     void assert_dbus(BW8cpu* cpu) {
@@ -419,39 +586,52 @@ namespace BW8cpu {
 
         switch (lines.dbus_assert) {
             case DbusAssert::ALU:
+                cpu->dbus = cpu->ALU;
                 break;
             case DbusAssert::A:
+                cpu->dbus = cpu->A;
                 break;
             case DbusAssert::B:
+                cpu->dbus = cpu->B;
                 break;
             case DbusAssert::C:
+                cpu->dbus = cpu->C;
                 break;
             case DbusAssert::D:
+                cpu->dbus = cpu->D;
                 break;
             case DbusAssert::DP:
+                cpu->dbus = cpu->DP;
                 break;
             case DbusAssert::DA:
+                cpu->dbus = cpu->DA;
                 break;
             case DbusAssert::TH:
+                cpu->dbus = cpu->TH;
                 break;
             case DbusAssert::TL:
+                cpu->dbus = cpu->TL;
                 break;
             case DbusAssert::SR:
+                // TODO - flag unpacking
                 break;
             case DbusAssert::MEM:
                 cpu->dbus = cpu->read(
                     cpu->BR,
-                    cpu->addr,
+                    cpu->addr_out,
                     cpu->bus_flags.mem_io,
                     cpu->bus_flags.super_user,
                     cpu->bus_flags.data_code
                 );
                 break;
             case DbusAssert::MSB:
+                cpu->dbus = cpu->xfer >> 8;
                 break;
             case DbusAssert::LSB:
+                cpu->dbus = cpu->xfer & 0xff;
                 break;
             case DbusAssert::BR:
+                cpu->dbus = cpu->BR;
                 break;
         }
     }
@@ -479,5 +659,9 @@ namespace BW8cpu {
     void clock(BW8cpu* cpu) {
         rising(cpu);
         falling(cpu);
+    }
+
+    const char* bool_colored(bool flag) {
+        return flag ? GREEN_TEXT : RED_TEXT;
     }
 }

@@ -82,7 +82,7 @@ _ = ASSEMBLY_TIME_CHECKS()
 
     ; 8-bit Loads
     load a, #{imm: i8}              => opcode(OP_LOAD_A_IMM)    @ imm
-    load a, [{abs: u16}]            => opcode(OP_LOAD_A_IMM)    @ abs
+    load a, [{abs: u16}]            => opcode(OP_LOAD_A_ABS)    @ abs
     load a, [!{dp: u8}]             => opcode(OP_LOAD_A_DP)     @ dp
     load a, [x, #{idx: s8}]         => opcode(OP_LOAD_A_X_IDX)  @ idx
     load a, [x, a]                  => opcode(OP_LOAD_A_X_A)
@@ -101,7 +101,7 @@ _ = ASSEMBLY_TIME_CHECKS()
     load a, [sp, d]                 => opcode(OP_LOAD_A_SP_D)
 
     load b, #{imm: i8}              => opcode(OP_LOAD_B_IMM)    @ imm
-    load b, [{abs: u16}]            => opcode(OP_LOAD_B_IMM)    @ abs
+    load b, [{abs: u16}]            => opcode(OP_LOAD_B_ABS)    @ abs
     load b, [!{dp: u8}]             => opcode(OP_LOAD_B_DP)     @ dp
     load b, [x, #{idx: s8}]         => opcode(OP_LOAD_B_X_IDX)  @ idx
     load b, [x, a]                  => opcode(OP_LOAD_B_X_A)
@@ -120,7 +120,7 @@ _ = ASSEMBLY_TIME_CHECKS()
     load b, [sp, d]                 => opcode(OP_LOAD_B_SP_D)
 
     load c, #{imm: i8}              => opcode(OP_LOAD_C_IMM)    @ imm
-    load c, [{abs: u16}]            => opcode(OP_LOAD_C_IMM)    @ abs
+    load c, [{abs: u16}]            => opcode(OP_LOAD_C_ABS)    @ abs
     load c, [!{dp: u8}]             => opcode(OP_LOAD_C_DP)     @ dp
     load c, [x, #{idx: s8}]         => opcode(OP_LOAD_C_X_IDX)  @ idx
     load c, [x, a]                  => opcode(OP_LOAD_C_X_A)
@@ -139,7 +139,7 @@ _ = ASSEMBLY_TIME_CHECKS()
     load c, [sp, d]                 => opcode(OP_LOAD_C_SP_D)
 
     load d, #{imm: i8}              => opcode(OP_LOAD_D_IMM)    @ imm
-    load d, [{abs: u16}]            => opcode(OP_LOAD_D_IMM)    @ abs
+    load d, [{abs: u16}]            => opcode(OP_LOAD_D_ABS)    @ abs
     load d, [!{dp: u8}]             => opcode(OP_LOAD_D_DP)     @ dp
     load d, [x, #{idx: s8}]         => opcode(OP_LOAD_D_X_IDX)  @ idx
     load d, [x, a]                  => opcode(OP_LOAD_D_X_A)
@@ -277,17 +277,17 @@ _ = ASSEMBLY_TIME_CHECKS()
     store [sp, #{imm: u8}], y       => opcode(OP_STORE_Y_SP_IDX)    @ idx
 
     ; Load Effective Address
-    lea x, #{idx: s8}               => opcode(OP_LEA_X_IDX)
+    lea x, #{idx: s8}               => opcode(OP_LEA_X_IDX)         @ idx
     lea x, a                        => opcode(OP_LEA_X_A)
     lea x, b                        => opcode(OP_LEA_X_B)
     lea x, c                        => opcode(OP_LEA_X_C)
     lea x, d                        => opcode(OP_LEA_X_D)
-    lea y, #{idx: s8}               => opcode(OP_LEA_Y_IDX)
+    lea y, #{idx: s8}               => opcode(OP_LEA_Y_IDX)         @ idx
     lea y, a                        => opcode(OP_LEA_Y_A)
     lea y, b                        => opcode(OP_LEA_Y_B)
     lea y, c                        => opcode(OP_LEA_Y_C)
     lea y, d                        => opcode(OP_LEA_Y_D)
-    lea sp, #{idx: s8}              => opcode(OP_LEA_SP_IDX)
+    lea sp, #{idx: s8}              => opcode(OP_LEA_SP_IDX)        @ idx
     lea sp, a                       => opcode(OP_LEA_SP_A)
     lea sp, b                       => opcode(OP_LEA_SP_B)
     lea sp, c                       => opcode(OP_LEA_SP_C)

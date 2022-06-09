@@ -3,6 +3,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#ifdef _WIN32
+#include <Windows.h>
+#else
+#include <unistd.h>
+#endif
+
 #include "bw8cpu.h"
 
 #define ADDR_SPACE_SIZE 1024 * 1024
@@ -34,11 +40,11 @@ int main(int argc, char** argv) {
     BW8cpu::reset(cpu, true);
     BW8cpu::reset(cpu, false);
 
-    BW8cpu::clock(cpu);
-    BW8cpu::cpu_dump(cpu, stdout);
-
-    BW8cpu::clock(cpu);
-    BW8cpu::cpu_dump(cpu, stdout);
+    while (true) {
+        BW8cpu::clock(cpu);
+        BW8cpu::cpu_dump(cpu, stdout);
+        Sleep(150);
+    }
 
     BW8cpu::cpu_free(cpu);
 }

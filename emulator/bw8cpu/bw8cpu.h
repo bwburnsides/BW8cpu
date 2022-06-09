@@ -2,20 +2,26 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define DUMP_TEMPLATE ""\
-"BW8cpu Dump:\n"\
-"PC: %d\tSP: %d\tX: %d\tY: %d\n"\
-"A: %d\tB: %d\tC: %d\tD: %d\n"\
-"IR: %d\tBR: %d\tOF: %d\n"\
-"Tstate: %d\n"\
-"State: %d\n"\
-"ADDR: %d\n"\
-"DBUS: %d\n"\
-"XFER: %d\n"\
-"DBUS_LOAD: %d\n"\
-"DBUS_ASSERT: %d\n"
+#define RED_TEXT "\033[0;31m"
+#define GREEN_TEXT "\033[0;32m"
+#define RESET_TEXT "\033[0m"
+#define STATE_FORMAT "\033[0;0H"\
+"+----------------------------------------------------+\n"\
+"| BW8cpu Emulator                          June 2022 |\n"\
+"| Clock Cycles: %-20lld       Tstate: %1d |\n"\
+"+----------------------------------------------------+\n"\
+"| Status: %sC %sZ %sV %sN %sI %sS %sU    %sRST %sREQ %sNMI %sIRQ\033[0m   %6s  |\n"\
+"| DBUS:  $%02X  ADDR: $%04X  XFER: $%04X  AOUT: $%04X  |\n"\
+"| PC:  $%04X   SP:  $%04X    X:  $%04X    Y:  $%04X  |\n"\
+"| A:     $%02x    B:    $%02X    C:    $%02X    D:    $%02X  |\n"\
+"| DP:    $%02x   DA:    $%02X   TH:    $%02X   TL:    $%02X  |\n"\
+"| BR:     $%01x   OF:    $%02X   IR:    $%02X               |\n"\
+"+----------------------------------------------------+\n"
 
 namespace BW8cpu {
+    static uint16_t IRQ_ADDR = 0x0003;
+    static uint16_t NMI_ADDR = 0x0006;
+
 	typedef uint8_t (* BusRead)(
         uint8_t bank,
         uint16_t ptr,
@@ -132,14 +138,6 @@ namespace BW8cpu {
         IO
     };
 
-    // enum class XferAssert {
-
-    // };
-
-    // enum class XferLoad {
-
-    // };
-
     enum class Count {
         NONE,
         PC_INC,
@@ -151,13 +149,58 @@ namespace BW8cpu {
         Y_DEC
     };
 
+    enum class XferAssert {
+        PC,
+        SP,
+        X,
+        Y,
+        IRQ,
+        ADDR,
+        A_A,
+        A_B,
+        A_C,
+        A_D,
+        A_TL,
+        B_A,
+        B_B,
+        B_C,
+        B_D,
+        B_TL,
+        C_A,
+        C_B,
+        C_C,
+        C_D,
+        C_TL,
+        D_A,
+        D_B,
+        D_C,
+        D_D,
+        D_TL,
+        TH_A,
+        TH_B,
+        TH_C,
+        TH_D,
+        T,
+        NMI,
+    };
+
+    enum class XferLoad {
+        NONE,
+        PC,
+        SP,
+        X,
+        Y,
+        AB,
+        CD,
+    };
+
     typedef struct CtrlLines {
         DbusAssert dbus_assert;
         // AluOp alu_op;
         DbusLoad dbus_load;
         AddrAssert addr_assert;
-        // XferAssert xfer_assert;
-        // XferLoad xfer_load;
+        XferAssert xfer_assert;
+        XferLoad xfer_load;
         Count count;
         bool dec_sp;
         bool rst_useq;
@@ -236,4 +279,6 @@ namespace BW8cpu {
     void assert_dbus(BW8cpu* cpu);
     void read_ucode(BW8cpu* cpu);
     void clock(BW8cpu* cpu);
+
+    const char* bool_colored(bool flag);
 }  // namespace BW8cpu

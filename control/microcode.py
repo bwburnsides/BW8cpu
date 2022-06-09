@@ -320,7 +320,7 @@ def load8_ptr_idx(dst: GPR, ptr: PTR) -> list[int]:
         | Ctrl.DBUS_LOAD_OFF
         | Ctrl.COUNT_INC_PC
     )
-    uops[2] |= ptr.ADDR_ASSERT | Ctrl.OFFSET | dst.DBUS_LOAD | Ctrl.RST_USEQ
+    uops[2] |= ptr.ADDR_ASSERT | Ctrl.OFFSET | Ctrl.DBUS_ASSERT_MEM | dst.DBUS_LOAD | Ctrl.RST_USEQ
     return uops
 
 
@@ -328,7 +328,7 @@ def load8_ptr_gpr(dst: GPR, ptr: PTR, idx: GPR) -> list[int]:
     uops = BASE.copy()
 
     uops[1] |= idx.DBUS_ASSERT | Ctrl.DBUS_LOAD_OFF
-    uops[2] |= ptr.ADDR_ASSERT | Ctrl.OFFSET | dst.DBUS_LOAD | Ctrl.RST_USEQ
+    uops[2] |= ptr.ADDR_ASSERT | Ctrl.OFFSET | Ctrl.DBUS_ASSERT_MEM | dst.DBUS_LOAD | Ctrl.RST_USEQ
     return uops
 
 
