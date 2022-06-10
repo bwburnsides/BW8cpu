@@ -329,7 +329,7 @@ _ = ASSEMBLY_TIME_CHECKS()
     adc [!{dp: u8}], b              => opcode(OP_ADC_D_B)   @ dp
     adc [!{dp: u8}], c              => opcode(OP_ADC_D_C)   @ dp
     adc [!{dp: u8}], d              => opcode(OP_ADC_D_D)   @ dp
-    adc [!{dp: u8}], #{imm: i8}     => opcode(OP_ADC_D_IMM) @ imm @ dp
+    adc [!{dp: u8}], #{imm: i8}     => opcode(OP_ADC_D_IMM) @ dp @ imm
 
     ; Subtract with Carry
     sbc a, a                        => opcode(OP_SBC_A_A)
@@ -364,7 +364,7 @@ _ = ASSEMBLY_TIME_CHECKS()
     sbc [!{dp: u8}], b              => opcode(OP_SBC_D_B)   @ dp
     sbc [!{dp: u8}], c              => opcode(OP_SBC_D_C)   @ dp
     sbc [!{dp: u8}], d              => opcode(OP_SBC_D_D)   @ dp
-    sbc [!{dp: u8}], #{imm: i8}     => opcode(OP_SBC_D_IMM) @ imm @ dp
+    sbc [!{dp: u8}], #{imm: i8}     => opcode(OP_SBC_D_IMM) @ dp @ imm
 
     ; Logical AND
     and a, b                        => opcode(OP_AND_A_B)
@@ -395,7 +395,7 @@ _ = ASSEMBLY_TIME_CHECKS()
     and [!{dp: u8}], b              => opcode(OP_AND_D_B)   @ dp
     and [!{dp: u8}], c              => opcode(OP_AND_D_C)   @ dp
     and [!{dp: u8}], d              => opcode(OP_AND_D_D)   @ dp
-    and [!{dp: u8}], #{imm: i8}     => opcode(OP_AND_D_IMM) @ imm @ dp
+    and [!{dp: u8}], #{imm: i8}     => opcode(OP_AND_D_IMM) @ dp @ imm
 
     ; Logical OR
     or a, b                         => opcode(OP_OR_A_B)
@@ -426,7 +426,7 @@ _ = ASSEMBLY_TIME_CHECKS()
     or [!{dp: u8}], b               => opcode(OP_OR_D_B)    @ dp
     or [!{dp: u8}], c               => opcode(OP_OR_D_C)    @ dp
     or [!{dp: u8}], d               => opcode(OP_OR_D_D)    @ dp
-    or [!{dp: u8}], #{imm: i8}      => opcode(OP_OR_D_IMM)  @ imm @ dp
+    or [!{dp: u8}], #{imm: i8}      => opcode(OP_OR_D_IMM)  @ dp @ imm
 
     ; Logical XOR
     xor a, a                        => opcode(OP_XOR_A_A)
@@ -461,7 +461,7 @@ _ = ASSEMBLY_TIME_CHECKS()
     xor [!{dp: u8}], b              => opcode(OP_XOR_D_B)   @ dp
     xor [!{dp: u8}], c              => opcode(OP_XOR_D_C)   @ dp
     xor [!{dp: u8}], d              => opcode(OP_XOR_D_D)   @ dp
-    xor [!{dp: u8}], #{imm: i8}     => opcode(OP_XOR_D_IMM) @ imm @ dp
+    xor [!{dp: u8}], #{imm: i8}     => opcode(OP_XOR_D_IMM) @ dp @ imm
 
     ; Logical NOT
     not a                       => opcode(OP_NOT_A)
@@ -516,7 +516,6 @@ _ = ASSEMBLY_TIME_CHECKS()
     push d                      => opcode(OP_PUSH_D)
     push x                      => opcode(OP_PUSH_X)
     push y                      => opcode(OP_PUSH_Y)
-    push sr                     => opcode(OP_PUSH_SR)
 
     ; Stack Pops
     pop a                       => opcode(OP_POP_A)
@@ -525,7 +524,6 @@ _ = ASSEMBLY_TIME_CHECKS()
     pop d                       => opcode(OP_POP_D)
     pop x                       => opcode(OP_POP_X)
     pop y                       => opcode(OP_POP_Y)
-    pop sr                      => opcode(OP_POP_SR)
 
     ; Compares
     cmp a, a                    => opcode(OP_CMP_A_A)
@@ -666,14 +664,14 @@ _ = ASSEMBLY_TIME_CHECKS()
     load d, [x]     => asm{load d, [x, #0]}
     load d, [y]     => asm{load d, [y, #0]}
 
-    store a, [x]    => asm{store a, [x, #0]}
-    store a, [y]    => asm{store a, [y, #0]}
-    store b, [x]    => asm{store b, [x, #0]}
-    store b, [y]    => asm{store b, [y, #0]}
-    store c, [x]    => asm{store c, [x, #0]}
-    store c, [y]    => asm{store c, [y, #0]}
-    store d, [x]    => asm{store d, [x, #0]}
-    store d, [y]    => asm{store d, [y, #0]}
+    store [x], a    => asm{store [x, #0], a}
+    store [y], a    => asm{store [y, #0], a}
+    store [x], b    => asm{store [x, #0], b}
+    store [y], b    => asm{store [y, #0], b}
+    store [x], c    => asm{store [x, #0], c}
+    store [y], c    => asm{store [y, #0], c}
+    store [x], d    => asm{store [x, #0], d}
+    store [y], d    => asm{store [y, #0], d}
 
     load x, [x]     => asm{load x, [x, #0]}
     load x, [y]     => asm{load x, [y, #0]}
@@ -689,10 +687,10 @@ _ = ASSEMBLY_TIME_CHECKS()
         load d, #imm[7:0]
     }
 
-    store x, [x]    => asm{store x, [x, #0]}
-    store x, [y]    => asm{store x, [y, #0]}
-    store y, [x]    => asm{store y, [x, #0]}
-    store y, [y]    => asm{store y, [y, #0]}
+    store [x], x    => asm{store [x, #0], x}
+    store [y], x    => asm{store [y, #0], x}
+    store [x], y    => asm{store [x, #0], y}
+    store [y], y    => asm{store [y, #0], y}
 
     mov ab, cd  => asm{
         mov a, c
