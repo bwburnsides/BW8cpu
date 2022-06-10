@@ -35,15 +35,21 @@ void bus_write(
 );
 
 int main(int argc, char** argv) {
-    initialize_memory("C:/Users/brady/projects/BW8cpu/assembler/test.bin");
+    if (argc < 2) {
+        fprintf(stderr, "usage: bw8emu.exe <rom_path>");
+        exit(-1);
+    }
+
+    char *fname = argv[1];
+    initialize_memory(fname);
     BW8cpu::BW8cpu* cpu = BW8cpu::cpu_malloc(bus_read, bus_write);
     BW8cpu::reset(cpu, true);
     BW8cpu::reset(cpu, false);
 
     while (true) {
-        BW8cpu::clock(cpu);
         BW8cpu::cpu_dump(cpu, stdout);
-        Sleep(150);
+        BW8cpu::clock(cpu);
+        Sleep(1000);
     }
 
     BW8cpu::cpu_free(cpu);

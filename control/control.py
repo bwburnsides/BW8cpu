@@ -65,6 +65,7 @@ class Ctrl:
     DBUS_LOAD_YH = 19 << 8
     DBUS_LOAD_YL = 20 << 8
     DBUS_LOAD_BR = 21 << 8
+
     SET_USE_BR = 22 << 8
     CLR_USE_BR = 23 << 8
     SET_SUPER_MODE = 24 << 8

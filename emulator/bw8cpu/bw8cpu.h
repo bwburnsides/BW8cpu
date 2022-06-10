@@ -10,17 +10,35 @@
 "| BW8cpu Emulator                          June 2022 |\n"\
 "| Clock Cycles: %-20lld       Tstate: %1d |\n"\
 "+----------------------------------------------------+\n"\
-"| Status: %sC %sZ %sV %sN %sI %sS %sU    %sRST %sREQ %sNMI %sIRQ\033[0m   %6s  |\n"\
+"| Status: %sC %sZ %sV %sN %sI %sS %sU %sE  %sRST %sREQ %sNMI %sIRQ\033[0m   %6s  |\n"\
 "| DBUS:  $%02X  ADDR: $%04X  XFER: $%04X  AOUT: $%04X  |\n"\
 "| PC:  $%04X   SP:  $%04X    X:  $%04X    Y:  $%04X  |\n"\
-"| A:     $%02x    B:    $%02X    C:    $%02X    D:    $%02X  |\n"\
-"| DP:    $%02x   DA:    $%02X   TH:    $%02X   TL:    $%02X  |\n"\
-"| BR:     $%01x   OF:    $%02X   IR:    $%02X               |\n"\
+"| A:     $%02X    B:    $%02X    C:    $%02X    D:    $%02X  |\n"\
+"| DP:    $%02X   DA:    $%02X   TH:    $%02X   TL:    $%02X  |\n"\
+"| BR:     $%01X   OF:    $%02X   IR:    $%02X               |\n"\
 "+----------------------------------------------------+\n"
 
 namespace BW8cpu {
     static uint16_t IRQ_ADDR = 0x0003;
     static uint16_t NMI_ADDR = 0x0006;
+	static uint32_t DIODE_MATRIX[16] = {
+		0b1111111111100001100,
+		0b1101010101011000001,
+		0b1101010101000110001,
+		0b1101110101011001111,
+		0b1101110101011110000,
+		0b1101110111110001100,
+		0b1101110111111101100,
+		0b1101110111101101100,
+		0b1101110111100111100,
+		0b1101110100100001100,
+		0b1101110100100000000,
+		0b0011111111111111111,
+		0b0111111111111111111,
+		0b1111111100011111111,
+		0b1111111101111111111,
+		0b1111101111111111111,
+	};
 
 	typedef uint8_t (* BusRead)(
         uint8_t bank,
@@ -62,9 +80,7 @@ namespace BW8cpu {
     } CtrlFlags;
 
     typedef struct BusFlags {
-        bool read_write;
         bool mem_io;
-        bool super_user;
         bool data_code;
     } BusFlags;
 
@@ -89,12 +105,87 @@ namespace BW8cpu {
         MEM,
         MSB,
         LSB,
-        BR
+        BR,
     };
 
-    // enum class AluOp {
+    enum class AluOp {
+        NOP,
+        ADC,
+        SBC,
+        INC,
+        DEC,
+        AND,
+        OR,
+        XOR,
+        NOT,
+        SRC,
+        ASR,
+        SEI,
+        CLI,
+        SEC,
+        CLC,
+        CLV,
+    };
 
-    // };
+	enum class SumFunc {
+		ZERO,
+		CF,
+		ONE,
+	};
+
+	enum class ShiftFunc {
+		LHS,
+		SRC,
+		ASR,
+		ZERO,
+	};
+
+	enum class LogicFunc {
+		ZERO,
+        PLACEHOLDER1,
+        PLACEHOLDER2,
+		notRHS,
+        PLACEHOLDER4,
+		notLHS,
+		XOR,
+        PLACEHOLDER7,
+		AND,
+        PLACEHOLDER9,
+        LHS,
+        PLACEHOLDER11,
+		RHS,
+        PLACEHOLDER13,
+		OR,
+		MAX,
+	};
+
+	enum class CfFunc {
+		ONE,
+		C_SHIFT,
+		C_SUM,
+		ZERO,
+		NO_CHANGE,
+		PLACEHOLDER5,
+		PLACEHOLDER6,
+		PLACEHOLDER7,
+	};
+
+	enum class ZfFunc {
+		ONE,
+		NEW,
+		ZERO,
+		NO_CHANGE,
+	};
+
+	typedef ZfFunc VfFunc;
+	typedef ZfFunc NfFunc;
+
+	enum class IfFunc {
+		ONE,
+		ZERO,
+        PLACEHOLDER_2,
+		NO_CHANGE,
+	};
 
     enum class DbusLoad {
         NONE,
@@ -196,7 +287,7 @@ namespace BW8cpu {
 
     typedef struct CtrlLines {
         DbusAssert dbus_assert;
-        // AluOp alu_op;
+        AluOp alu_op;
         DbusLoad dbus_load;
         AddrAssert addr_assert;
         XferAssert xfer_assert;
@@ -208,6 +299,17 @@ namespace BW8cpu {
         bool offset;
         bool unused;
     } CtrlLines;
+
+    typedef struct AluCtrlLines {
+        SumFunc sum_func;
+        ShiftFunc shift_func;
+        LogicFunc logic_func;
+        CfFunc cf_func;
+        ZfFunc zf_func;
+        VfFunc vf_func;
+        NfFunc nf_func;
+        IfFunc if_func;
+    } AluCtrlLines;
 
     typedef struct BW8cpu {
 		uint64_t clocks;
@@ -263,22 +365,13 @@ namespace BW8cpu {
     } BW8cpu;
 
     // Interface
-    void reset(BW8cpu* cpu, bool status);
-    void rising(BW8cpu* cpu);
-    void falling(BW8cpu* cpu);
-
-    // Utilities
     BW8cpu* cpu_malloc(BusRead read, BusWrite write);
     void cpu_free(BW8cpu* cpu);
     void cpu_dump(BW8cpu* cpu, FILE* stream);
-
-    uint8_t pack_state_flags(BW8cpu* cpu);
-    CtrlLines decode_ctrl(BW8cpu* cpu);
-    void assert_addr(BW8cpu* cpu);
-    void assert_xfer(BW8cpu* cpu);
-    void assert_dbus(BW8cpu* cpu);
-    void read_ucode(BW8cpu* cpu);
     void clock(BW8cpu* cpu);
+    void cpu_coredump(BW8cpu* cpu);
 
-    const char* bool_colored(bool flag);
+    void reset(BW8cpu* cpu, bool status);
+    void rising(BW8cpu* cpu);
+    void falling(BW8cpu* cpu);
 }  // namespace BW8cpu

@@ -909,35 +909,38 @@ def jsr_ptr(ptr: GPP) -> list[int]:
 def jmp_abs(pred: Callable[[], bool]) -> list[int]:
     uops = BASE.copy()
 
+    uops[1] |= (
+        Ctrl.ADDR_ASSERT_PC
+        | Ctrl.DBUS_ASSERT_MEM
+        | Ctrl.DBUS_LOAD_TH
+        | Ctrl.COUNT_INC_PC
+    )
+    uops[2] |= (
+        Ctrl.ADDR_ASSERT_PC
+        | Ctrl.DBUS_ASSERT_MEM
+        | Ctrl.DBUS_LOAD_TL
+        | Ctrl.COUNT_INC_PC
+    )
+
     if pred():
-        uops[1] |= (
-            Ctrl.ADDR_ASSERT_PC
-            | Ctrl.DBUS_ASSERT_MEM
-            | Ctrl.DBUS_LOAD_TH
-            | Ctrl.COUNT_INC_PC
-        )
-        uops[2] |= (
-            Ctrl.ADDR_ASSERT_PC
-            | Ctrl.DBUS_ASSERT_MEM
-            | Ctrl.DBUS_LOAD_TL
-            | Ctrl.COUNT_INC_PC
-        )
         uops[3] |= Ctrl.XFER_ASSERT_T | Ctrl.XFER_LOAD_PC | Ctrl.RST_USEQ
     else:
-        uops[1] |= Ctrl.RST_USEQ
+        uops[3] |= Ctrl.RST_USEQ
+
     return uops
 
 
 def jmp_rel(pred: Callable[[], bool]) -> list[int]:
     uops = BASE.copy()
 
+    uops[1] |= (
+        Ctrl.ADDR_ASSERT_PC
+        | Ctrl.DBUS_ASSERT_MEM
+        | Ctrl.DBUS_LOAD_OFF
+        | Ctrl.COUNT_INC_PC
+    )
+
     if pred():
-        uops[1] |= (
-            Ctrl.ADDR_ASSERT_PC
-            | Ctrl.DBUS_ASSERT_MEM
-            | Ctrl.DBUS_LOAD_OFF
-            | Ctrl.COUNT_INC_PC
-        )
         uops[2] |= (
             Ctrl.ADDR_ASSERT_PC
             | Ctrl.OFFSET
@@ -946,7 +949,7 @@ def jmp_rel(pred: Callable[[], bool]) -> list[int]:
             | Ctrl.RST_USEQ
         )
     else:
-        uops[1] |= Ctrl.RST_USEQ
+        uops[2] |= Ctrl.RST_USEQ
     return uops
 
 
@@ -2380,7 +2383,7 @@ def main() -> None:
     write_ucode(ucode, "microcode{}.bin")
 
 
-    state = State.from_packed(2560 >> 3)
+    state = State.from_packed(0x8382 >> 3)
     uops = get_uops(state) 
 
     for uop in uops:

@@ -44,6 +44,9 @@ _ = ASSEMBLY_TIME_CHECKS()
     sec                             => opcode(OP_SEC)
     sei                             => opcode(OP_SEI)
 
+    ubr                             => opcode(OP_UBR)
+    kbr                             => opcode(OP_KBR)
+
     ; IO Operations
     in a, <{port: u8}>              => opcode(OP_IN_A)          @ port
     in b, <{port: u8}>              => opcode(OP_IN_B)          @ port
@@ -1012,4 +1015,14 @@ _ = ASSEMBLY_TIME_CHECKS()
         sec
         sbc [!dp], #imm
     }
+
+    jz {abs: u16}               => asm {je abs}
+    jz {rel: bw8cpu_reladdr}    => asm {je rel}
+    jz x                        => asm {je x}
+    jz y                        => asm {je y}
+
+    jnz {abs: u16}              => asm {jne abs}
+    jnz {rel: bw8cpu_reladdr}   => asm {jne rel}
+    jnz x                       => asm {jne x}
+    jnz y                       => asm {jne y}
 }
