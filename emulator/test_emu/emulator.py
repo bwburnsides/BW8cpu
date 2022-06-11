@@ -49,16 +49,30 @@ class CoreDump:
     ir: int
     of: int
 
+    c_f: bool
+    z_f: bool
+    v_f: bool
+    n_f: bool
+    i_f: bool
 
-NoneDump = CoreDump(*(None for _ in range(15)))
+    ext_f: bool
+    nmi_f: bool
+    sup_f: bool
+    ubr_f: bool
 
-def Emulator(assembly: str) -> CoreDump:
+    memory: list[list[int]] | None = None
+
+
+NoneDump = CoreDump(*(None for _ in range(25)))
+
+
+def Emulator(assembly: str, memory=False) -> CoreDump:
     fname = "TEMP_EMU_TESTING"
     asm_path = ASSEMBLER_PATH / f"{fname}.asm"
 
     # Write the assembly to a file
     with open(asm_path, "w") as f:
-        f.write("#include \"bw8cpu.asm\"\n")
+        f.write('#include "bw8cpu.asm"\n')
         f.write(BANK_DEF)
         f.write("\n")
         f.write(assembly)
@@ -66,7 +80,11 @@ def Emulator(assembly: str) -> CoreDump:
 
     # Assemble the file
     try:
-        subprocess.call(["customasm.exe", str(asm_path)], timeout=timeout)
+        subprocess.call(
+            ["customasm.exe", str(asm_path)],
+            timeout=timeout,
+            stdout=subprocess.DEVNULL,
+        )
     except subprocess.TimeoutExpired:
         return NoneDump
     finally:
@@ -75,7 +93,11 @@ def Emulator(assembly: str) -> CoreDump:
     # Run the emulator
     bin_path = ASSEMBLER_PATH / f"{fname}.bin"
     try:
-        subprocess.call([str(EMULATOR_PATH), str(bin_path)], timeout=timeout)
+        subprocess.call(
+            [str(EMULATOR_PATH), str(bin_path)],
+            timeout=timeout,
+            stdout=subprocess.DEVNULL,
+        )
     except subprocess.TimeoutExpired:
         return NoneDump
     finally:
@@ -89,7 +111,23 @@ def Emulator(assembly: str) -> CoreDump:
         for _ in range(11):
             regs.append(int.from_bytes(f.read(1), byteorder="little"))
 
-        core_dump = CoreDump(*regs)
+        flags = []
+        for _ in range(9):
+            regs.append(bool(int.from_bytes(f.read(1), byteorder="little")))
+
+        if memory:
+            memory = []
+            for br in range(16):
+                memory.append([])
+                for _ in range(1024 * 1024):
+                    memory[br].append(int.from_bytes(f.read(1), byteorder="little"))
+
+            final = regs + flags + [memory]
+            core_dump = CoreDump(*final)
+
+        else:
+            final = regs + flags
+            core_dump = CoreDump(*final)
 
     CORE_DUMP_PATH.unlink()
 
@@ -97,6 +135,7 @@ def Emulator(assembly: str) -> CoreDump:
 
 
 OPCODES = list(opcodes.Op)
+
 
 def under_test(*opcodes):
     def decorator(fn):
@@ -109,5 +148,7 @@ def under_test(*opcodes):
                     OPCODES.remove(opcode)
 
             return result
+
         return wrapper
+
     return decorator

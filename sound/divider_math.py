@@ -13,7 +13,7 @@ for crystal in sorted([1843.20, 6144, 1000, 524.288, 500, 1544]):
     print(f"Reference Crystal {crystal} kHz")
     crystal *= 1000
     frequencies = []
-    for b in range(1, 2 ** f_width):
+    for b in range(1, 2**f_width):
         frequencies.append((crystal / div) / b)
 
     print("Audible frequencies: ", sum(f < 20_000 for f in frequencies))

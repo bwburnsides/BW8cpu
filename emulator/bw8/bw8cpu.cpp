@@ -735,7 +735,7 @@ namespace BW8cpu {
         }
     }
 
-    BW8cpu* cpu_malloc(BusRead read, BusWrite write) {
+    BW8cpu* cpu_malloc(BusRead read, BusWrite write, uint8_t *memory) {
         BW8cpu* cpu = (BW8cpu*)malloc(sizeof(BW8cpu));
 
         if (cpu == NULL) {
@@ -761,6 +761,7 @@ namespace BW8cpu {
         cpu->read = read;
         cpu->write = write;
         cpu->clocks = 0;
+        cpu->memory = memory;
 
         srand(time(NULL));
 
@@ -922,10 +923,10 @@ namespace BW8cpu {
 
     void read_ucode(BW8cpu* cpu) {
         const char* fname[4] = {
-			"C:/Users/brady/projects/BW8cpu/control/microcode0.bin",
-			"C:/Users/brady/projects/BW8cpu/control/microcode1.bin",
-			"C:/Users/brady/projects/BW8cpu/control/microcode2.bin",
-			"C:/Users/brady/projects/BW8cpu/control/microcode3.bin",
+			"C:/Users/brady/projects/BW8cpu/control/bin/microcode0.bin",
+			"C:/Users/brady/projects/BW8cpu/control/bin/microcode1.bin",
+			"C:/Users/brady/projects/BW8cpu/control/bin/microcode2.bin",
+			"C:/Users/brady/projects/BW8cpu/control/bin/microcode3.bin",
 		};
 		FILE* fp;
 
@@ -963,6 +964,14 @@ namespace BW8cpu {
             cpu->IR, cpu->OF, cpu->BR,
         };
         fwrite(reg8, sizeof(uint8_t), 11, fp);
+
+        bool flags[] = {
+            cpu->status_flags.Cf, cpu->status_flags.Zf, cpu->status_flags.Vf, cpu->status_flags.Nf, cpu->status_flags.If,
+            cpu->ctrl_flags.ext, cpu->ctrl_flags.nmi, cpu->ctrl_flags.sup, cpu->ctrl_flags.ubr,
+        };
+        fwrite(flags, sizeof(bool), 9, fp);
+
+        fwrite(cpu->memory, sizeof(uint8_t), 1024 * 1024, fp);
 
         fclose(fp);
         exit(0);

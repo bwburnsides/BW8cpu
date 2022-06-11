@@ -1,7 +1,13 @@
 from enum import Enum
-from typing import Callable
-from control import Ctrl, Mode, State
-from opcodes import Op
+from typing import Callable, Final
+
+from .control import Ctrl, Mode, State
+from .opcodes import Op
+
+from pathlib import Path
+import argparse
+
+OUTPUT_LOCATION: Final[Path] = Path(__file__) / ".." / "bin"
 
 
 class GPR(Enum):
@@ -320,7 +326,13 @@ def load8_ptr_idx(dst: GPR, ptr: PTR) -> list[int]:
         | Ctrl.DBUS_LOAD_OFF
         | Ctrl.COUNT_INC_PC
     )
-    uops[2] |= ptr.ADDR_ASSERT | Ctrl.OFFSET | Ctrl.DBUS_ASSERT_MEM | dst.DBUS_LOAD | Ctrl.RST_USEQ
+    uops[2] |= (
+        ptr.ADDR_ASSERT
+        | Ctrl.OFFSET
+        | Ctrl.DBUS_ASSERT_MEM
+        | dst.DBUS_LOAD
+        | Ctrl.RST_USEQ
+    )
     return uops
 
 
@@ -328,7 +340,13 @@ def load8_ptr_gpr(dst: GPR, ptr: PTR, idx: GPR) -> list[int]:
     uops = BASE.copy()
 
     uops[1] |= idx.DBUS_ASSERT | Ctrl.DBUS_LOAD_OFF
-    uops[2] |= ptr.ADDR_ASSERT | Ctrl.OFFSET | Ctrl.DBUS_ASSERT_MEM | dst.DBUS_LOAD | Ctrl.RST_USEQ
+    uops[2] |= (
+        ptr.ADDR_ASSERT
+        | Ctrl.OFFSET
+        | Ctrl.DBUS_ASSERT_MEM
+        | dst.DBUS_LOAD
+        | Ctrl.RST_USEQ
+    )
     return uops
 
 
@@ -960,6 +978,19 @@ def jmp_ptr(pred: Callable[[], bool], ptr: GPP) -> list[int]:
         uops[1] |= ptr.XFER_ASSERT | Ctrl.XFER_LOAD_PC | Ctrl.RST_USEQ
     else:
         uops[1] |= Ctrl.RST_USEQ
+    return uops
+
+
+def musteq_imm(gpr: GPR) -> list[int]:
+    uops = BASE.copy()
+    uops[1] |= (
+        Ctrl.ADDR_ASSERT_PC
+        | Ctrl.DBUS_ASSERT_MEM
+        | Ctrl.COUNT_INC_PC
+        | gpr.XFER_ASSERT_TL
+        | Ctrl.DBUS_LOAD_MUSTEQ
+        | Ctrl.RST_USEQ
+    )
     return uops
 
 
@@ -2292,6 +2323,15 @@ def get_uops(state: State) -> list[int]:
     elif OP == Op.JG_Y:
         return jmp_ptr(flags.is_greater, GPP.Y)
 
+    elif OP == Op.MUSTEQ_A_IMM:
+        return musteq_imm(GPR.A)
+    elif OP == Op.MUSTEQ_B_IMM:
+        return musteq_imm(GPR.B)
+    elif OP == Op.MUSTEQ_C_IMM:
+        return musteq_imm(GPR.C)
+    elif OP == Op.MUSTEQ_D_IMM:
+        return musteq_imm(GPR.D)
+
     else:
         return [-1]
 
@@ -2353,7 +2393,7 @@ def write_ucode(ucode: list[int], file_name_format: str) -> None:
 
     # Write each ROM list to disk
     for rom, name in zip(roms, names):
-        with open(name, "wb") as f:
+        with open(OUTPUT_LOCATION / name, "wb") as f:
             for uop in rom:
                 f.write(uop.to_bytes(1, "big"))
 
@@ -2382,13 +2422,6 @@ def main() -> None:
 
     write_ucode(ucode, "microcode{}.bin")
 
-
-    state = State.from_packed(0x8382 >> 3)
-    uops = get_uops(state) 
-
-    for uop in uops:
-        print(Ctrl.decode(uop))
-        print()
 
 if __name__ == "__main__":
     main()

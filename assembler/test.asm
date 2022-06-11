@@ -11,6 +11,4 @@
     halt => opcode(OP_EXT) @ 0xFC
 }
 
-load x, #0x6809
-mov y, x
-mov sp, x
+halt

@@ -42,14 +42,14 @@ int main(int argc, char** argv) {
 
     char *fname = argv[1];
     initialize_memory(fname);
-    BW8cpu::BW8cpu* cpu = BW8cpu::cpu_malloc(bus_read, bus_write);
+    BW8cpu::BW8cpu* cpu = BW8cpu::cpu_malloc(bus_read, bus_write, memory);
     BW8cpu::reset(cpu, true);
     BW8cpu::reset(cpu, false);
 
     while (true) {
-        // BW8cpu::cpu_dump(cpu, stdout);
+        //BW8cpu::cpu_dump(cpu, stdout);
         BW8cpu::clock(cpu);
-        // Sleep(1000);
+        //Sleep(1000);
     }
 
     BW8cpu::cpu_free(cpu);

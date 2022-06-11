@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from enum import Enum
+from enum import Enum, IntEnum
 
 
 class Ctrl:
@@ -74,6 +74,8 @@ class Ctrl:
     CLR_NMI_MASK = 27 << 8
 
     DBUS_LOAD_PORT = DBUS_LOAD_TL
+
+    DBUS_LOAD_MUSTEQ = 28 << 8
 
     # 3 bits for ADDR Assert
     ADDR_ASSERT_ACK = 0 << 13
@@ -265,9 +267,9 @@ class State:
         packed_flags = (packed_state >> 0) & 0b1111
         op = (packed_state >> 4) & 0b1111_1111
         ext = (packed_state >> 12) & 0b1
-        mode = (packed_state >> 13) & 0b11
+        mode_int = (packed_state >> 13) & 0b11
 
-        mode = Mode(mode)
+        mode = Mode(mode_int)
         flags = Flags(packed_flags)
         opcode = op | (ext << 8)
 

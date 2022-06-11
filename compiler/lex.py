@@ -240,12 +240,18 @@ class Lexer:
                 tokens.append(token)
 
             elif char == '"':
-                tokens.append(Token(kind=TokenKind.StringLiteral, value=self.make_string()))
+                tokens.append(
+                    Token(kind=TokenKind.StringLiteral, value=self.make_string())
+                )
             elif char == "'":
                 tokens.append(Token(kind=TokenKind.CharLiteral, value=self.make_char()))
 
             elif char in self.INT_INIT_CHARS:
-                tokens.append(Token(kind=TokenKind.DecIntegerLiteral, value=self.make_dec_int(char)))
+                tokens.append(
+                    Token(
+                        kind=TokenKind.DecIntegerLiteral, value=self.make_dec_int(char)
+                    )
+                )
             elif char == "0":
                 result = self.make_hex_int(char)
                 if result is not None:

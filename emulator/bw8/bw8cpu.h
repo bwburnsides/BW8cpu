@@ -313,6 +313,7 @@ namespace BW8cpu {
 
     typedef struct BW8cpu {
 		uint64_t clocks;
+        uint8_t *memory;
 
 		// Function pointers for doing bus operations
 		BusRead read;
@@ -365,7 +366,7 @@ namespace BW8cpu {
     } BW8cpu;
 
     // Interface
-    BW8cpu* cpu_malloc(BusRead read, BusWrite write);
+    BW8cpu* cpu_malloc(BusRead read, BusWrite write, uint8_t *memory);
     void cpu_free(BW8cpu* cpu);
     void cpu_dump(BW8cpu* cpu, FILE* stream);
     void clock(BW8cpu* cpu);

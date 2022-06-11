@@ -12,12 +12,14 @@ def test_lex_ints():
     tokens = Lexer("0b10_10").lex()
     assert tokens[0] == Token(TokenKind.BinIntegerLiteral, "0b10_10")
 
+
 def test_lex_strs():
     tokens = Lexer('"Hello, World!"').lex()
     assert tokens[0] == Token(TokenKind.StringLiteral, "Hello, World!")
 
     # tokens = Lexer('"\"Foo\""').lex()
     # assert tokens[0] == Token(TokenKind.StringLiteral, '\"Foo\"')
+
 
 def test_lex_var_def():
     tokens = Lexer("a: int = 44;").lex()
