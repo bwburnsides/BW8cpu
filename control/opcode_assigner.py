@@ -82,7 +82,7 @@ def write_output(out_paths, opcodes):
         elif path.suffix == ".py":
             comment_token = "#"
             padding = "    "
-            extra_lines.append("class Op:")
+            extra_lines.extend(("import enum", "class Op(enum.IntEnum):"))
         else:
             raise ValueError(f"{path} has unexpected suffix.")
 

@@ -72,6 +72,7 @@ class Ctrl:
     CLR_SUPER_MODE = 25 << 8
     SET_NMI_MASK = 26 << 8
     CLR_NMI_MASK = 27 << 8
+
     DBUS_LOAD_PORT = DBUS_LOAD_TL
 
     # 3 bits for ADDR Assert

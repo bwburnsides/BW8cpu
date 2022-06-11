@@ -2072,6 +2072,30 @@
       </elementAttributes>
       <pos x="-100" y="-840"/>
     </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>~nmi</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-1580" y="-440"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>NetName</string>
+          <string>~nmi-latch</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-1300" y="-440"/>
+    </visualElement>
   </visualElements>
   <wires>
     <wire>
@@ -2603,6 +2627,10 @@
       <p2 x="-140" y="-820"/>
     </wire>
     <wire>
+      <p1 x="-1580" y="-440"/>
+      <p2 x="-1540" y="-440"/>
+    </wire>
+    <wire>
       <p1 x="-1100" y="-440"/>
       <p2 x="-1080" y="-440"/>
     </wire>
@@ -2615,8 +2643,8 @@
       <p2 x="-320" y="-440"/>
     </wire>
     <wire>
-      <p1 x="-1560" y="-440"/>
-      <p2 x="-1540" y="-440"/>
+      <p1 x="-1320" y="-440"/>
+      <p2 x="-1300" y="-440"/>
     </wire>
     <wire>
       <p1 x="-1360" y="-760"/>
@@ -2847,12 +2875,8 @@
       <p2 x="-1560" y="-400"/>
     </wire>
     <wire>
-      <p1 x="-1560" y="-440"/>
-      <p2 x="-1560" y="-420"/>
-    </wire>
-    <wire>
       <p1 x="-1560" y="-480"/>
-      <p2 x="-1560" y="-440"/>
+      <p2 x="-1560" y="-420"/>
     </wire>
     <wire>
       <p1 x="-1560" y="-500"/>

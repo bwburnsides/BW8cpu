@@ -36,32 +36,32 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>VCC</string>
+          <string>RES</string>
         </entry>
         <entry>
           <string>pinNumber</string>
-          <string>16</string>
+          <string>15</string>
         </entry>
         <entry>
           <string>InDefault</string>
           <value v="1" z="false"/>
         </entry>
       </elementAttributes>
-      <pos x="-320" y="-480"/>
+      <pos x="-320" y="-40"/>
     </visualElement>
     <visualElement>
       <elementName>In</elementName>
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>GND</string>
+          <string>CLK</string>
         </entry>
         <entry>
           <string>pinNumber</string>
-          <string>8</string>
+          <string>7</string>
         </entry>
       </elementAttributes>
-      <pos x="-320" y="-440"/>
+      <pos x="-320" y="-100"/>
     </visualElement>
     <visualElement>
       <elementName>D_FF_AS</elementName>
@@ -98,18 +98,14 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>RES</string>
+          <string>DE1</string>
         </entry>
         <entry>
           <string>pinNumber</string>
-          <string>15</string>
-        </entry>
-        <entry>
-          <string>InDefault</string>
-          <value v="1" z="false"/>
+          <string>9</string>
         </entry>
       </elementAttributes>
-      <pos x="-320" y="-40"/>
+      <pos x="-320" y="-220"/>
     </visualElement>
     <visualElement>
       <elementName>And</elementName>
@@ -168,14 +164,14 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>CLK</string>
+          <string>DE2</string>
         </entry>
         <entry>
           <string>pinNumber</string>
-          <string>7</string>
+          <string>10</string>
         </entry>
       </elementAttributes>
-      <pos x="-320" y="-100"/>
+      <pos x="-320" y="-180"/>
     </visualElement>
     <visualElement>
       <elementName>Not</elementName>
@@ -191,34 +187,6 @@
       <elementName>Or</elementName>
       <elementAttributes/>
       <pos x="-300" y="-220"/>
-    </visualElement>
-    <visualElement>
-      <elementName>In</elementName>
-      <elementAttributes>
-        <entry>
-          <string>Label</string>
-          <string>DE1</string>
-        </entry>
-        <entry>
-          <string>pinNumber</string>
-          <string>9</string>
-        </entry>
-      </elementAttributes>
-      <pos x="-320" y="-220"/>
-    </visualElement>
-    <visualElement>
-      <elementName>In</elementName>
-      <elementAttributes>
-        <entry>
-          <string>Label</string>
-          <string>DE2</string>
-        </entry>
-        <entry>
-          <string>pinNumber</string>
-          <string>10</string>
-        </entry>
-      </elementAttributes>
-      <pos x="-320" y="-180"/>
     </visualElement>
     <visualElement>
       <elementName>In</elementName>
@@ -247,6 +215,38 @@
         </entry>
       </elementAttributes>
       <pos x="-320" y="60"/>
+    </visualElement>
+    <visualElement>
+      <elementName>In</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>VCC</string>
+        </entry>
+        <entry>
+          <string>pinNumber</string>
+          <string>16</string>
+        </entry>
+        <entry>
+          <string>InDefault</string>
+          <value v="1" z="false"/>
+        </entry>
+      </elementAttributes>
+      <pos x="-320" y="-480"/>
+    </visualElement>
+    <visualElement>
+      <elementName>In</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>GND</string>
+        </entry>
+        <entry>
+          <string>pinNumber</string>
+          <string>8</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-320" y="-440"/>
     </visualElement>
     <visualElement>
       <elementName>Testcase</elementName>

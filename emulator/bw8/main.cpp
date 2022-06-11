@@ -47,9 +47,9 @@ int main(int argc, char** argv) {
     BW8cpu::reset(cpu, false);
 
     while (true) {
-        BW8cpu::cpu_dump(cpu, stdout);
+        // BW8cpu::cpu_dump(cpu, stdout);
         BW8cpu::clock(cpu);
-        Sleep(1000);
+        // Sleep(1000);
     }
 
     BW8cpu::cpu_free(cpu);

@@ -1795,34 +1795,6 @@
         </entry>
         <entry>
           <string>NetName</string>
-          <string>~clk</string>
-        </entry>
-      </elementAttributes>
-      <pos x="-1240" y="-500"/>
-    </visualElement>
-    <visualElement>
-      <elementName>Tunnel</elementName>
-      <elementAttributes>
-        <entry>
-          <string>rotation</string>
-          <rotation rotation="2"/>
-        </entry>
-        <entry>
-          <string>NetName</string>
-          <string>~clk</string>
-        </entry>
-      </elementAttributes>
-      <pos x="-1240" y="-260"/>
-    </visualElement>
-    <visualElement>
-      <elementName>Tunnel</elementName>
-      <elementAttributes>
-        <entry>
-          <string>rotation</string>
-          <rotation rotation="2"/>
-        </entry>
-        <entry>
-          <string>NetName</string>
           <string>dl4</string>
         </entry>
       </elementAttributes>
@@ -5203,20 +5175,6 @@
       <pos x="-1240" y="0"/>
     </visualElement>
     <visualElement>
-      <elementName>Tunnel</elementName>
-      <elementAttributes>
-        <entry>
-          <string>rotation</string>
-          <rotation rotation="2"/>
-        </entry>
-        <entry>
-          <string>NetName</string>
-          <string>~clk</string>
-        </entry>
-      </elementAttributes>
-      <pos x="-1240" y="-20"/>
-    </visualElement>
-    <visualElement>
       <elementName>7404.dig</elementName>
       <elementAttributes>
         <entry>
@@ -5580,6 +5538,36 @@
       <elementAttributes/>
       <pos x="860" y="40"/>
     </visualElement>
+    <visualElement>
+      <elementName>Ground</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="1"/>
+        </entry>
+      </elementAttributes>
+      <pos x="-1240" y="-260"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Ground</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="1"/>
+        </entry>
+      </elementAttributes>
+      <pos x="-1240" y="-20"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Ground</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="1"/>
+        </entry>
+      </elementAttributes>
+      <pos x="-1240" y="-500"/>
+    </visualElement>
   </visualElements>
   <wires>
     <wire>
@@ -5671,12 +5659,12 @@
       <p2 x="-1100" y="-260"/>
     </wire>
     <wire>
-      <p1 x="-1240" y="-260"/>
-      <p2 x="-1220" y="-260"/>
-    </wire>
-    <wire>
       <p1 x="-880" y="-260"/>
       <p2 x="-860" y="-260"/>
+    </wire>
+    <wire>
+      <p1 x="-1240" y="-260"/>
+      <p2 x="-1220" y="-260"/>
     </wire>
     <wire>
       <p1 x="420" y="-1160"/>
@@ -5783,10 +5771,6 @@
       <p2 x="440" y="-20"/>
     </wire>
     <wire>
-      <p1 x="-1240" y="-20"/>
-      <p2 x="-1220" y="-20"/>
-    </wire>
-    <wire>
       <p1 x="1360" y="-20"/>
       <p2 x="1380" y="-20"/>
     </wire>
@@ -5797,6 +5781,10 @@
     <wire>
       <p1 x="860" y="-20"/>
       <p2 x="880" y="-20"/>
+    </wire>
+    <wire>
+      <p1 x="-1240" y="-20"/>
+      <p2 x="-1220" y="-20"/>
     </wire>
     <wire>
       <p1 x="1880" y="-660"/>
@@ -7139,10 +7127,6 @@
       <p2 x="-1100" y="-500"/>
     </wire>
     <wire>
-      <p1 x="-1240" y="-500"/>
-      <p2 x="-1220" y="-500"/>
-    </wire>
-    <wire>
       <p1 x="-900" y="-500"/>
       <p2 x="-880" y="-500"/>
     </wire>
@@ -7165,6 +7149,10 @@
     <wire>
       <p1 x="-360" y="-500"/>
       <p2 x="-320" y="-500"/>
+    </wire>
+    <wire>
+      <p1 x="-1240" y="-500"/>
+      <p2 x="-1220" y="-500"/>
     </wire>
     <wire>
       <p1 x="2400" y="-1140"/>

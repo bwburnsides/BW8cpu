@@ -2,7 +2,7 @@
 
 ![BW8cpu Digital Simulation top level view](docs/assets/cpu_sim.png)
 
-The BW8cpu is a homemade CPU built with discrete TTL logic chips on custom PCBs. It has a target clock rate of approximately 6 MHz, and is comparable to the Motorola 6809, and more specifically the Hitachi 6309, with its dual accumulators and additional dual general purpose registers.
+The BW8cpu is a homemade CPU built with discrete CMOS logic chips on custom PCBs. It has a target clock rate of approximately 4 MHz, and is comparable to venerable 8-bit CPUs such as the MOS 6502, Zilog Z80, Motorola 6809, and Intel 8088.
 
 A larger computer system is built around the CPU in the form of a full peripheral suite that allows the BW8cpu to function as a machine similar to the Commodore 64, Apple II, or NES. From a hardware perspective, the BW8cpu matches or maybe exceeds these systems in capability and usability in many regards. Its my hope that the system will eventually exceed its predecessors from a software perspective as well.
 
@@ -12,16 +12,16 @@ This project is extremely ambitious and long running. This repository will maint
 
 ## Features
 
-- 8-bit CPU with 16-bit addressing
-- Up to 512 opcodes across 50+ instructions (CISC ISA)
-- Dual 8-bit accumulators (A, B) accessible also as one 16-bit accumulator (E)
-- Two additional 8-bit General Purpose Registers (C, D)
+- 8-bit CPU with 20-bit memory addressing, 8-bit IO addressing
+- Up to 512 opcodes across 50 instructions (CISC ISA)
+- 4x 8-bit General Purpose Registers (A, B, C, D)
 - Full 16-bit Stack Pointer (SP) and Program Counters (PC)
 - Configurable Direct Page addressing (movable Zero Page)
-- Two 16-bit Index Registers (X, Y)
-- 32-function ALU with 4 flags (Carry, Zero, Overflow, Sign)
-- Single IRQ source
-- Partially configurable hardware memory map
+- Two 16-bit General Purpose Pointers (X, Y)
+- 16-function ALU with 4 flags (Carry, Zero, Overflow, Sign)
+- IRQ and NMI inputs
+- Bus arbitration, allowing for DMA control
+- Thin supervisor mode
 
 ## Architecture Overview
 
@@ -51,11 +51,10 @@ This project is extremely ambitious and long running. This repository will maint
 ## Tool Chain
 
 - Simulation with [Digital](https://github.com/hneemann/Digital)
-- Emulation with [Rust](https://www.rust-lang.org/)
+- Emulation with C
 - Schematics and PCB layout with [KiCAD](https://www.kicad.org/)
 - Assembler with [customasm](https://github.com/hlorenzi/customasm)
-- Microcode development with customasm
-- High level programming with [MHL](https://github.com/Artentus/MHL)
+- Microcode development with Python
 
 
 ## Explore

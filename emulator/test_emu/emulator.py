@@ -1,16 +1,19 @@
-from contextlib import contextmanager
-from typing import Generator, Final
-from dataclasses import dataclass
+import typing
+import dataclasses
 import subprocess
 from pathlib import Path
+import contextlib
+import functools
 
-from numpy import byte
+import opcodes
 
-ASSEMBLER_PATH: Final[Path] = Path("C:/Users/brady/projects/BW8cpu/assembler")
-EMULATOR_PATH: Final[Path] = Path(
-    "C:/Users/brady/projects/BW8cpu/emulator/bw8cpu/Debug/bw8cpu.exe"
+timeout: typing.Final[int] = 5
+
+ASSEMBLER_PATH: typing.Final[Path] = Path("C:/Users/brady/projects/BW8cpu/assembler")
+EMULATOR_PATH: typing.Final[Path] = Path(
+    "C:/Users/brady/projects/BW8cpu/emulator/bw8/x64/Debug/cpu.exe"
 )
-CORE_DUMP_PATH: Final[Path] = Path(
+CORE_DUMP_PATH: typing.Final[Path] = Path(
     "C:/Users/brady/projects/BW8cpu/emulator/test_emu/CORE_DUMP.BIN"
 )
 
@@ -28,7 +31,7 @@ BANK_DEF: str = """
 """
 
 
-@dataclass
+@dataclasses.dataclass
 class CoreDump:
     pc: int
     sp: int
@@ -47,7 +50,9 @@ class CoreDump:
     of: int
 
 
-def emulator(assembly: str) -> CoreDump:
+NoneDump = CoreDump(*(None for _ in range(15)))
+
+def Emulator(assembly: str) -> CoreDump:
     fname = "TEMP_EMU_TESTING"
     asm_path = ASSEMBLER_PATH / f"{fname}.asm"
 
@@ -60,15 +65,21 @@ def emulator(assembly: str) -> CoreDump:
         f.write("\n halt")
 
     # Assemble the file
-    subprocess.call(["customasm.exe", str(asm_path)])
-
-    asm_path.unlink()
+    try:
+        subprocess.call(["customasm.exe", str(asm_path)], timeout=timeout)
+    except subprocess.TimeoutExpired:
+        return NoneDump
+    finally:
+        asm_path.unlink()
 
     # Run the emulator
     bin_path = ASSEMBLER_PATH / f"{fname}.bin"
-    subprocess.call([str(EMULATOR_PATH), str(bin_path)])
-
-    bin_path.unlink()
+    try:
+        subprocess.call([str(EMULATOR_PATH), str(bin_path)], timeout=timeout)
+    except subprocess.TimeoutExpired:
+        return NoneDump
+    finally:
+        bin_path.unlink()
 
     # Read the core dump
     with open(CORE_DUMP_PATH, "rb") as f:
@@ -83,3 +94,20 @@ def emulator(assembly: str) -> CoreDump:
     CORE_DUMP_PATH.unlink()
 
     return core_dump
+
+
+OPCODES = list(opcodes.Op)
+
+def under_test(*opcodes):
+    def decorator(fn):
+        @functools.wraps(fn)
+        def wrapper(*args, **kwargs):
+            result = fn(*args, **kwargs)
+
+            with contextlib.suppress(ValueError):
+                for opcode in opcodes:
+                    OPCODES.remove(opcode)
+
+            return result
+        return wrapper
+    return decorator
