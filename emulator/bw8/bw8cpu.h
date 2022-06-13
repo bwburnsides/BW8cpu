@@ -79,6 +79,18 @@ namespace BW8cpu {
 		bool nmi;   // Non Maskable Interrupt mask
     } CtrlFlags;
 
+    typedef struct StatusFlags {
+        bool Cf;    // Carry/Not Borrow
+        bool Zf;    // Zero
+        bool Vf;    // Overflow
+        bool Nf;    // Negaitve (sign)
+        bool If;    // IRQ Enable
+		bool ext;	// Extended Opcode flag
+		bool sup;   // Supervisor Mode flag
+		bool ubr;   // Use Bank Register flag
+		bool nmi;   // Non Maskable Interrupt mask
+    } StatusFlags;
+
     typedef struct BusFlags {
         bool mem_io;
         bool data_code;
@@ -210,12 +222,6 @@ namespace BW8cpu {
         YH,
         YL,
         BR,
-        SET_UBR,
-        CLR_UBR,
-        SET_SUP,
-        CLR_SUP,
-        SET_NMI,
-        CLR_NMI
     };
 
     enum class AddrAssert {
@@ -241,12 +247,11 @@ namespace BW8cpu {
     };
 
     enum class XferAssert {
+        NONE,
         PC,
         SP,
         X,
         Y,
-        IRQ,
-        ADDR,
         A_A,
         A_B,
         A_C,
@@ -272,7 +277,8 @@ namespace BW8cpu {
         TH_C,
         TH_D,
         T,
-        NMI,
+        ADDR,
+        INT,
     };
 
     enum class XferLoad {
@@ -285,6 +291,17 @@ namespace BW8cpu {
         CD,
     };
 
+    enum class CtrlGroup {
+        NONE,
+        RST_USEQ,
+        SET_EXT,
+        SET_UBR,
+        CLR_UBR,
+        SET_SUP,
+        SET_NMI_INHIB,
+        PLACEHOLDER7,
+    };
+
     typedef struct CtrlLines {
         DbusAssert dbus_assert;
         AluOp alu_op;
@@ -294,10 +311,8 @@ namespace BW8cpu {
         XferLoad xfer_load;
         Count count;
         bool dec_sp;
-        bool rst_useq;
-        bool tog_ext;
         bool offset;
-        bool unused;
+        CtrlGroup ctrl_group;
     } CtrlLines;
 
     typedef struct AluCtrlLines {
@@ -344,8 +359,7 @@ namespace BW8cpu {
 		uint16_t Y;
 
         // Flags
-        AluFlags status_flags;
-        CtrlFlags ctrl_flags;
+        StatusFlags status_flags;
         BusFlags bus_flags;
 
 		// Interrupts

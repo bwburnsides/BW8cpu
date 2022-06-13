@@ -5,7 +5,6 @@ from .control import Ctrl, Mode, State
 from .opcodes import Op
 
 from pathlib import Path
-import argparse
 
 OUTPUT_LOCATION: Final[Path] = Path(__file__) / ".." / "bin"
 
@@ -81,8 +80,6 @@ class GPR(Enum):
 class MOV16(Enum):
     X = Ctrl.XFER_LOAD_X, Ctrl.XFER_ASSERT_X
     Y = Ctrl.XFER_LOAD_Y, Ctrl.XFER_ASSERT_Y
-    AB = Ctrl.XFER_LOAD_AB, Ctrl.XFER_ASSERT_A_B
-    CD = Ctrl.XFER_LOAD_CD, Ctrl.XFER_ASSERT_C_D
 
     def __init__(self, xfer_load: int, xfer_assert: int):
         self.XFER_LOAD = xfer_load
@@ -184,57 +181,28 @@ BASE = [FETCH, 0, 0, 0, 0, 0, 0, 0]
 
 STALL_OPS = [Ctrl.ADDR_ASSERT_ACK for _ in range(8)]
 
-IRQ_UOPS = [
-    Ctrl.COUNT_DEC_SP | Ctrl.ALU_CLI,
-    Ctrl.ADDR_ASSERT_SP
-    | Ctrl.XFER_ASSERT_PC
-    | Ctrl.DBUS_ASSERT_LSB
-    | Ctrl.DBUS_LOAD_MEM
-    | Ctrl.COUNT_DEC_SP,
-    Ctrl.ADDR_ASSERT_SP
-    | Ctrl.XFER_ASSERT_PC
-    | Ctrl.DBUS_ASSERT_MSB
-    | Ctrl.DBUS_LOAD_MEM
-    | Ctrl.COUNT_DEC_SP,
-    Ctrl.ADDR_ASSERT_SP
-    | Ctrl.DBUS_ASSERT_SR
-    | Ctrl.DBUS_LOAD_MEM
-    | Ctrl.XFER_ASSERT_IRQ
-    | Ctrl.XFER_LOAD_PC,
-    Ctrl.SET_SUPER_MODE | Ctrl.RST_USEQ,
-    0,
-    0,
-    0,
+IRQ_ACK = [
+    Ctrl.COUNT_DEC_SP, Ctrl.ALU_CLI,
+    Ctrl.ADDR_ASSERT_SP | Ctrl.DBUS_LOAD_MEM | Ctrl.DBUS_ASSERT_SR | Ctrl.COUNT_DEC_SP,
+    Ctrl.ADDR_ASSERT_SP | Ctrl.DBUS_LOAD_MEM | Ctrl.DBUS_ASSERT_LSB | Ctrl.XFER_ASSERT_PC | Ctrl.COUNT_DEC_SP,
+    Ctrl.ADDR_ASSERT_SP | Ctrl.DBUS_LOAD_MEM | Ctrl.DBUS_ASSERT_MSB | Ctrl.XFER_ASSERT_PC | Ctrl.CTRL_SET_SUP,
+    Ctrl.XFER_ASSERT_INT | Ctrl.XFER_LOAD_PC | Ctrl.CTRL_RST_USEQ,
+    0, 0, 0
 ]
 
-NMI_UOPS = [
-    Ctrl.COUNT_DEC_SP | Ctrl.ALU_CLI | Ctrl.SET_NMI_MASK,
-    Ctrl.ADDR_ASSERT_SP
-    | Ctrl.XFER_ASSERT_PC
-    | Ctrl.DBUS_ASSERT_LSB
-    | Ctrl.DBUS_LOAD_MEM
-    | Ctrl.COUNT_DEC_SP,
-    Ctrl.ADDR_ASSERT_SP
-    | Ctrl.XFER_ASSERT_PC
-    | Ctrl.DBUS_ASSERT_MSB
-    | Ctrl.DBUS_LOAD_MEM
-    | Ctrl.COUNT_DEC_SP,
-    Ctrl.ADDR_ASSERT_SP
-    | Ctrl.DBUS_ASSERT_SR
-    | Ctrl.DBUS_LOAD_MEM
-    | Ctrl.XFER_ASSERT_NMI
-    | Ctrl.XFER_LOAD_PC,
-    Ctrl.SET_SUPER_MODE | Ctrl.RST_USEQ,
-    0,
-    0,
-    0,
+NMI_ACK = [
+    Ctrl.COUNT_DEC_SP, Ctrl.ALU_CLI,
+    Ctrl.ADDR_ASSERT_SP | Ctrl.DBUS_LOAD_MEM | Ctrl.DBUS_ASSERT_SR | Ctrl.COUNT_DEC_SP,
+    Ctrl.ADDR_ASSERT_SP | Ctrl.DBUS_LOAD_MEM | Ctrl.DBUS_ASSERT_LSB | Ctrl.XFER_ASSERT_PC | Ctrl.COUNT_DEC_SP | Ctrl.CTRL_SET_NMI_MASK,
+    Ctrl.ADDR_ASSERT_SP | Ctrl.DBUS_LOAD_MEM | Ctrl.DBUS_ASSERT_MSB | Ctrl.XFER_ASSERT_PC | Ctrl.CTRL_SET_SUP,
+    Ctrl.XFER_ASSERT_INT | Ctrl.XFER_LOAD_PC | Ctrl.CTRL_RST_USEQ,
+    0, 0, 0
 ]
-
 
 def mov8(dst: GPR, src: GPR) -> list[int]:
     uops = BASE.copy()
 
-    uops[1] |= dst.DBUS_LOAD | src.DBUS_ASSERT | Ctrl.RST_USEQ
+    uops[1] |= dst.DBUS_LOAD | src.DBUS_ASSERT | Ctrl.CTRL_RST_USEQ
     return uops
 
 
@@ -248,7 +216,7 @@ def in_gpr(dst: GPR) -> list[int]:
         | Ctrl.COUNT_INC_PC
     )
     uops[2] |= (
-        Ctrl.ADDR_ASSERT_IO | Ctrl.DBUS_ASSERT_MEM | dst.DBUS_LOAD | Ctrl.RST_USEQ
+        Ctrl.ADDR_ASSERT_IO | Ctrl.DBUS_ASSERT_MEM | dst.DBUS_LOAD | Ctrl.CTRL_RST_USEQ
     )
 
     return uops
@@ -264,7 +232,7 @@ def out_gpr(src: GPR) -> list[int]:
         | Ctrl.COUNT_INC_PC
     )
     uops[2] |= (
-        Ctrl.ADDR_ASSERT_IO | Ctrl.DBUS_LOAD_MEM | src.DBUS_ASSERT | Ctrl.RST_USEQ
+        Ctrl.ADDR_ASSERT_IO | Ctrl.DBUS_LOAD_MEM | src.DBUS_ASSERT | Ctrl.CTRL_RST_USEQ
     )
 
     return uops
@@ -278,7 +246,7 @@ def load8_imm(dst: GPR) -> list[int]:
         | Ctrl.DBUS_ASSERT_MEM
         | Ctrl.COUNT_INC_PC
         | dst.DBUS_LOAD
-        | Ctrl.RST_USEQ
+        | Ctrl.CTRL_RST_USEQ
     )
     return uops
 
@@ -298,7 +266,7 @@ def load8_abs(dst: GPR) -> list[int]:
         | Ctrl.DBUS_LOAD_TL
         | Ctrl.COUNT_INC_PC
     )
-    uops[3] |= Ctrl.ADDR_ASSERT_T | Ctrl.DBUS_ASSERT_MEM | dst.DBUS_LOAD | Ctrl.RST_USEQ
+    uops[3] |= Ctrl.ADDR_ASSERT_T | Ctrl.DBUS_ASSERT_MEM | dst.DBUS_LOAD | Ctrl.CTRL_RST_USEQ
     return uops
 
 
@@ -312,7 +280,7 @@ def load8_dp(dst: GPR) -> list[int]:
         | Ctrl.COUNT_INC_PC
     )
     uops[2] |= (
-        Ctrl.ADDR_ASSERT_DP | Ctrl.DBUS_ASSERT_MEM | dst.DBUS_LOAD | Ctrl.RST_USEQ
+        Ctrl.ADDR_ASSERT_DP | Ctrl.DBUS_ASSERT_MEM | dst.DBUS_LOAD | Ctrl.CTRL_RST_USEQ
     )
     return uops
 
@@ -328,10 +296,10 @@ def load8_ptr_idx(dst: GPR, ptr: PTR) -> list[int]:
     )
     uops[2] |= (
         ptr.ADDR_ASSERT
-        | Ctrl.OFFSET
+        | Ctrl.OFFSET_EN
         | Ctrl.DBUS_ASSERT_MEM
         | dst.DBUS_LOAD
-        | Ctrl.RST_USEQ
+        | Ctrl.CTRL_RST_USEQ
     )
     return uops
 
@@ -342,10 +310,10 @@ def load8_ptr_gpr(dst: GPR, ptr: PTR, idx: GPR) -> list[int]:
     uops[1] |= idx.DBUS_ASSERT | Ctrl.DBUS_LOAD_OFF
     uops[2] |= (
         ptr.ADDR_ASSERT
-        | Ctrl.OFFSET
+        | Ctrl.OFFSET_EN
         | Ctrl.DBUS_ASSERT_MEM
         | dst.DBUS_LOAD
-        | Ctrl.RST_USEQ
+        | Ctrl.CTRL_RST_USEQ
     )
     return uops
 
@@ -365,7 +333,7 @@ def store8_abs(src: GPR) -> list[int]:
         | Ctrl.DBUS_LOAD_TL
         | Ctrl.COUNT_INC_PC
     )
-    uops[3] |= Ctrl.ADDR_ASSERT_T | Ctrl.DBUS_LOAD_MEM | src.DBUS_ASSERT | Ctrl.RST_USEQ
+    uops[3] |= Ctrl.ADDR_ASSERT_T | Ctrl.DBUS_LOAD_MEM | src.DBUS_ASSERT | Ctrl.CTRL_RST_USEQ
     return uops
 
 
@@ -379,7 +347,7 @@ def store8_dp(src: GPR) -> list[int]:
         | Ctrl.COUNT_INC_PC
     )
     uops[2] |= (
-        Ctrl.ADDR_ASSERT_DP | Ctrl.DBUS_LOAD_MEM | src.DBUS_ASSERT | Ctrl.RST_USEQ
+        Ctrl.ADDR_ASSERT_DP | Ctrl.DBUS_LOAD_MEM | src.DBUS_ASSERT | Ctrl.CTRL_RST_USEQ
     )
     return uops
 
@@ -395,10 +363,10 @@ def store8_ptr_idx(src: GPR, ptr: PTR) -> list[int]:
     )
     uops[2] |= (
         ptr.ADDR_ASSERT
-        | Ctrl.OFFSET
+        | Ctrl.OFFSET_EN
         | Ctrl.DBUS_LOAD_MEM
         | src.DBUS_ASSERT
-        | Ctrl.RST_USEQ
+        | Ctrl.CTRL_RST_USEQ
     )
     return uops
 
@@ -409,10 +377,10 @@ def store8_ptr_gpr(src: GPR, ptr: PTR, idx: GPR) -> list[int]:
     uops[1] |= idx.DBUS_ASSERT | Ctrl.DBUS_LOAD_OFF
     uops[2] |= (
         ptr.ADDR_ASSERT
-        | Ctrl.OFFSET
+        | Ctrl.OFFSET_EN
         | Ctrl.DBUS_LOAD_MEM
         | src.DBUS_ASSERT
-        | Ctrl.RST_USEQ
+        | Ctrl.CTRL_RST_USEQ
     )
     return uops
 
@@ -420,7 +388,7 @@ def store8_ptr_gpr(src: GPR, ptr: PTR, idx: GPR) -> list[int]:
 def mov16(dst: MOV16, src: MOV16) -> list[int]:
     uops = BASE.copy()
 
-    uops[1] |= dst.XFER_LOAD | src.XFER_ASSERT | Ctrl.RST_USEQ
+    uops[1] |= dst.XFER_LOAD | src.XFER_ASSERT | Ctrl.CTRL_RST_USEQ
     return uops
 
 
@@ -438,7 +406,7 @@ def load16_imm(dst: GPP) -> list[int]:
         | Ctrl.DBUS_ASSERT_MEM
         | dst.DBUS_LOAD_LO
         | Ctrl.COUNT_INC_PC
-        | Ctrl.RST_USEQ
+        | Ctrl.CTRL_RST_USEQ
     )
     return uops
 
@@ -464,7 +432,7 @@ def load16_abs(dst: GPP) -> list[int]:
         | Ctrl.COUNT_INC_ADDR
         | Ctrl.DBUS_ASSERT_MEM
         | dst.DBUS_LOAD_LO
-        | Ctrl.RST_USEQ
+        | Ctrl.CTRL_RST_USEQ
     )
     return uops
 
@@ -484,7 +452,7 @@ def load16_dp(dst: GPP) -> list[int]:
         | Ctrl.COUNT_INC_ADDR
         | Ctrl.DBUS_ASSERT_MEM
         | dst.DBUS_LOAD_LO
-        | Ctrl.RST_USEQ
+        | Ctrl.CTRL_RST_USEQ
     )
     return uops
 
@@ -501,27 +469,27 @@ def load16_ptr_idx(dst: GPP, ptr: PTR) -> list[int]:
 
     if (dst == GPP.X and ptr == PTR.X) or (dst == GPP.Y and ptr == PTR.Y):
         uops[2] |= (
-            ptr.ADDR_ASSERT | Ctrl.OFFSET | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_TH
+            ptr.ADDR_ASSERT | Ctrl.OFFSET_EN | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_TH
         )
         uops[3] |= (
             ptr.ADDR_ASSERT
-            | Ctrl.OFFSET
+            | Ctrl.OFFSET_EN
             | Ctrl.COUNT_INC_ADDR
             | Ctrl.DBUS_ASSERT_MEM
             | Ctrl.DBUS_LOAD_TL
         )
-        uops[4] |= Ctrl.XFER_ASSERT_T | dst.XFER_LOAD | Ctrl.RST_USEQ
+        uops[4] |= Ctrl.XFER_ASSERT_T | dst.XFER_LOAD | Ctrl.CTRL_RST_USEQ
     else:
         uops[2] |= (
-            ptr.ADDR_ASSERT | Ctrl.OFFSET | Ctrl.DBUS_ASSERT_MEM | dst.DBUS_LOAD_HI
+            ptr.ADDR_ASSERT | Ctrl.OFFSET_EN | Ctrl.DBUS_ASSERT_MEM | dst.DBUS_LOAD_HI
         )
         uops[3] |= (
             ptr.ADDR_ASSERT
-            | Ctrl.OFFSET
+            | Ctrl.OFFSET_EN
             | Ctrl.COUNT_INC_ADDR
             | Ctrl.DBUS_ASSERT_MEM
             | dst.DBUS_LOAD_LO
-            | Ctrl.RST_USEQ
+            | Ctrl.CTRL_RST_USEQ
         )
 
     return uops
@@ -551,7 +519,7 @@ def store16_abs(src: GPP) -> list[int]:
         | Ctrl.DBUS_LOAD_MEM
         | src.XFER_ASSERT
         | Ctrl.DBUS_ASSERT_LSB
-        | Ctrl.RST_USEQ
+        | Ctrl.CTRL_RST_USEQ
     )
     return uops
 
@@ -577,7 +545,7 @@ def store16_dp(src: GPP) -> list[int]:
         | Ctrl.DBUS_LOAD_MEM
         | src.XFER_ASSERT
         | Ctrl.DBUS_ASSERT_LSB
-        | Ctrl.RST_USEQ
+        | Ctrl.CTRL_RST_USEQ
     )
     return uops
 
@@ -593,19 +561,19 @@ def store16_ptr_idx(src: GPP, ptr: PTR) -> list[int]:
     )
     uops[2] |= (
         ptr.ADDR_ASSERT
-        | Ctrl.OFFSET
+        | Ctrl.OFFSET_EN
         | Ctrl.DBUS_LOAD_MEM
         | src.XFER_ASSERT
         | Ctrl.DBUS_ASSERT_MSB
     )
     uops[3] |= (
         ptr.ADDR_ASSERT
-        | Ctrl.OFFSET
+        | Ctrl.OFFSET_EN
         | Ctrl.COUNT_INC_ADDR
         | Ctrl.DBUS_LOAD_MEM
         | src.XFER_ASSERT
         | Ctrl.DBUS_ASSERT_LSB
-        | Ctrl.RST_USEQ
+        | Ctrl.CTRL_RST_USEQ
     )
     return uops
 
@@ -616,10 +584,10 @@ def lea_gpr(dst: PTR, gpr: GPR) -> list[int]:
     uops[1] |= gpr.DBUS_ASSERT | Ctrl.DBUS_LOAD_OFF
     uops[2] |= (
         dst.ADDR_ASSERT
-        | Ctrl.OFFSET
+        | Ctrl.OFFSET_EN
         | Ctrl.XFER_ASSERT_ADDR
         | dst.XFER_LOAD
-        | Ctrl.RST_USEQ
+        | Ctrl.CTRL_RST_USEQ
     )
     return uops
 
@@ -635,10 +603,10 @@ def lea_idx(dst: PTR) -> list[int]:
     )
     uops[2] |= (
         dst.ADDR_ASSERT
-        | Ctrl.OFFSET
+        | Ctrl.OFFSET_EN
         | Ctrl.XFER_ASSERT_ADDR
         | dst.XFER_LOAD
-        | Ctrl.RST_USEQ
+        | Ctrl.CTRL_RST_USEQ
     )
     return uops
 
@@ -648,7 +616,7 @@ def binop_gpr_gpr(op: BinOp, lhs: GPR, rhs: GPR) -> list[int]:
     XFER_ASSERT = lhs.xfer_assert(rhs)
 
     uops[1] |= (
-        op.value | XFER_ASSERT | Ctrl.DBUS_ASSERT_ALU | lhs.DBUS_LOAD | Ctrl.RST_USEQ
+        op.value | XFER_ASSERT | Ctrl.DBUS_ASSERT_ALU | lhs.DBUS_LOAD | Ctrl.CTRL_RST_USEQ
     )
     return uops
 
@@ -664,7 +632,7 @@ def binop_gpr_imm(op: BinOp, lhs: GPR) -> list[int]:
         | Ctrl.COUNT_INC_PC
     )
     uops[2] |= (
-        op.value | XFER_ASSERT | Ctrl.DBUS_ASSERT_ALU | lhs.DBUS_LOAD | Ctrl.RST_USEQ
+        op.value | XFER_ASSERT | Ctrl.DBUS_ASSERT_ALU | lhs.DBUS_LOAD | Ctrl.CTRL_RST_USEQ
     )
     return uops
 
@@ -681,7 +649,7 @@ def binop_gpr_dp(op: BinOp, lhs: GPR) -> list[int]:
     )
     uops[2] |= Ctrl.ADDR_ASSERT_DP | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_TL
     uops[3] |= (
-        op.value | XFER_ASSERT | Ctrl.DBUS_ASSERT_ALU | lhs.DBUS_LOAD | Ctrl.RST_USEQ
+        op.value | XFER_ASSERT | Ctrl.DBUS_ASSERT_ALU | lhs.DBUS_LOAD | Ctrl.CTRL_RST_USEQ
     )
     return uops
 
@@ -699,7 +667,7 @@ def binop_dp_gpr(op: BinOp, rhs: GPR) -> list[int]:
     uops[2] |= Ctrl.ADDR_ASSERT_DP | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_TH
     uops[3] |= op.value | XFER_ASSERT | Ctrl.DBUS_ASSERT_ALU | Ctrl.DBUS_LOAD_TH
     uops[4] |= (
-        Ctrl.ADDR_ASSERT_DP | Ctrl.DBUS_LOAD_MEM | Ctrl.DBUS_ASSERT_TH | Ctrl.RST_USEQ
+        Ctrl.ADDR_ASSERT_DP | Ctrl.DBUS_LOAD_MEM | Ctrl.DBUS_ASSERT_TH | Ctrl.CTRL_RST_USEQ
     )
     return uops
 
@@ -722,7 +690,7 @@ def binop_dp_imm(op: BinOp) -> list[int]:
     uops[3] |= Ctrl.ADDR_ASSERT_DP | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_TH
     uops[4] |= op.value | Ctrl.XFER_ASSERT_T | Ctrl.DBUS_ASSERT_ALU | Ctrl.DBUS_LOAD_TH
     uops[5] |= (
-        Ctrl.ADDR_ASSERT_DP | Ctrl.DBUS_LOAD_MEM | Ctrl.DBUS_ASSERT_TH | Ctrl.RST_USEQ
+        Ctrl.ADDR_ASSERT_DP | Ctrl.DBUS_LOAD_MEM | Ctrl.DBUS_ASSERT_TH | Ctrl.CTRL_RST_USEQ
     )
     return uops
 
@@ -736,7 +704,7 @@ def unyop_gpr(op: UnyOp, reg: GPR) -> list[int]:
         XFER_ASSERT = reg.XFER_ASSERT_TL
 
     uops[1] |= (
-        op.ALU_OP | XFER_ASSERT | Ctrl.DBUS_ASSERT_ALU | reg.DBUS_LOAD | Ctrl.RST_USEQ
+        op.ALU_OP | XFER_ASSERT | Ctrl.DBUS_ASSERT_ALU | reg.DBUS_LOAD | Ctrl.CTRL_RST_USEQ
     )
     return uops
 
@@ -759,7 +727,7 @@ def unyop_dp(op: UnyOp) -> list[int]:
     )
     uops[2] |= Ctrl.ADDR_ASSERT_DP | Ctrl.DBUS_ASSERT_MEM | DBUS_LOAD
     uops[3] |= op.ALU_OP | Ctrl.XFER_ASSERT_T | Ctrl.DBUS_ASSERT_ALU | DBUS_LOAD
-    uops[4] |= Ctrl.DBUS_ASSERT_DP | Ctrl.DBUS_LOAD_MEM | DBUS_ASSERT | Ctrl.RST_USEQ
+    uops[4] |= Ctrl.DBUS_ASSERT_DP | Ctrl.DBUS_LOAD_MEM | DBUS_ASSERT | Ctrl.CTRL_RST_USEQ
     return uops
 
 
@@ -772,7 +740,7 @@ def neg_gpr(reg: GPR) -> list[int]:
         | reg.XFER_ASSERT_TH
         | Ctrl.DBUS_ASSERT_ALU
         | reg.DBUS_LOAD
-        | Ctrl.RST_USEQ
+        | Ctrl.CTRL_RST_USEQ
     )
     return uops
 
@@ -782,7 +750,7 @@ def push8(reg: StackOperable8) -> list[int]:
 
     uops[1] |= Ctrl.COUNT_DEC_SP
     uops[2] |= (
-        Ctrl.ADDR_ASSERT_SP | Ctrl.DBUS_LOAD_MEM | reg.DBUS_ASSERT | Ctrl.RST_USEQ
+        Ctrl.ADDR_ASSERT_SP | Ctrl.DBUS_LOAD_MEM | reg.DBUS_ASSERT | Ctrl.CTRL_RST_USEQ
     )
     return uops
 
@@ -803,7 +771,7 @@ def push16(reg: StackOperable16) -> list[int]:
         | Ctrl.DBUS_LOAD_MEM
         | Ctrl.DBUS_ASSERT_MSB
         | reg.XFER_ASSERT
-        | Ctrl.RST_USEQ
+        | Ctrl.CTRL_RST_USEQ
     )
     return uops
 
@@ -816,7 +784,7 @@ def pop8(reg: StackOperable8) -> list[int]:
         | Ctrl.DBUS_ASSERT_MEM
         | reg.DBUS_LOAD
         | Ctrl.COUNT_INC_SP
-        | Ctrl.RST_USEQ
+        | Ctrl.CTRL_RST_USEQ
     )
     return uops
 
@@ -835,7 +803,7 @@ def pop16(reg: StackOperable16) -> list[int]:
         | Ctrl.DBUS_ASSERT_MEM
         | reg.DBUS_LOAD_LO
         | Ctrl.COUNT_INC_SP
-        | Ctrl.RST_USEQ
+        | Ctrl.CTRL_RST_USEQ
     )
     return uops
 
@@ -845,7 +813,7 @@ def cmp_gpr_gpr(lhs: GPR, rhs: GPR) -> list[int]:
     XFER_ASSERT = lhs.xfer_assert(rhs)
 
     uops[1] |= Ctrl.ALU_SEC
-    uops[2] |= Ctrl.ALU_SBC | XFER_ASSERT | Ctrl.RST_USEQ
+    uops[2] |= Ctrl.ALU_SBC | XFER_ASSERT | Ctrl.CTRL_RST_USEQ
     return uops
 
 
@@ -859,7 +827,7 @@ def cmp_gpr_imm(lhs: GPR) -> list[int]:
         | Ctrl.COUNT_INC_PC
         | Ctrl.ALU_SEC
     )
-    uops[2] |= Ctrl.ALU_SBC | lhs.XFER_ASSERT_TL | Ctrl.RST_USEQ
+    uops[2] |= Ctrl.ALU_SBC | lhs.XFER_ASSERT_TL | Ctrl.CTRL_RST_USEQ
     return uops
 
 
@@ -875,7 +843,7 @@ def cmp_gpr_dp(lhs: GPR) -> list[int]:
     uops[2] |= (
         Ctrl.ADDR_ASSERT_DP | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_TL | Ctrl.ALU_SEC
     )
-    uops[3] |= Ctrl.ALU_SBC | lhs.XFER_ASSERT_TL | Ctrl.RST_USEQ
+    uops[3] |= Ctrl.ALU_SBC | lhs.XFER_ASSERT_TL | Ctrl.CTRL_RST_USEQ
     return uops
 
 
@@ -891,7 +859,7 @@ def cmp_dp_gpr(rhs: GPR) -> list[int]:
     uops[2] |= (
         Ctrl.ADDR_ASSERT_DP | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_TH | Ctrl.ALU_SEC
     )
-    uops[3] |= Ctrl.ALU_SBC | rhs.XFER_ASSERT_TH | Ctrl.RST_USEQ
+    uops[3] |= Ctrl.ALU_SBC | rhs.XFER_ASSERT_TH | Ctrl.CTRL_RST_USEQ
     return uops
 
 
@@ -899,7 +867,7 @@ def tst_gpr(reg: GPR) -> list[int]:
     uops = BASE.copy()
     XFER_ASSERT = reg.xfer_assert(reg)
 
-    uops[1] |= Ctrl.ALU_AND | XFER_ASSERT | Ctrl.RST_USEQ
+    uops[1] |= Ctrl.ALU_AND | XFER_ASSERT | Ctrl.CTRL_RST_USEQ
     return uops
 
 
@@ -920,7 +888,7 @@ def jsr_ptr(ptr: GPP) -> list[int]:
         | Ctrl.DBUS_ASSERT_MSB
         | Ctrl.XFER_ASSERT_PC
     )
-    uops[4] |= ptr.XFER_ASSERT | Ctrl.XFER_LOAD_PC | Ctrl.RST_USEQ
+    uops[4] |= ptr.XFER_ASSERT | Ctrl.XFER_LOAD_PC | Ctrl.CTRL_RST_USEQ
     return uops
 
 
@@ -941,9 +909,9 @@ def jmp_abs(pred: Callable[[], bool]) -> list[int]:
     )
 
     if pred():
-        uops[3] |= Ctrl.XFER_ASSERT_T | Ctrl.XFER_LOAD_PC | Ctrl.RST_USEQ
+        uops[3] |= Ctrl.XFER_ASSERT_T | Ctrl.XFER_LOAD_PC | Ctrl.CTRL_RST_USEQ
     else:
-        uops[3] |= Ctrl.RST_USEQ
+        uops[3] |= Ctrl.CTRL_RST_USEQ
 
     return uops
 
@@ -961,13 +929,13 @@ def jmp_rel(pred: Callable[[], bool]) -> list[int]:
     if pred():
         uops[2] |= (
             Ctrl.ADDR_ASSERT_PC
-            | Ctrl.OFFSET
+            | Ctrl.OFFSET_EN
             | Ctrl.XFER_ASSERT_ADDR
             | Ctrl.XFER_LOAD_PC
-            | Ctrl.RST_USEQ
+            | Ctrl.CTRL_RST_USEQ
         )
     else:
-        uops[2] |= Ctrl.RST_USEQ
+        uops[2] |= Ctrl.CTRL_RST_USEQ
     return uops
 
 
@@ -975,9 +943,9 @@ def jmp_ptr(pred: Callable[[], bool], ptr: GPP) -> list[int]:
     uops = BASE.copy()
 
     if pred():
-        uops[1] |= ptr.XFER_ASSERT | Ctrl.XFER_LOAD_PC | Ctrl.RST_USEQ
+        uops[1] |= ptr.XFER_ASSERT | Ctrl.XFER_LOAD_PC | Ctrl.CTRL_RST_USEQ
     else:
-        uops[1] |= Ctrl.RST_USEQ
+        uops[1] |= Ctrl.CTRL_RST_USEQ
     return uops
 
 
@@ -989,7 +957,7 @@ def musteq_imm(gpr: GPR) -> list[int]:
         | Ctrl.COUNT_INC_PC
         | gpr.XFER_ASSERT_TL
         | Ctrl.DBUS_LOAD_MUSTEQ
-        | Ctrl.RST_USEQ
+        | Ctrl.CTRL_RST_USEQ
     )
     return uops
 
@@ -1003,33 +971,35 @@ def get_uops(state: State) -> list[int]:
         return STALL_OPS.copy()
 
     if mode == Mode.IRQ:
-        return IRQ_UOPS.copy()
+        return IRQ_ACK.copy()
 
     if mode == Mode.NMI:
-        return NMI_UOPS.copy()
+        return NMI_ACK.copy()
 
     uops = BASE.copy()
 
     # Housekeeping / Flag Management
     if OP == Op.NOP:
-        uops[1] |= Ctrl.RST_USEQ
+        uops[1] |= Ctrl.CTRL_RST_USEQ
     elif OP == Op.EXT:
-        uops[1] |= Ctrl.TOG_EXT | FETCH
+        uops[1] |= Ctrl.CTRL_SET_EXT | FETCH
     elif OP == Op.CLC:
-        uops[1] |= Ctrl.ALU_CLC | Ctrl.RST_USEQ
+        uops[1] |= Ctrl.ALU_CLC | Ctrl.CTRL_RST_USEQ
     elif OP == Op.CLI:
-        uops[1] |= Ctrl.ALU_CLI | Ctrl.RST_USEQ
+        uops[1] |= Ctrl.ALU_CLI | Ctrl.CTRL_RST_USEQ
     elif OP == Op.CLV:
-        uops[1] |= Ctrl.ALU_CLV | Ctrl.RST_USEQ
+        uops[1] |= Ctrl.ALU_CLV | Ctrl.CTRL_RST_USEQ
     elif OP == Op.SEC:
-        uops[1] |= Ctrl.ALU_SEC | Ctrl.RST_USEQ
+        uops[1] |= Ctrl.ALU_SEC | Ctrl.CTRL_RST_USEQ
     elif OP == Op.SEI:
-        uops[1] |= Ctrl.ALU_SEI | Ctrl.RST_USEQ
+        uops[1] |= Ctrl.ALU_SEI | Ctrl.CTRL_RST_USEQ
 
     elif OP == Op.UBR:
-        uops[1] |= Ctrl.SET_USE_BR | Ctrl.RST_USEQ
+        uops[1] |= Ctrl.CTRL_SET_UBR
+        uops[2] |= Ctrl.CTRL_RST_USEQ
     elif OP == Op.KBR:
-        uops[1] |= Ctrl.CLR_USE_BR | Ctrl.RST_USEQ
+        uops[1] |= Ctrl.CTRL_CLR_UBR
+        uops[2] |= Ctrl.CTRL_RST_USEQ
 
     # 8-bit Moves
     elif OP == Op.MOV_A_B:
@@ -1058,13 +1028,13 @@ def get_uops(state: State) -> list[int]:
         return mov8(GPR.D, GPR.C)
 
     elif OP == Op.MOV_A_DP:
-        uops[1] |= Ctrl.DBUS_ASSERT_DP | Ctrl.DBUS_LOAD_A | Ctrl.RST_USEQ
+        uops[1] |= Ctrl.DBUS_ASSERT_DP | Ctrl.DBUS_LOAD_A | Ctrl.CTRL_RST_USEQ
     elif OP == Op.MOV_DP_A:
-        uops[1] |= Ctrl.DBUS_ASSERT_A | Ctrl.DBUS_LOAD_DP | Ctrl.RST_USEQ
+        uops[1] |= Ctrl.DBUS_ASSERT_A | Ctrl.DBUS_LOAD_DP | Ctrl.CTRL_RST_USEQ
     elif OP == Op.MOV_BR_A:
-        uops[1] |= Ctrl.DBUS_ASSERT_A | Ctrl.DBUS_LOAD_BR | Ctrl.RST_USEQ
+        uops[1] |= Ctrl.DBUS_ASSERT_A | Ctrl.DBUS_LOAD_BR | Ctrl.CTRL_RST_USEQ
     elif OP == Op.MOV_A_BR:
-        uops[1] |= Ctrl.DBUS_ASSERT_BR | Ctrl.DBUS_LOAD_A | Ctrl.RST_USEQ
+        uops[1] |= Ctrl.DBUS_ASSERT_BR | Ctrl.DBUS_LOAD_A | Ctrl.CTRL_RST_USEQ
 
     # IO Operations
     elif OP == Op.IN_A:
@@ -1093,7 +1063,7 @@ def get_uops(state: State) -> list[int]:
             Ctrl.ADDR_ASSERT_DP
             | Ctrl.DBUS_LOAD_MEM
             | Ctrl.DBUS_ASSERT_TH
-            | Ctrl.RST_USEQ
+            | Ctrl.CTRL_RST_USEQ
         )
 
     elif OP == Op.OUT_A:
@@ -1122,7 +1092,7 @@ def get_uops(state: State) -> list[int]:
             Ctrl.ADDR_ASSERT_IO
             | Ctrl.DBUS_LOAD_MEM
             | Ctrl.DBUS_ASSERT_TH
-            | Ctrl.RST_USEQ
+            | Ctrl.CTRL_RST_USEQ
         )
     elif OP == Op.OUT_IMM:
         uops[1] |= (
@@ -1141,7 +1111,7 @@ def get_uops(state: State) -> list[int]:
             Ctrl.ADDR_ASSERT_IO
             | Ctrl.DBUS_LOAD_MEM
             | Ctrl.DBUS_ASSERT_TH
-            | Ctrl.RST_USEQ
+            | Ctrl.CTRL_RST_USEQ
         )
 
     # A Loads
@@ -1444,31 +1414,39 @@ def get_uops(state: State) -> list[int]:
     elif OP == Op.MOV_X_Y:
         return mov16(MOV16.X, MOV16.Y)
     elif OP == Op.MOV_X_AB:
-        return mov16(MOV16.X, MOV16.AB)
+        uops[1] |= Ctrl.DBUS_ASSERT_A | Ctrl.DBUS_LOAD_XH
+        uops[2] |= Ctrl.DBUS_ASSERT_B | Ctrl.DBUS_LOAD_XL | Ctrl.CTRL_RST_USEQ
     elif OP == Op.MOV_X_CD:
-        return mov16(MOV16.X, MOV16.CD)
+        uops[1] |= Ctrl.DBUS_ASSERT_C | Ctrl.DBUS_LOAD_XH
+        uops[2] |= Ctrl.DBUS_ASSERT_D | Ctrl.DBUS_LOAD_XL | Ctrl.CTRL_RST_USEQ
 
     elif OP == Op.MOV_Y_X:
         return mov16(MOV16.Y, MOV16.X)
     elif OP == Op.MOV_Y_AB:
-        return mov16(MOV16.Y, MOV16.AB)
+        uops[1] |= Ctrl.DBUS_ASSERT_A | Ctrl.DBUS_LOAD_YH
+        uops[2] |= Ctrl.DBUS_ASSERT_B | Ctrl.DBUS_LOAD_YL | Ctrl.CTRL_RST_USEQ
     elif OP == Op.MOV_Y_CD:
-        return mov16(MOV16.Y, MOV16.CD)
+        uops[1] |= Ctrl.DBUS_ASSERT_C | Ctrl.DBUS_LOAD_YH
+        uops[2] |= Ctrl.DBUS_ASSERT_D | Ctrl.DBUS_LOAD_YL | Ctrl.CTRL_RST_USEQ
 
     elif OP == Op.MOV_AB_X:
-        return mov16(MOV16.AB, MOV16.X)
+        uops[1] |= Ctrl.XFER_ASSERT_X | Ctrl.DBUS_ASSERT_MSB | Ctrl.DBUS_LOAD_A
+        uops[2] |= Ctrl.XFER_ASSERT_X | Ctrl.DBUS_ASSERT_LSB | Ctrl.DBUS_LOAD_B
     elif OP == Op.MOV_AB_Y:
-        return mov16(MOV16.AB, MOV16.Y)
+        uops[1] |= Ctrl.XFER_ASSERT_Y | Ctrl.DBUS_ASSERT_MSB | Ctrl.DBUS_LOAD_A
+        uops[2] |= Ctrl.XFER_ASSERT_Y | Ctrl.DBUS_ASSERT_LSB | Ctrl.DBUS_LOAD_B
 
     elif OP == Op.MOV_CD_X:
-        return mov16(MOV16.CD, MOV16.X)
+        uops[1] |= Ctrl.XFER_ASSERT_X | Ctrl.DBUS_ASSERT_MSB | Ctrl.DBUS_LOAD_C
+        uops[2] |= Ctrl.XFER_ASSERT_X | Ctrl.DBUS_ASSERT_LSB | Ctrl.DBUS_LOAD_D
     elif OP == Op.MOV_CD_Y:
-        return mov16(MOV16.CD, MOV16.Y)
+        uops[1] |= Ctrl.XFER_ASSERT_Y | Ctrl.DBUS_ASSERT_MSB | Ctrl.DBUS_LOAD_C
+        uops[2] |= Ctrl.XFER_ASSERT_Y | Ctrl.DBUS_ASSERT_LSB | Ctrl.DBUS_LOAD_D
 
     elif OP == Op.MOV_SP_X:
-        uops[1] |= Ctrl.XFER_ASSERT_X | Ctrl.XFER_LOAD_SP | Ctrl.RST_USEQ
+        uops[1] |= Ctrl.XFER_ASSERT_X | Ctrl.XFER_LOAD_SP | Ctrl.CTRL_RST_USEQ
     elif OP == Op.MOV_X_SP:
-        uops[1] |= Ctrl.XFER_ASSERT_SP | Ctrl.XFER_LOAD_X | Ctrl.RST_USEQ
+        uops[1] |= Ctrl.XFER_ASSERT_SP | Ctrl.XFER_LOAD_X | Ctrl.CTRL_RST_USEQ
 
     # X Loads
     elif OP == Op.LOAD_X_IMM:
@@ -1899,7 +1877,7 @@ def get_uops(state: State) -> list[int]:
             Ctrl.ADDR_ASSERT_DP
             | Ctrl.DBUS_LOAD_MEM
             | Ctrl.DBUS_ASSERT_TL
-            | Ctrl.RST_USEQ
+            | Ctrl.CTRL_RST_USEQ
         )
 
     # Shift Right with Carry
@@ -1939,9 +1917,9 @@ def get_uops(state: State) -> list[int]:
         return unyop_dp(UnyOp.INC)
 
     elif OP == Op.INC_X:
-        uops[1] |= Ctrl.COUNT_INC_X | Ctrl.RST_USEQ
+        uops[1] |= Ctrl.COUNT_INC_X | Ctrl.CTRL_RST_USEQ
     elif OP == Op.INC_Y:
-        uops[1] |= Ctrl.COUNT_INC_Y | Ctrl.RST_USEQ
+        uops[1] |= Ctrl.COUNT_INC_Y | Ctrl.CTRL_RST_USEQ
 
     # Decrement
     elif OP == Op.DEC_A:
@@ -1956,9 +1934,9 @@ def get_uops(state: State) -> list[int]:
         return unyop_dp(UnyOp.DEC)
 
     elif OP == Op.DEC_X:
-        uops[1] |= Ctrl.COUNT_DEC_X | Ctrl.RST_USEQ
+        uops[1] |= Ctrl.COUNT_DEC_X | Ctrl.CTRL_RST_USEQ
     elif OP == Op.DEC_Y:
-        uops[1] |= Ctrl.COUNT_DEC_Y | Ctrl.RST_USEQ
+        uops[1] |= Ctrl.COUNT_DEC_Y | Ctrl.CTRL_RST_USEQ
 
     # Stack Pushes
     elif OP == Op.PUSH_A:
@@ -2068,7 +2046,7 @@ def get_uops(state: State) -> list[int]:
             | Ctrl.DBUS_LOAD_TH
             | Ctrl.ALU_SEC
         )
-        uops[4] |= Ctrl.ALU_SBC | Ctrl.XFER_ASSERT_T | Ctrl.RST_USEQ
+        uops[4] |= Ctrl.ALU_SBC | Ctrl.XFER_ASSERT_T | Ctrl.CTRL_RST_USEQ
 
     # Tests (Self AND)
     elif OP == Op.TST_A:
@@ -2088,7 +2066,7 @@ def get_uops(state: State) -> list[int]:
         )
         uops[2] |= Ctrl.ADDR_ASSERT_DP | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_TH
         uops[3] |= Ctrl.DBUS_ASSERT_TH | Ctrl.DBUS_LOAD_TL
-        uops[4] |= Ctrl.ALU_AND | Ctrl.XFER_ASSERT_T | Ctrl.RST_USEQ
+        uops[4] |= Ctrl.ALU_AND | Ctrl.XFER_ASSERT_T | Ctrl.CTRL_RST_USEQ
 
     # Subroutine Control
     elif OP == Op.JSR_ABS:
@@ -2118,7 +2096,7 @@ def get_uops(state: State) -> list[int]:
             | Ctrl.DBUS_ASSERT_MSB
             | Ctrl.XFER_ASSERT_PC
         )
-        uops[5] |= Ctrl.XFER_ASSERT_T | Ctrl.XFER_LOAD_PC | Ctrl.RST_USEQ
+        uops[5] |= Ctrl.XFER_ASSERT_T | Ctrl.XFER_LOAD_PC | Ctrl.CTRL_RST_USEQ
     elif OP == Op.JSR_REL:
         uops[1] |= (
             Ctrl.ADDR_ASSERT_PC
@@ -2142,7 +2120,7 @@ def get_uops(state: State) -> list[int]:
         )
         uops[4] |= (
             Ctrl.ADDR_ASSERT_PC
-            | Ctrl.OFFSET
+            | Ctrl.OFFSET_EN
             | Ctrl.XFER_ASSERT_ADDR
             | Ctrl.XFER_LOAD_PC
         )
@@ -2162,31 +2140,13 @@ def get_uops(state: State) -> list[int]:
             | Ctrl.DBUS_ASSERT_MEM
             | Ctrl.DBUS_LOAD_PCL
             | Ctrl.COUNT_INC_SP
-            | Ctrl.RST_USEQ
+            | Ctrl.CTRL_RST_USEQ
         )
     elif OP == Op.RTI:
-        uops[1] |= Ctrl.CLR_SUPER_MODE
-        uops[2] |= (
-            Ctrl.ADDR_ASSERT_SP
-            | Ctrl.DBUS_ASSERT_MEM
-            | Ctrl.DBUS_LOAD_SR
-            | Ctrl.COUNT_INC_SP
-        )
-        uops[3] |= (
-            Ctrl.ADDR_ASSERT_SP
-            | Ctrl.DBUS_ASSERT_MEM
-            | Ctrl.DBUS_LOAD_PCH
-            | Ctrl.COUNT_INC_SP
-        )
-        uops[4] |= (
-            Ctrl.ADDR_ASSERT_SP
-            | Ctrl.DBUS_ASSERT_MEM
-            | Ctrl.DBUS_LOAD_PCL
-            | Ctrl.COUNT_INC_SP
-            | Ctrl.ALU_SEI
-        )
-        uops[5] |= Ctrl.CLR_NMI_MASK
-        uops[6] |= Ctrl.CLR_USE_BR | Ctrl.RST_USEQ
+        uops[1] |= Ctrl.CTRL_SET_UBR | Ctrl.ALU_SEI
+        uops[2] |= Ctrl.ADDR_ASSERT_PC | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_PCH | Ctrl.COUNT_INC_SP
+        uops[3] |= Ctrl.ADDR_ASSERT_PC | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_PCL | Ctrl.COUNT_INC_SP
+        uops[4] |= Ctrl.ADDR_ASSERT_PC | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_SR | Ctrl.COUNT_INC_SP | Ctrl.CTRL_RST_USEQ
 
     elif OP == Op.JMP_ABS:
         return jmp_abs(flags.unconditional)
@@ -2345,20 +2305,8 @@ def make_extended(uops: list[int], OP: int) -> list[int]:
     corrected = BASE.copy()
 
     for i in range(2, 8):
-        try:
-            corrected[i] = uops[i - 1]
-        except IndexError:
-            print(hex(OP))
-            exit()
+        corrected[i] = uops[i - 1]
 
-    if all(corrected[2:]):
-        corrected[-1] |= Ctrl.TOG_EXT
-    else:
-        for i, word in enumerate(reversed(corrected[2:])):
-            if word:
-                break
-
-    corrected[7 - i] |= Ctrl.TOG_EXT
     return corrected
 
 

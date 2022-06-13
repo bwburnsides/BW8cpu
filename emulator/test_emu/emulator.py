@@ -115,22 +115,20 @@ def Emulator(assembly: str, memory=False) -> CoreDump:
         for _ in range(9):
             regs.append(bool(int.from_bytes(f.read(1), byteorder="little")))
 
+        final = regs + flags
+
         if memory:
             memory = []
             for br in range(16):
                 memory.append([])
-                for _ in range(1024 * 1024):
-                    memory[br].append(int.from_bytes(f.read(1), byteorder="little"))
+                data = f.read(1024 * 1024)                
+                for byte in data:
+                    memory[br].append(byte)
 
-            final = regs + flags + [memory]
-            core_dump = CoreDump(*final)
+            final += [memory]
 
-        else:
-            final = regs + flags
-            core_dump = CoreDump(*final)
-
+    core_dump = CoreDump(*final)
     CORE_DUMP_PATH.unlink()
-
     return core_dump
 
 

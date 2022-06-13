@@ -57,18 +57,15 @@ namespace BW8cpu {
         cpu->Y = 0x0000;
 
         cpu->status_flags = {
-            false,
-            false,
-            false,
-            false,
-            false,
-        };
-
-        cpu->ctrl_flags = {
-            false,
-            true,
-            false,
-            true,
+            false,  // Cf
+            false,  // Zf
+            false,  // Vf
+            false,  // Nf
+            false,  // If
+            false,  // EXT
+            true,   // ~SUP
+            false,  // UBR
+            true,   // ~(NMI Enable)
         };
 
         cpu->bus_flags = {
@@ -103,7 +100,7 @@ namespace BW8cpu {
         cpu->state |= (cpu->tstate & 0b111) << 0;
         cpu->state |= ((pack_state_flags(cpu) & 0b1111)) << 3;
         cpu->state |= (cpu->IR) << 7;
-        cpu->state |= ((int)(cpu->ctrl_flags.ext)) << 15;
+        cpu->state |= ((int)(cpu->status_flags.ext)) << 15;
         cpu->state |= (((int)(cpu->mode)) & 0b11) << 16;
 
         // Next, set the control word via the microcode
@@ -112,31 +109,29 @@ namespace BW8cpu {
         }
 
         CtrlLines lines = decode_ctrl(cpu);
-        if (lines.tog_ext) {
-            cpu->ctrl_flags.ext = true;
-        }
 
         cpu->bus_flags.data_code = true;
         cpu->bus_flags.mem_io = true;
 
-        switch (lines.dbus_load) {
-            case DbusLoad::SET_UBR:
-                cpu->ctrl_flags.ubr = true;
+        switch (lines.ctrl_group) {
+            case CtrlGroup::NONE:
                 break;
-            case DbusLoad::CLR_UBR:
-                cpu->ctrl_flags.ubr = false;
+            case CtrlGroup::RST_USEQ:
                 break;
-            case DbusLoad::SET_SUP:
-                cpu->ctrl_flags.sup = true;
+            case CtrlGroup::SET_EXT:
+                cpu->status_flags.ext = true;
                 break;
-            case DbusLoad::CLR_SUP:
-                cpu->ctrl_flags.sup = false;
+            case CtrlGroup::SET_UBR:
+                cpu->status_flags.ubr = true;
                 break;
-            case DbusLoad::SET_NMI:
-                cpu->ctrl_flags.nmi = true;
+            case CtrlGroup::CLR_UBR:
+                cpu->status_flags.ubr = false;
                 break;
-            case DbusLoad::CLR_NMI:
-                cpu->ctrl_flags.nmi = false;
+            case CtrlGroup::SET_SUP:
+                cpu->status_flags.sup = true;
+                break;
+            case CtrlGroup::SET_NMI_INHIB:
+                cpu->status_flags.nmi = true;
                 break;
         }
 
@@ -195,6 +190,8 @@ namespace BW8cpu {
         CtrlLines lines = decode_ctrl(cpu);
 
         switch (lines.xfer_assert) {
+            case XferAssert::NONE:
+                break;
             case XferAssert::PC:
                 cpu->xfer = cpu->PC;
                 break;
@@ -206,12 +203,6 @@ namespace BW8cpu {
                 break;
             case XferAssert::Y:
                 cpu->xfer = cpu->Y;
-                break;
-            case XferAssert::IRQ:
-                cpu->xfer = IRQ_ADDR;
-                break;
-            case XferAssert::ADDR:
-                cpu->xfer = cpu->addr_out;
                 break;
             case XferAssert::A_A:
                 cpu->xfer = (cpu->A << 8) | (cpu->A << 0);
@@ -288,8 +279,11 @@ namespace BW8cpu {
             case XferAssert::T:
                 cpu->xfer = (cpu->TH << 8) | (cpu->TL << 0);
                 break;
-            case XferAssert::NMI:
-                cpu->xfer = NMI_ADDR;
+            case XferAssert::INT:
+                cpu->xfer = cpu->mode == Mode::NMI ? NMI_ADDR : IRQ_ADDR;
+                break;
+            case XferAssert::ADDR:
+                cpu->xfer = cpu->addr_out;
                 break;
         }
     }
@@ -493,7 +487,7 @@ namespace BW8cpu {
         CtrlLines lines = decode_ctrl(cpu);
         uint8_t bank = cpu->BR;
 
-        if (cpu->ctrl_flags.sup) {
+        if (cpu->status_flags.sup) {
             bank = 0x0;
         }
         if (cpu->bus_flags.data_code) {
@@ -536,7 +530,7 @@ namespace BW8cpu {
                     bank,
                     cpu->addr_out,
                     cpu->bus_flags.mem_io,
-                    cpu->ctrl_flags.sup,
+                    cpu->status_flags.sup,
                     cpu->bus_flags.data_code
                 );
                 break;
@@ -559,12 +553,12 @@ namespace BW8cpu {
 
         CtrlLines lines = decode_ctrl(cpu);
 
-        if (lines.rst_useq) {
+        if (lines.ctrl_group == CtrlGroup::RST_USEQ) {
             cpu->tstate = 0;
         }
 
         if (cpu->tstate == 0) {
-            cpu->ctrl_flags.ext = false;
+            cpu->status_flags.ext = false;
 
             if (cpu->interrupts.req) {
                 cpu->mode = Mode::STALL;
@@ -615,7 +609,7 @@ namespace BW8cpu {
                     cpu->addr_out,
                     cpu->dbus,
                     cpu->bus_flags.mem_io,
-                    cpu->ctrl_flags.sup,
+                    cpu->status_flags.sup,
                     cpu->bus_flags.data_code
                 );
                 break;
@@ -652,18 +646,6 @@ namespace BW8cpu {
             case DbusLoad::BR:
                 cpu->BR = cpu->dbus;
                 break;
-            case DbusLoad::SET_UBR:
-                break;
-            case DbusLoad::CLR_UBR:
-                break;
-            case DbusLoad::SET_SUP:
-                break;
-            case DbusLoad::CLR_SUP:
-                break;
-            case DbusLoad::SET_NMI:
-                break;
-            case DbusLoad::CLR_NMI:
-                break;
         }
 
         if (lines.dbus_load == DbusLoad::SR) {
@@ -673,10 +655,14 @@ namespace BW8cpu {
             cpu->status_flags.Nf = (bool)((cpu->dbus >> 1) & 0b11111);
             cpu->status_flags.If = (bool)((cpu->dbus >> 0) & 0b11111);
         } else {
-            cpu->status_flags = cpu->ALU_FLAGS;
+            cpu->status_flags.Cf = cpu->ALU_FLAGS.Cf;
+            cpu->status_flags.Zf = cpu->ALU_FLAGS.Zf;
+            cpu->status_flags.Vf = cpu->ALU_FLAGS.Vf;
+            cpu->status_flags.Nf = cpu->ALU_FLAGS.Nf;
+            cpu->status_flags.If = cpu->ALU_FLAGS.If;
         }
 
-        if (cpu->IR == 0xFC && cpu->ctrl_flags.ext) {
+        if (cpu->IR == 0xFC && cpu->status_flags.ext) {
             cpu_coredump(cpu);
         }
 
@@ -741,7 +727,7 @@ namespace BW8cpu {
         if (cpu == NULL) {
             fprintf(
                 stderr,
-                "Error BW8cpu *create_cpu: Could not allocate memory for CPU.\n"
+                "Error BW8cpu *cpu_malloc: Could not allocate memory for CPU.\n"
             );
             exit(-1);
         }
@@ -752,7 +738,7 @@ namespace BW8cpu {
             if (cpu->ucode[i] == NULL) {
                 fprintf(
                     stderr,
-                    "Error BW8cpu *create_cpu: Could not allocate memory for CPU.\n"
+                    "Error BW8cpu *cpu_malloc: Could not allocate memory for CPU.\n"
                 );
                 exit(-1);
             }
@@ -800,7 +786,12 @@ namespace BW8cpu {
             randbool(),
         };
 
-        cpu->ctrl_flags = {
+        cpu->status_flags = {
+            randbool(),
+            randbool(),
+            randbool(),
+            randbool(),
+            randbool(),
             randbool(),
             randbool(),
             randbool(),
@@ -855,9 +846,9 @@ namespace BW8cpu {
             bool_colored(cpu->status_flags.Vf),
             bool_colored(cpu->status_flags.Nf),
             bool_colored(cpu->status_flags.If),
-            bool_colored(cpu->ctrl_flags.sup),
-            bool_colored(cpu->ctrl_flags.ubr),
-            bool_colored(cpu->ctrl_flags.ext),
+            bool_colored(cpu->status_flags.sup),
+            bool_colored(cpu->status_flags.ubr),
+            bool_colored(cpu->status_flags.ext),
             bool_colored(cpu->interrupts.rst),
             bool_colored(cpu->interrupts.req),
             bool_colored(cpu->interrupts.nmi),
@@ -894,10 +885,10 @@ namespace BW8cpu {
 
 		lines.count 	    = Count((cpu->ctrl[3] >> 0) & 0b111);
 		lines.dec_sp 	    = (bool)((cpu->ctrl[3] >> 3) & 0b1);
-		lines.rst_useq 	    = (bool)((cpu->ctrl[3] >> 4) & 0b1);
-		lines.tog_ext 	    = (bool)((cpu->ctrl[3] >> 5) & 0b1);
-		lines.offset 	    = (bool)((cpu->ctrl[3] >> 6) & 0b1);
-		lines.unused 	    = (bool)((cpu->ctrl[3] >> 7) & 0b1);
+
+		lines.offset 	    = (bool)((cpu->ctrl[3] >> 4) & 0b1);
+
+        lines.ctrl_group    = CtrlGroup((cpu->ctrl[3] >> 5) & 0b111);
 
 		return lines;
     }
@@ -967,7 +958,7 @@ namespace BW8cpu {
 
         bool flags[] = {
             cpu->status_flags.Cf, cpu->status_flags.Zf, cpu->status_flags.Vf, cpu->status_flags.Nf, cpu->status_flags.If,
-            cpu->ctrl_flags.ext, cpu->ctrl_flags.nmi, cpu->ctrl_flags.sup, cpu->ctrl_flags.ubr,
+            cpu->status_flags.ext, cpu->status_flags.nmi, cpu->status_flags.sup, cpu->status_flags.ubr,
         };
         fwrite(flags, sizeof(bool), 9, fp);
 

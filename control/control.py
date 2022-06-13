@@ -6,7 +6,7 @@ class Ctrl:
     # Ctrl Latch 0: DBUS_ASSERT, ALU_OP
     # Ctrl Latch 1: DBUS_LOAD, ADDR_ASSERT
     # Ctrl Latch 2: XFER_ASSERT, XFER_LOAD
-    # Ctrl Latch 3: COUNT, RST_USEQ, SET_EXT, OFFSET, BRK_CLK
+    # Ctrl Latch 3: COUNT, OFFSET_EN, CTRL
 
     # 4 bits for DBUS Assert
     DBUS_ASSERT_ALU = 0 << 0
@@ -65,17 +65,9 @@ class Ctrl:
     DBUS_LOAD_YH = 19 << 8
     DBUS_LOAD_YL = 20 << 8
     DBUS_LOAD_BR = 21 << 8
-
-    SET_USE_BR = 22 << 8
-    CLR_USE_BR = 23 << 8
-    SET_SUPER_MODE = 24 << 8
-    CLR_SUPER_MODE = 25 << 8
-    SET_NMI_MASK = 26 << 8
-    CLR_NMI_MASK = 27 << 8
+    DBUS_LOAD_MUSTEQ = 22 << 8
 
     DBUS_LOAD_PORT = DBUS_LOAD_TL
-
-    DBUS_LOAD_MUSTEQ = 28 << 8
 
     # 3 bits for ADDR Assert
     ADDR_ASSERT_ACK = 0 << 13
@@ -88,38 +80,38 @@ class Ctrl:
     ADDR_ASSERT_IO = 7 << 13
 
     # 5 bits for XFER Assert
-    XFER_ASSERT_PC = 0 << 16
-    XFER_ASSERT_SP = 1 << 16
-    XFER_ASSERT_X = 2 << 16
-    XFER_ASSERT_Y = 3 << 16
-    XFER_ASSERT_IRQ = 4 << 16
-    XFER_ASSERT_ADDR = 5 << 16
-    XFER_ASSERT_A_A = 6 << 16
-    XFER_ASSERT_A_B = 7 << 16
-    XFER_ASSERT_A_C = 8 << 16
-    XFER_ASSERT_A_D = 9 << 16
-    XFER_ASSERT_A_TL = 10 << 16
-    XFER_ASSERT_B_A = 11 << 16
-    XFER_ASSERT_B_B = 12 << 16
-    XFER_ASSERT_B_C = 13 << 16
-    XFER_ASSERT_B_D = 14 << 16
-    XFER_ASSERT_B_TL = 15 << 16
-    XFER_ASSERT_C_A = 16 << 16
-    XFER_ASSERT_C_B = 17 << 16
-    XFER_ASSERT_C_C = 18 << 16
-    XFER_ASSERT_C_D = 19 << 16
-    XFER_ASSERT_C_TL = 20 << 16
-    XFER_ASSERT_D_A = 21 << 16
-    XFER_ASSERT_D_B = 22 << 16
-    XFER_ASSERT_D_C = 23 << 16
-    XFER_ASSERT_D_D = 24 << 16
-    XFER_ASSERT_D_TL = 25 << 16
-    XFER_ASSERT_TH_A = 26 << 16
-    XFER_ASSERT_TH_B = 27 << 16
-    XFER_ASSERT_TH_C = 28 << 16
-    XFER_ASSERT_TH_D = 29 << 16
-    XFER_ASSERT_T = 30 << 16
-    XFER_ASSERT_NMI = 31 << 16
+    XFER_ASSERT_NULL = 0 << 16
+    XFER_ASSERT_PC = 1 << 16
+    XFER_ASSERT_SP = 2 << 16
+    XFER_ASSERT_X = 3 << 16
+    XFER_ASSERT_Y = 4 << 16
+    XFER_ASSERT_A_A = 5 << 16
+    XFER_ASSERT_A_B = 6 << 16
+    XFER_ASSERT_A_C = 7 << 16
+    XFER_ASSERT_A_D = 8 << 16
+    XFER_ASSERT_A_TL = 9 << 16
+    XFER_ASSERT_B_A = 10 << 16
+    XFER_ASSERT_B_B = 11 << 16
+    XFER_ASSERT_B_C = 12 << 16
+    XFER_ASSERT_B_D = 13 << 16
+    XFER_ASSERT_B_TL = 14 << 16
+    XFER_ASSERT_C_A = 15 << 16
+    XFER_ASSERT_C_B = 16 << 16
+    XFER_ASSERT_C_C = 17 << 16
+    XFER_ASSERT_C_D = 18 << 16
+    XFER_ASSERT_C_TL = 19 << 16
+    XFER_ASSERT_D_A = 20 << 16
+    XFER_ASSERT_D_B = 21 << 16
+    XFER_ASSERT_D_C = 22 << 16
+    XFER_ASSERT_D_D = 23 << 16
+    XFER_ASSERT_D_TL = 24 << 16
+    XFER_ASSERT_TH_A = 25 << 16
+    XFER_ASSERT_TH_B = 26 << 16
+    XFER_ASSERT_TH_C = 27 << 16
+    XFER_ASSERT_TH_D = 28 << 16
+    XFER_ASSERT_T = 29 << 16
+    XFER_ASSERT_ADDR = 30 << 16
+    XFER_ASSERT_INT = 31 << 16
 
     # 3 bits for XFER Load
     XFER_LOAD_NULL = 0 << 21
@@ -127,8 +119,6 @@ class Ctrl:
     XFER_LOAD_SP = 2 << 21
     XFER_LOAD_X = 3 << 21
     XFER_LOAD_Y = 4 << 21
-    XFER_LOAD_AB = 5 << 21
-    XFER_LOAD_CD = 6 << 21
 
     # 3 bits for Counter Inc/Decs
     COUNT_NULL = 0 << 24
@@ -143,12 +133,16 @@ class Ctrl:
     # 1 bit for SP Dec
     # (Allows SP to be prepped for push while operand is being fetched)
     COUNT_DEC_SP = 1 << 27
+    OFFSET_EN = 1 << 28
 
-    # 4 bit fields for CPU CTRL
-    RST_USEQ = 1 << 28
-    TOG_EXT = 1 << 29
-    OFFSET = 1 << 30
-    UNUSED = 1 << 31
+    # 3 bits for CPU CTRL
+    CTRL_NULL = 0 << 29
+    CTRL_RST_USEQ = 1 << 29
+    CTRL_SET_EXT = 2 << 29
+    CTRL_SET_UBR = 3 << 29
+    CTRL_CLR_UBR = 4 << 29
+    CTRL_SET_SUP = 5 << 29
+    CTRL_SET_NMI_MASK = 6 << 29
 
     @staticmethod
     def decode(word: int) -> str:

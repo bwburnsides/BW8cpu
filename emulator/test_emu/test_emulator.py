@@ -1,5 +1,6 @@
 import operator
 import pprint
+import py
 
 import pytest
 
@@ -334,6 +335,197 @@ def test_load8_ptr_gpr(dst, ptr, idx):
     emu = Emulator(assembly)
     assert (ptr_getter(emu), dst_getter(emu)) == expected
 
+@pytest.mark.parametrize(("src"), "abcd")
+@under_test(
+    Op.STORE_A_ABS,
+    Op.STORE_B_ABS,
+    Op.STORE_C_ABS,
+    Op.STORE_D_ABS,
+)
+def test_store8_abs(src):
+    expected = 0x69
+    addr = 0x6502
+
+    assembly = f"""
+    load {src}, #{expected}
+    store [{addr}], {src}
+    """
+
+    emu = Emulator(assembly, memory=True)
+    assert emu.memory[0][0x6502] == expected
+
+@pytest.mark.parametrize(("src"), "abcd")
+@under_test(
+    Op.STORE_A_DP,
+    Op.STORE_B_DP,
+    Op.STORE_C_DP,
+    Op.STORE_D_DP,
+)
+def test_store8_dp(src):
+    expected = 0x79
+    dp = 0x68
+    da = 0x09
+
+    assembly = f"""
+    load a, #{dp}
+    mov dp, a
+
+    load {src}, #{expected}
+    store [!{da}], {src}
+    """
+
+    emu = Emulator(assembly, memory=True)
+    assert emu.memory[0][0x6809] == expected
+
+@pytest.mark.parametrize(
+    ("src", "ptr"),
+    (
+        "ax",
+        "bx",
+        "cx",
+        "dx",
+        "ay",
+        "by",
+        "cy",
+        "dy"
+    )
+)
+@under_test(
+    Op.STORE_A_X_IDX,
+    Op.STORE_A_Y_IDX,
+    Op.STORE_B_X_IDX,
+    Op.STORE_B_Y_IDX,
+    Op.STORE_C_X_IDX,
+    Op.STORE_C_Y_IDX,
+    Op.STORE_D_X_IDX,
+    Op.STORE_D_Y_IDX,
+)
+def test_store8_ptr_idx(src, ptr):
+    base = 0x6500
+    offset = 0x02
+    expected = 0xff
+
+    assembly = f"""
+    load {ptr}, #{base}
+    load {src}, #{expected}
+
+    store [{ptr}, #{offset}], {src}
+    """
+
+    emu = Emulator(assembly, memory=True)
+    assert emu.memory[0][base + offset] == expected
+
+@pytest.mark.parametrize(("src"), "abcd")
+@under_test(
+    Op.STORE_A_SP_IDX,
+    Op.STORE_B_SP_IDX,
+    Op.STORE_C_SP_IDX,
+    Op.STORE_D_SP_IDX,
+)
+def test_store8_sp_idx(src):
+    assembly = f"""
+    load x, #0x8085
+    mov sp, x
+
+    load {src}, #0xFF
+    store [sp, #1], {src}
+    """
+
+    emu = Emulator(assembly, memory=True)
+    assert emu.memory[0][0x8086] == 0xFF
+
+@pytest.mark.parametrize(
+    ("src", "ptr", "idx"),
+    (
+        "axa",
+        "axb",
+        "axc",
+        "axd",
+        "bxa",
+        "bxb",
+        "bxc",
+        "bxd",
+        "cxa",
+        "cxb",
+        "cxc",
+        "cxd",
+        "cxa",
+        "cxb",
+        "cxc",
+        "cxd",
+        "dxa",
+        "dxb",
+        "dxc",
+        "dxd",
+        "aya",
+        "ayb",
+        "ayc",
+        "ayd",
+        "bya",
+        "byb",
+        "byc",
+        "byd",
+        "cya",
+        "cyb",
+        "cyc",
+        "cyd",
+        "cya",
+        "cyb",
+        "cyc",
+        "cyd",
+        "dya",
+        "dyb",
+        "dyc",
+        "dyd",
+    )
+)
+@under_test(
+    Op.STORE_A_X_A,
+    Op.STORE_A_X_B,
+    Op.STORE_A_X_C,
+    Op.STORE_A_X_D,
+    Op.STORE_B_X_A,
+    Op.STORE_B_X_B,
+    Op.STORE_B_X_C,
+    Op.STORE_B_X_D,
+    Op.STORE_C_X_A,
+    Op.STORE_C_X_B,
+    Op.STORE_C_X_C,
+    Op.STORE_C_X_D,
+    Op.STORE_D_X_A,
+    Op.STORE_D_X_B,
+    Op.STORE_D_X_C,
+    Op.STORE_D_X_D,
+    Op.STORE_A_Y_A,
+    Op.STORE_A_Y_B,
+    Op.STORE_A_Y_C,
+    Op.STORE_A_Y_D,
+    Op.STORE_B_Y_A,
+    Op.STORE_B_Y_B,
+    Op.STORE_B_Y_C,
+    Op.STORE_B_Y_D,
+    Op.STORE_C_Y_A,
+    Op.STORE_C_Y_B,
+    Op.STORE_C_Y_C,
+    Op.STORE_C_Y_D,
+    Op.STORE_D_Y_A,
+    Op.STORE_D_Y_B,
+    Op.STORE_D_Y_C,
+    Op.STORE_D_Y_D,
+)
+def test_store8_gpr_ptr_gpr(src, ptr, idx):
+    expected = 0xDE
+    base = 0x6500
+    offset = 0x02
+    assembly = f"""
+    load {ptr}, #{base}
+    load {idx}, #{offset}
+    load {src}, #{expected}
+
+    store [{ptr}, {idx}], {src}
+    """
+    emu = Emulator(assembly, memory=True)
+    assert emu.memory[0][0x6502] == expected
 
 @pytest.mark.parametrize(("dst", "src"), ("xy", "yx"))
 @under_test(
