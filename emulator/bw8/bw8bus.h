@@ -1,17 +1,23 @@
 #pragma once
 
 #include <inttypes.h>
-#include "bw8pic.h"
+#include "bw8cpu.h"
 
 #define ADDR_SPACE_SIZE 1024 * 1024
 #define ROM_SIZE 64 * 1024
 
 namespace BW8 {
-    namespace bus {
-        static uint8_t memory[ADDR_SPACE_SIZE];
-        static pic::BW8pic pic;
+    class CPU;
 
-        uint8_t* init(const char* rom_path);
+    class Bus {
+    public:
+        uint8_t* memory;
+        CPU* cpu;
+
+        Bus(const char* rom_path);
+        ~Bus();
+
+        void attach(CPU* cpu);
 
         uint8_t read(
             uint8_t bank,
@@ -30,10 +36,16 @@ namespace BW8 {
             bool data_code
         );
 
+    private:
+        bool irq_sources[8];
+
         enum class Port {
+            // Clock
             CLK_MODE,
+            // Interrupt Controller
             IRQ_SRC,
             IRQ_MASK,
+            // DMA Controller
             DMA_DST_BR,
             DMA_DST_HI,
             DMA_DST_LO,
@@ -43,5 +55,9 @@ namespace BW8 {
             DMA_LEN_HI,
             DMA_LEN_LO,
         };
-    }
-}
+
+    private:
+        uint8_t io_in(uint8_t port, bool super_user);
+        void io_out(uint8_t port, uint8_t data, bool super_user);
+    };  // class Bus
+};  // namespace BW8
