@@ -11,7 +11,7 @@ timeout: typing.Final[int] = 5
 
 ASSEMBLER_PATH: typing.Final[Path] = Path("C:/Users/brady/projects/BW8cpu/assembler")
 EMULATOR_PATH: typing.Final[Path] = Path(
-    "C:/Users/brady/projects/BW8cpu/emulator/bw8/x64/Debug/cpu.exe"
+    "C:/Users/brady/projects/BW8cpu/emulator/bw8/x64/Debug/bw8.exe"
 )
 CORE_DUMP_PATH: typing.Final[Path] = Path(
     "C:/Users/brady/projects/BW8cpu/emulator/test_emu/CORE_DUMP.BIN"

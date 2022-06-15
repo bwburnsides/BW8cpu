@@ -11,4 +11,4 @@
     halt => opcode(OP_EXT) @ 0xFC
 }
 
-halt
+load a, #0x69

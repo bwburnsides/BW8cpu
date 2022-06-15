@@ -1,6 +1,5 @@
 import operator
 import pprint
-import py
 
 import pytest
 
@@ -449,10 +448,6 @@ def test_store8_sp_idx(src):
         "cxb",
         "cxc",
         "cxd",
-        "cxa",
-        "cxb",
-        "cxc",
-        "cxd",
         "dxa",
         "dxb",
         "dxc",
@@ -465,10 +460,6 @@ def test_store8_sp_idx(src):
         "byb",
         "byc",
         "byd",
-        "cya",
-        "cyb",
-        "cyc",
-        "cyd",
         "cya",
         "cyb",
         "cyc",

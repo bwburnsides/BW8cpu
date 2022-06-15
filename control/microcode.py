@@ -2369,6 +2369,12 @@ def main() -> None:
     print(f"Bytes per Instruction estimate: {sum(sizes) / len(sizes):.2f}")
 
     write_ucode(ucode, "microcode{}.bin")
+    print(Ctrl.decode(ucode[0b110000000000000000]))
+    print()
+    print(Ctrl.decode(ucode[0b110000000000000001]))
+    print()
+    print(Ctrl.decode(ucode[0b110000000000000010]))
+    print()
 
 
 if __name__ == "__main__":
