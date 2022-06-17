@@ -9,7 +9,7 @@ class Ctrl:
     # Ctrl Latch 3: COUNT, OFFSET_EN, CTRL
 
     # 4 bits for DBUS Assert
-    DBUS_ASSERT_ALU = 0 << 0
+    DBUS_ASSERT_NULL = 0 << 0
     DBUS_ASSERT_A = 1 << 0
     DBUS_ASSERT_B = 2 << 0
     DBUS_ASSERT_C = 3 << 0
@@ -23,6 +23,7 @@ class Ctrl:
     DBUS_ASSERT_MSB = 11 << 0
     DBUS_ASSERT_LSB = 12 << 0
     DBUS_ASSERT_BR = 13 << 0
+    DBUS_ASSERT_ALU = 14 << 0
 
     # 4 bits for ALU OP
     ALU_NOP = 0 << 4

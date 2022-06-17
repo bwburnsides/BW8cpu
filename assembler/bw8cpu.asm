@@ -576,7 +576,7 @@ _ = ASSEMBLY_TIME_CHECKS()
     rti                         => opcode(OP_RTI)
 
     ; Unconditional Jumps
-    jmp_abs {abs: u16}          => opcode(OP_JMP_ABS)          @ abs
+    jmp.abs {abs: u16}          => opcode(OP_JMP_ABS)          @ abs
     jmp {abs: u16}              => opcode(OP_JMP_ABS)          @ abs
     jmp {rel: bw8cpu_reladdr}   => opcode(OP_JMP_REL)          @ rel
     jmp x                       => opcode(OP_JMP_X)
