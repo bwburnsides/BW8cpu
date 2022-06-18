@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <circuit>
   <version>1</version>
-  <attributes/>
+  <attributes>
+    <entry>
+      <string>Width</string>
+      <int>11</int>
+    </entry>
+  </attributes>
   <visualElements>
     <visualElement>
       <elementName>74ls173.dig</elementName>
@@ -26,12 +31,12 @@
           <string>Status Register</string>
         </entry>
         <entry>
-          <string>intFormat</string>
-          <intFormat>bin</intFormat>
-        </entry>
-        <entry>
           <string>Bits</string>
           <int>8</int>
+        </entry>
+        <entry>
+          <string>intFormat</string>
+          <intFormat>bin</intFormat>
         </entry>
       </elementAttributes>
       <pos x="1320" y="20"/>
@@ -720,12 +725,12 @@
           <int>12</int>
         </entry>
         <entry>
-          <string>Label</string>
-          <string>Zero because SUP active low</string>
-        </entry>
-        <entry>
           <string>RectHeight</string>
           <int>6</int>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>Zero because SUP active low</string>
         </entry>
         <entry>
           <string>RectWidth</string>
