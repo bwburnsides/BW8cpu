@@ -193,34 +193,15 @@ class Flags:
         self.Z = bool((packed_flags >> 1) & 2)
         self.C = bool((packed_flags >> 0) & 1)
 
-    def unconditional(self) -> bool:
-        return True
-
-    def is_overflow(self) -> bool:
-        return self.V
-
-    def is_not_overflow(self) -> bool:
-        return not self.V
-
-    def is_negative(self) -> bool:
-        return self.N
-
-    def is_not_negative(self) -> bool:
-        return not self.N
-
-    def is_equal(self) -> bool:
-        return self.Z
-
-    def is_not_equal(self) -> bool:
-        return not self.Z
-
-    # Opposite carry check from x86 due to carry semantics
-    def is_carry(self) -> bool:
-        return not self.C
-
-    # Opposite carry check from x86 due to carry semantics
-    def is_not_carry(self) -> bool:
-        return self.C
+    def unconditional(self) -> bool:    return True
+    def is_overflow(self) -> bool:  return self.V
+    def is_not_overflow(self) -> bool:  return not self.V
+    def is_negative(self) -> bool:  return self.N
+    def is_not_negative(self) -> bool:  return not self.N
+    def is_equal(self) -> bool: return self.Z
+    def is_not_equal(self) -> bool: return not self.Z
+    def is_carry(self) -> bool: return self.C
+    def is_not_carry(self) -> bool: return not self.C
 
     # Opposite carry check from x86 due to carry semantics
     def is_below_or_equal(self) -> bool:
@@ -230,17 +211,10 @@ class Flags:
     def is_above(self) -> bool:
         return self.C and not self.Z
 
-    def is_less(self) -> bool:
-        return self.N != self.V
-
-    def is_greater_or_equal(self) -> bool:
-        return self.N == self.V
-
-    def is_less_or_equal(self) -> bool:
-        return self.Z or (self.N != self.V)
-
-    def is_greater(self) -> bool:
-        return not self.Z and self.N == self.V
+    def is_less(self) -> bool:  return self.N != self.V
+    def is_greater_or_equal(self) -> bool:  return self.N == self.V
+    def is_less_or_equal(self) -> bool: return self.Z or (self.N != self.V)
+    def is_greater(self) -> bool:   return not self.Z and self.N == self.V
 
 
 class Mode(Enum):

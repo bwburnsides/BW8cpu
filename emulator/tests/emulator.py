@@ -6,6 +6,7 @@ import contextlib
 import functools
 
 import opcodes
+from .test_harness import CoreDump
 
 timeout: typing.Final[int] = 5
 
@@ -20,7 +21,7 @@ CORE_DUMP_PATH: typing.Final[Path] = Path(
 BANK_DEF: str = """
 #bankdef rom {
     #addr 0x0000
-    #size 0xFFFF
+    #size 0x8000
     #outp 8 * 0x0000
     #fill
 }
@@ -29,38 +30,6 @@ BANK_DEF: str = """
     halt => opcode(OP_EXT) @ 0xFC
 }
 """
-
-
-@dataclasses.dataclass
-class CoreDump:
-    pc: int
-    sp: int
-    x: int
-    y: int
-    a: int
-    b: int
-    c: int
-    d: int
-    dp: int
-    da: int
-    th: int
-    tl: int
-    br: int
-    ir: int
-    of: int
-
-    c_f: bool
-    z_f: bool
-    v_f: bool
-    n_f: bool
-    i_f: bool
-
-    ext_f: bool
-    nmi_f: bool
-    sup_f: bool
-    ubr_f: bool
-
-    memory: list[list[int]] | None = None
 
 
 NoneDump = CoreDump(*(None for _ in range(25)))

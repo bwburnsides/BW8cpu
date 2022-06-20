@@ -145,7 +145,7 @@ class UnyOp(Enum):
     SRC = Ctrl.ALU_SRC, ALUSide.ShiftUnit
     ASR = Ctrl.ALU_ASR, ALUSide.ShiftUnit
     INC = Ctrl.ALU_INC, ALUSide.LogicUnit
-    DEC = Ctrl.ALU_DEC, ALUSide.LogicUnit
+    DEC = Ctrl.ALU_DEC, ALUSide.ShiftUnit
 
     def __init__(self, alu_op: int, alu_side: ALUSide):
         self.ALU_OP = alu_op
@@ -182,11 +182,11 @@ BASE = [FETCH, 0, 0, 0, 0, 0, 0, 0]
 STALL_OPS = [Ctrl.ADDR_ASSERT_ACK for _ in range(8)]
 
 IRQ_ACK = [
-    Ctrl.COUNT_DEC_SP | Ctrl.ALU_CLI,
+    Ctrl.COUNT_DEC_SP,
     Ctrl.ADDR_ASSERT_SP | Ctrl.DBUS_LOAD_MEM | Ctrl.DBUS_ASSERT_SR | Ctrl.COUNT_DEC_SP,
     Ctrl.ADDR_ASSERT_SP | Ctrl.DBUS_LOAD_MEM | Ctrl.DBUS_ASSERT_LSB | Ctrl.XFER_ASSERT_PC | Ctrl.COUNT_DEC_SP,
     Ctrl.ADDR_ASSERT_SP | Ctrl.DBUS_LOAD_MEM | Ctrl.DBUS_ASSERT_MSB | Ctrl.XFER_ASSERT_PC | Ctrl.CTRL_SET_SUP,
-    Ctrl.XFER_ASSERT_INT | Ctrl.XFER_LOAD_PC | Ctrl.CTRL_RST_USEQ,
+    Ctrl.XFER_ASSERT_INT | Ctrl.XFER_LOAD_PC | Ctrl.ALU_CLI | Ctrl.CTRL_RST_USEQ,
     0, 0, 0
 ]
 
@@ -2143,10 +2143,10 @@ def get_uops(state: State) -> list[int]:
             | Ctrl.CTRL_RST_USEQ
         )
     elif OP == Op.RTI:
-        uops[1] |= Ctrl.CTRL_SET_UBR | Ctrl.ALU_SEI
-        uops[2] |= Ctrl.ADDR_ASSERT_PC | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_PCH | Ctrl.COUNT_INC_SP
-        uops[3] |= Ctrl.ADDR_ASSERT_PC | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_PCL | Ctrl.COUNT_INC_SP
-        uops[4] |= Ctrl.ADDR_ASSERT_PC | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_SR | Ctrl.COUNT_INC_SP | Ctrl.CTRL_RST_USEQ
+        uops[1] |= Ctrl.CTRL_SET_UBR
+        uops[2] |= Ctrl.ADDR_ASSERT_SP | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_PCH | Ctrl.COUNT_INC_SP
+        uops[3] |= Ctrl.ADDR_ASSERT_SP | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_PCL | Ctrl.COUNT_INC_SP
+        uops[4] |= Ctrl.ADDR_ASSERT_SP | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_SR | Ctrl.COUNT_INC_SP | Ctrl.CTRL_RST_USEQ
 
     elif OP == Op.JMP_ABS:
         return jmp_abs(flags.unconditional)
@@ -2369,12 +2369,6 @@ def main() -> None:
     print(f"Bytes per Instruction estimate: {sum(sizes) / len(sizes):.2f}")
 
     write_ucode(ucode, "microcode{}.bin")
-    print(Ctrl.decode(ucode[0b110000000000000000]))
-    print()
-    print(Ctrl.decode(ucode[0b110000000000000001]))
-    print()
-    print(Ctrl.decode(ucode[0b110000000000000010]))
-    print()
 
 
 if __name__ == "__main__":
