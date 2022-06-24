@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
     char* rom_fname = argv[1];
     BW8::Bus bus = BW8::Bus(rom_fname);
     BW8::CPU cpu = BW8::CPU(&bus);
-    BW8::UART uart = BW8::UART(&bus);
+    BW8::UART uart = BW8::UART(&bus, stdin, stdout);
 
     cpu.rst(true);
     cpu.rst(false);

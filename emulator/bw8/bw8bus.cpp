@@ -45,16 +45,22 @@ namespace BW8 {
 
     void Bus::interrupt(uint8_t index, bool state){
         irq_sources[index % 8] = state;
+        for (int i = 0; i < 8; i++) {
+            if (irq_sources[i]) {
+                cpu->irq(true);
+                return;
+            }
+        }
+        cpu->irq(false);
     };
 
     void Bus::dump(FILE *stream) {
+        // fprintf(stream, "%s", "\033[0;0H");
         // cpu->dump(stream);
         // uart->dump(stream);
         for (int i = 0; i < uart->tx_count(); i++) {
             fprintf(stream, "%c", uart->dequeue_tx());
         }
-
-
     }
 
     uint8_t Bus::read(uint8_t bank, uint16_t ptr, bool mem_io, bool super_user, bool data_code) {
@@ -64,7 +70,7 @@ namespace BW8 {
         if (mem_io) {
             return memory[addr];
         } else {
-            return io_in(port, super_user);
+            return io(port, 0x00, true, super_user);
         }
     }
 
@@ -75,15 +81,12 @@ namespace BW8 {
         if (mem_io) {
             memory[addr] = data;
         } else {
-            io_out(port, data, super_user);
+            io(port, data, false, super_user);
         }
     }
 
-    uint8_t Bus::io_in(uint8_t port, bool super_user) {
-        return 0;
-    }
-
-    void Bus::io_out(uint8_t port, uint8_t data, bool super_user) {
+    uint8_t Bus::io(uint8_t port, uint8_t data_in, bool read_write, bool super_user) {
+        uint8_t data_out;
         switch (Port(port)) {
             case Port::CLK_MODE:
                 break;
@@ -108,9 +111,14 @@ namespace BW8 {
             case Port::DMA_LEN_LO:
                 break;
             case Port::UART_RX:
-                break;
+                if (read_write) {
+                    data_out = uart->dequeue_rx();
+                    return data_out;
+                }
             case Port::UART_TX:
-                uart->enqueue_tx(data);
+                if (!read_write) {
+                    uart->enqueue_tx(data_in);
+                }
                 break;
             case Port::UART_CTRL:
                 break;

@@ -64,7 +64,6 @@ namespace BW8 {
             UART_CTRL,
         };
 
-        uint8_t io_in(uint8_t port, bool super_user);
-        void io_out(uint8_t port, uint8_t data, bool super_user);
+        uint8_t io(uint8_t port, uint8_t data, bool read_write, bool super_user);
     };  // class Bus
 };  // namespace BW8

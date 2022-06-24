@@ -1,5 +1,6 @@
 #pragma once
 #include <inttypes.h>
+#include <thread>
 
 #include "bw8bus.h"
 
@@ -8,11 +9,10 @@ namespace BW8{
 
     class UART {
         public:
-            UART(Bus* sys_bus);
-            void rising();
-            void falling();
+            UART(Bus* sys_bus, FILE *istream, FILE *ostream);
             void enqueue_tx(uint8_t data);
             uint8_t dequeue_tx();
+            void enqueue_rx(uint8_t data);
             uint8_t dequeue_rx();
             void dump(FILE* stream);
 
@@ -21,6 +21,8 @@ namespace BW8{
 
         private:
             Bus* bus;
+            FILE *input;
+            FILE *output;
 
             uint8_t tx_read;
             uint8_t tx_write;
@@ -30,5 +32,8 @@ namespace BW8{
 
             uint8_t tx_buffer[8];
             uint8_t rx_buffer[8];
+
+            std::thread console_thread;
+            void console_monitor();
     };
 }
