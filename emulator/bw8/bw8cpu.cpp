@@ -6,9 +6,24 @@
 
 #include "bw8cpu.h"
 
-
 #define randrange(a, b) rand() % ((b) + 1 - (a)) + (a)
 #define randbool() (bool)(rand() % 2)
+
+#define RED_TEXT "\033[0;31m"
+#define GREEN_TEXT "\033[0;32m"
+#define RESET_TEXT "\033[0m"
+#define STATE_FORMAT "\033[0;0H"\
+"+----------------------------------------------------+\n"\
+"| BW8cpu Emulator                          June 2022 |\n"\
+"| Clock Cycles: %-20lld       Tstate: %1d |\n"\
+"+----------------------------------------------------+\n"\
+"| Status: %sC %sZ %sV %sN %sI %sS %sU %sE  %sRST %sREQ %sNMI %sIRQ\033[0m   %6s  |\n"\
+"| DBUS:  $%02X  ADDR: $%04X  XFER: $%04X  AOUT: $%04X  |\n"\
+"| PC:  $%04X   SP:  $%04X    X:  $%04X    Y:  $%04X  |\n"\
+"| A:     $%02X    B:    $%02X    C:    $%02X    D:    $%02X  |\n"\
+"| DP:    $%02X   DA:    $%02X   TH:    $%02X   TL:    $%02X  |\n"\
+"| BR:     $%01X   OF:    $%02X   IR:    $%02X               |\n"\
+"+----------------------------------------------------+\n"
 
 namespace BW8 {
     const uint32_t CPU::DIODE_MATRIX[16] = {
@@ -91,14 +106,32 @@ namespace BW8 {
         mode = Mode::FETCH;
         tstate = 0;
         state = 0;
-        for (int i = 0; i < 4; i++) {
-            ctrl[i] = 0x00;
-        }
+        lines = decode_ctrl(state);
 
         dbus = 0x00;
         xfer = 0x0000;
         addr = 0x0000;
         addr_out = 0x0000;
+    }
+
+    void CPU::req(bool status) {
+        interrupts.req = status;
+    }
+
+    void CPU::nmi(bool status) {
+        interrupts.nmi = status;
+    }
+
+    void CPU::irq(bool status) {
+        interrupts.irq = status;
+    }
+
+    bool CPU::ack() {
+        return lines.addr_assert == AddrAssert::ACK && lines.xfer_assert == XferAssert::ADDR;
+    }
+
+    bool CPU::hlt() {
+        return IR == 0xFC && status_flags.ext;
     }
 
     void CPU::rising() {        
@@ -111,12 +144,7 @@ namespace BW8 {
         state |= ((int)(status_flags.ext)) << 15;
         state |= (((int)(mode)) & 0b11) << 16;
 
-        // Next, set the control word via the microcode
-        for (int i = 0; i < 4; i++) {
-            ctrl[i] = ucode[i][state];
-        }
-
-        CtrlLines lines = decode_ctrl();
+        lines = decode_ctrl(state);
 
         bus_flags.data_code = true;
         bus_flags.mem_io = true;
@@ -151,8 +179,6 @@ namespace BW8 {
     }
 
     void CPU::assert_addr() {
-        CPU::CtrlLines lines = decode_ctrl();
-
         switch (lines.addr_assert) {
             case AddrAssert::ACK:
                 addr = 0x0000;
@@ -195,8 +221,6 @@ namespace BW8 {
     }
 
     void CPU::assert_xfer() {
-        CtrlLines lines = decode_ctrl();
-
         switch (lines.xfer_assert) {
             case XferAssert::NONE:
                 break;
@@ -297,8 +321,7 @@ namespace BW8 {
     }
 
     void CPU::calculate_alu() {
-        CtrlLines ctrl_lines = decode_ctrl();
-        uint8_t alu_op = (uint8_t)(ctrl_lines.alu_op);
+        uint8_t alu_op = (uint8_t)(lines.alu_op);
 
         AluCtrlLines lines = decode_alu_ctrl();
 
@@ -492,7 +515,6 @@ namespace BW8 {
     }
 
     void CPU::assert_dbus() {
-        CtrlLines lines = decode_ctrl();
         uint8_t bank = BR;
 
         if (status_flags.sup) {
@@ -559,7 +581,6 @@ namespace BW8 {
         tstate %= 8;
         clocks++;
 
-        CtrlLines lines = decode_ctrl();
 
         if (lines.ctrl_group == CtrlGroup::RST_USEQ) {
             tstate = 0;
@@ -570,9 +591,9 @@ namespace BW8 {
 
             if (interrupts.req) {
                 mode = Mode::STALL;
-            } else if (interrupts.nmi) {
+            } else if (interrupts.nmi && !status_flags.nmi) {
                 mode = Mode::NMI;
-            } else if (interrupts.irq) {
+            } else if (interrupts.irq && status_flags.If) {
                 mode = Mode::IRQ;
             } else {
                 mode = Mode::FETCH;
@@ -670,10 +691,6 @@ namespace BW8 {
             status_flags.If = ALU_FLAGS.If;
         }
 
-        if (IR == 0xFC && status_flags.ext) {
-            coredump();
-        }
-
         switch (lines.count) {
             case Count::NONE:
                 break;
@@ -743,6 +760,7 @@ namespace BW8 {
         }
 
         bus = sys_bus;
+        bus->attach(this);
         clocks = 0;
 
         srand((unsigned int)time(NULL));
@@ -810,9 +828,7 @@ namespace BW8 {
         tstate = randrange(0, 7);
         state = randrange(0, 0xffff);  // todo this is wrong
 
-        for (int i = 0; i < 4; i++) {
-            ctrl[i] = randrange(0, 0xff);
-        }
+        lines = decode_ctrl(state);
 
         // TODO: these should take their values based on the random control bus values
         dbus = randrange(0, 0xff);
@@ -828,7 +844,6 @@ namespace BW8 {
     }
 
     void CPU::dump(FILE* stream) {
-        CtrlLines lines = decode_ctrl();
         fprintf(
             stream,
             STATE_FORMAT,
@@ -864,8 +879,13 @@ namespace BW8 {
         return flags;
     }
 
-    CPU::CtrlLines CPU::decode_ctrl() {
+    CPU::CtrlLines CPU::decode_ctrl(uint32_t state) {
         CtrlLines lines;
+        uint8_t ctrl[4];
+
+        for (int i = 0; i < 4; i++) {
+            ctrl[i] = ucode[i][state];
+        }
 
         lines.dbus_assert   = DbusAssert((ctrl[0] >> 0) & 0b1111);
         lines.alu_op        = AluOp((ctrl[0] >> 4) & 0b1111);
@@ -888,7 +908,6 @@ namespace BW8 {
 
     CPU::AluCtrlLines CPU::decode_alu_ctrl() {
         AluCtrlLines alu_lines;
-        CtrlLines lines = decode_ctrl();
 
         uint8_t alu_op = (uint8_t)(lines.alu_op);
         uint32_t row = DIODE_MATRIX[alu_op];

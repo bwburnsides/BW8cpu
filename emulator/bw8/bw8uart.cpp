@@ -14,7 +14,7 @@ namespace BW8 {
     }
 
     void UART::rising() {
-        if (tx_write >= 4) {
+        if (rx_write >= 4) {
             bus->interrupt(0, true);
         } else {
             bus->interrupt(0, false);
@@ -25,12 +25,24 @@ namespace BW8 {
 
     }
 
-
     void UART::enqueue_tx(uint8_t data) {
         tx_buffer[tx_write++] = data;
+        tx_write %= 8;
     }
 
-    void UART::print(FILE* stream) {
+    uint8_t UART::dequeue_tx() {
+        uint8_t byte = tx_buffer[tx_read++];
+        tx_read %= 8;
+        return byte;
+    }
+
+    uint8_t UART::dequeue_rx() {
+        uint8_t byte = rx_buffer[rx_read++];
+        rx_read %= 8;
+        return byte;
+    }
+
+    void UART::dump(FILE* stream) {
         fprintf(stream, "tx read ptr: %d\n", tx_read);
         fprintf(stream, "tx write ptr: %d\n", tx_write);
         fprintf(stream, "rx read ptr: %d\n", rx_read);
@@ -38,7 +50,17 @@ namespace BW8 {
 
         fprintf(stream, "tx buf\trx_buff\n");
         for (int i = 0; i < 8; i++) {
-            fprintf(stream, "%d\t%d\n", tx_buffer[i], rx_buffer[i]);
+            fprintf(stream, "%02X\t%02X\n", tx_buffer[i], rx_buffer[i]);
         }
     }
+
+    uint8_t UART::tx_count() {
+        return (tx_write - tx_read) % 8;
+    }
+
+    uint8_t UART::rx_count() {
+        return (rx_write - rx_read) % 8;
+    }
+
+
 };

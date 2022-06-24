@@ -28,6 +28,7 @@ namespace BW8 {
         }
 
         cpu = NULL;
+        uart = NULL;
     }
 
     Bus::~Bus() {
@@ -38,9 +39,33 @@ namespace BW8 {
         this->cpu = cpu;
     };
 
+    void Bus::attach(UART* uart) {
+        this->uart = uart;
+    };
+
+    void Bus::interrupt(uint8_t index, bool state){
+        irq_sources[index % 8] = state;
+    };
+
+    void Bus::dump(FILE *stream) {
+        // cpu->dump(stream);
+        // uart->dump(stream);
+        for (int i = 0; i < uart->tx_count(); i++) {
+            fprintf(stream, "%c", uart->dequeue_tx());
+        }
+
+
+    }
+
     uint8_t Bus::read(uint8_t bank, uint16_t ptr, bool mem_io, bool super_user, bool data_code) {
         uint32_t addr = ((bank & 0xf) << 16) | ptr;
-        return memory[addr];
+        uint8_t port = addr & 0xff;
+
+        if (mem_io) {
+            return memory[addr];
+        } else {
+            return io_in(port, super_user);
+        }
     }
 
     void Bus::write(uint8_t bank, uint16_t ptr, uint8_t data, bool mem_io, bool super_user, bool data_code) {
@@ -50,7 +75,7 @@ namespace BW8 {
         if (mem_io) {
             memory[addr] = data;
         } else {
-            io_in(addr & 0xff, super_user);
+            io_out(port, data, super_user);
         }
     }
 
@@ -59,6 +84,36 @@ namespace BW8 {
     }
 
     void Bus::io_out(uint8_t port, uint8_t data, bool super_user) {
-
+        switch (Port(port)) {
+            case Port::CLK_MODE:
+                break;
+            case Port::IRQ_SRC:
+                break;
+            case Port::IRQ_MASK:
+                break;
+            case Port::DMA_DST_BR:
+                break;
+            case Port::DMA_DST_HI:
+                break;
+            case Port::DMA_DST_LO:
+                break;
+            case Port::DMA_SRC_BR:
+                break;
+            case Port::DMA_SRC_HI:
+                break;
+            case Port::DMA_SRC_LO:
+                break;
+            case Port::DMA_LEN_HI:
+                break;
+            case Port::DMA_LEN_LO:
+                break;
+            case Port::UART_RX:
+                break;
+            case Port::UART_TX:
+                uart->enqueue_tx(data);
+                break;
+            case Port::UART_CTRL:
+                break;
+        }
     }
 }

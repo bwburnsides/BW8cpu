@@ -19,8 +19,10 @@ int main(int argc, char** argv) {
         exit(-1);
     }
 
-    BW8::Bus bus = BW8::Bus(argv[1]);
+    char* rom_fname = argv[1];
+    BW8::Bus bus = BW8::Bus(rom_fname);
     BW8::CPU cpu = BW8::CPU(&bus);
+    BW8::UART uart = BW8::UART(&bus);
 
     cpu.rst(true);
     cpu.rst(false);
@@ -28,5 +30,9 @@ int main(int argc, char** argv) {
     while (true) {
         cpu.rising();
         cpu.falling();
+        bus.dump(stdout);
+        if (cpu.hlt()) {
+            cpu.coredump();
+        }
     }
 }

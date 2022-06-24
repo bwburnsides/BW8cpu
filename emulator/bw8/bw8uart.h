@@ -12,7 +12,12 @@ namespace BW8{
             void rising();
             void falling();
             void enqueue_tx(uint8_t data);
-            void print(FILE* stream);
+            uint8_t dequeue_tx();
+            uint8_t dequeue_rx();
+            void dump(FILE* stream);
+
+            uint8_t tx_count();
+            uint8_t rx_count();
 
         private:
             Bus* bus;

@@ -4,22 +4,6 @@
 
 #include "bw8bus.h"
 
-#define RED_TEXT "\033[0;31m"
-#define GREEN_TEXT "\033[0;32m"
-#define RESET_TEXT "\033[0m"
-#define STATE_FORMAT "\033[0;0H"\
-"+----------------------------------------------------+\n"\
-"| BW8cpu Emulator                          June 2022 |\n"\
-"| Clock Cycles: %-20lld       Tstate: %1d |\n"\
-"+----------------------------------------------------+\n"\
-"| Status: %sC %sZ %sV %sN %sI %sS %sU %sE  %sRST %sREQ %sNMI %sIRQ\033[0m   %6s  |\n"\
-"| DBUS:  $%02X  ADDR: $%04X  XFER: $%04X  AOUT: $%04X  |\n"\
-"| PC:  $%04X   SP:  $%04X    X:  $%04X    Y:  $%04X  |\n"\
-"| A:     $%02X    B:    $%02X    C:    $%02X    D:    $%02X  |\n"\
-"| DP:    $%02X   DA:    $%02X   TH:    $%02X   TL:    $%02X  |\n"\
-"| BR:     $%01X   OF:    $%02X   IR:    $%02X               |\n"\
-"+----------------------------------------------------+\n"
-
 namespace BW8 {
     class Bus;
 
@@ -41,10 +25,11 @@ namespace BW8 {
             void nmi(bool status);
             void irq(bool status);
 
+            bool ack();
+            bool hlt();
+
             void rising();
             void falling();
-
-            bool ack();
 
         private:
             enum class Mode {
@@ -357,7 +342,7 @@ namespace BW8 {
             uint8_t* ucode[4];		// 256 KB * 4 = 1 MB of microcode
             uint8_t tstate;
             uint32_t state;
-            uint8_t ctrl[4];
+            CtrlLines lines;
 
             // Internal buses
             uint8_t dbus;
@@ -366,7 +351,7 @@ namespace BW8 {
             uint16_t addr_out;
 
             uint8_t pack_state_flags();
-            CtrlLines decode_ctrl();
+            CtrlLines decode_ctrl(uint32_t state);
             AluCtrlLines decode_alu_ctrl();
             void assert_addr();
             void assert_xfer();
