@@ -20,8 +20,13 @@ namespace BW8 {
         Bus(const char* rom_path);
         ~Bus();
 
-        void attach(CPU* cpu);
-        void attach(UART* uart);
+        void clock();
+
+        void rst(bool state);
+        bool hlt();
+        void coredump();
+
+        void interrupt(uint8_t index, bool state);
 
         uint8_t read(
             uint8_t bank,
@@ -40,28 +45,22 @@ namespace BW8 {
             bool data_code
         );
 
-        void interrupt(uint8_t index, bool state);
-
         void dump(FILE *stream);
 
     private:
         bool irq_sources[8];
 
-        enum class Port {
-            CLK_MODE,
-            IRQ_SRC,
-            IRQ_MASK,
-            DMA_DST_BR,
-            DMA_DST_HI,
-            DMA_DST_LO,
-            DMA_SRC_BR,
-            DMA_SRC_HI,
-            DMA_SRC_LO,
-            DMA_LEN_HI,
-            DMA_LEN_LO,
-            UART_RX,
-            UART_TX,
-            UART_CTRL,
+        char terminal[15][51];
+        struct Cursor {
+            uint8_t row;
+            uint8_t col;
+        } cursor;
+
+        enum class Device {
+            CLK,
+            IRQ,
+            DMA,
+            UART,
         };
 
         uint8_t io(uint8_t port, uint8_t data, bool read_write, bool super_user);

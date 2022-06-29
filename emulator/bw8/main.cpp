@@ -14,25 +14,23 @@
 
 
 int main(int argc, char** argv) {
+    bool dump = false;
+
     if (argc < 2) {
         fprintf(stderr, "usage: bw8.exe <rom_path>");
         exit(-1);
     }
 
-    char* rom_fname = argv[1];
-    BW8::Bus bus = BW8::Bus(rom_fname);
-    BW8::CPU cpu = BW8::CPU(&bus);
-    BW8::UART uart = BW8::UART(&bus, stdin, stdout);
+    BW8::Bus bus = BW8::Bus(argv[1]);
 
-    cpu.rst(true);
-    cpu.rst(false);
+    bus.rst(true);
+    bus.rst(false);
 
     while (true) {
-        cpu.rising();
-        cpu.falling();
+        bus.clock();
         bus.dump(stdout);
-        if (cpu.hlt()) {
-            cpu.coredump();
+        if (bus.hlt()) {
+            bus.coredump();
         }
     }
 }

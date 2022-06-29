@@ -8,6 +8,8 @@ namespace BW8 {
     class Bus;
 
     class CPU {
+        friend class Bus;
+
         static const uint16_t IRQ_ADDR = 0x0003;
         static const uint16_t NMI_ADDR = 0x0006;
         static const uint32_t DIODE_MATRIX[16];
@@ -17,7 +19,6 @@ namespace BW8 {
             ~CPU();
 
             void dump(FILE* stream);
-            void clock();
             void coredump();
 
             void rst(bool status);
@@ -31,13 +32,14 @@ namespace BW8 {
             void rising();
             void falling();
 
-        private:
             enum class Mode {
                 FETCH,
                 NMI,
                 IRQ,
                 STALL,
             };
+
+        private:
 
             typedef struct AluFlags {
                 bool Cf;    // Carry/Not Borrow
@@ -79,7 +81,7 @@ namespace BW8 {
             } Interrupts;
 
             enum class DbusAssert {
-                ALU,
+                NONE,
                 A,
                 B,
                 C,
@@ -93,6 +95,7 @@ namespace BW8 {
                 MSB,
                 LSB,
                 BR,
+                ALU,
             };
 
             enum class AluOp {
@@ -117,6 +120,7 @@ namespace BW8 {
             enum class SumFunc {
                 ZERO,
                 CF,
+                PLACEHOLDER2,
                 ONE,
             };
 
@@ -350,7 +354,7 @@ namespace BW8 {
             uint16_t addr;
             uint16_t addr_out;
 
-            uint8_t pack_state_flags();
+            uint32_t encode_state(uint8_t tstate, StatusFlags flags, uint8_t ir, Mode mode);
             CtrlLines decode_ctrl(uint32_t state);
             AluCtrlLines decode_alu_ctrl();
             void assert_addr();
@@ -358,7 +362,5 @@ namespace BW8 {
             void calculate_alu();
             void assert_dbus();
             void read_ucode();
-            const char* mode_repr(Mode mode);
-            const char* bool_colored(bool flag);
     };  // class cpu
 };  // namespace BW8

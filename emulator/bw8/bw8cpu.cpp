@@ -9,22 +9,6 @@
 #define randrange(a, b) rand() % ((b) + 1 - (a)) + (a)
 #define randbool() (bool)(rand() % 2)
 
-#define RED_TEXT "\033[0;31m"
-#define GREEN_TEXT "\033[0;32m"
-#define RESET_TEXT "\033[0m"
-#define STATE_FORMAT "\033[0;0H"\
-"+----------------------------------------------------+\n"\
-"| BW8cpu Emulator                          June 2022 |\n"\
-"| Clock Cycles: %-20lld       Tstate: %1d |\n"\
-"+----------------------------------------------------+\n"\
-"| Status: %sC %sZ %sV %sN %sI %sS %sU %sE  %sRST %sREQ %sNMI %sIRQ\033[0m   %6s  |\n"\
-"| DBUS:  $%02X  ADDR: $%04X  XFER: $%04X  AOUT: $%04X  |\n"\
-"| PC:  $%04X   SP:  $%04X    X:  $%04X    Y:  $%04X  |\n"\
-"| A:     $%02X    B:    $%02X    C:    $%02X    D:    $%02X  |\n"\
-"| DP:    $%02X   DA:    $%02X   TH:    $%02X   TL:    $%02X  |\n"\
-"| BR:     $%01X   OF:    $%02X   IR:    $%02X               |\n"\
-"+----------------------------------------------------+\n"
-
 namespace BW8 {
     const uint32_t CPU::DIODE_MATRIX[16] = {
             0b1111111111100001100,
@@ -44,6 +28,95 @@ namespace BW8 {
             0b1111111101111111111,
             0b1111101111111111111,
     };
+
+    CPU::CPU(Bus* sys_bus) {
+        for (int i = 0; i < 4; i++) {
+            ucode[i] = (uint8_t*)calloc(256 * 1024, sizeof(uint8_t));
+
+            if (ucode[i] == NULL) {
+                fprintf(
+                    stderr,
+                    "Error BW8::CPU Constructor: Could not allocate memory for CPU.\n"
+                );
+                exit(-1);
+            }
+        }
+
+        bus = sys_bus;
+        clocks = 0;
+
+        srand((unsigned int)time(NULL));
+
+        A = randrange(0, 0xff);
+        B = randrange(0, 0xff);
+        C = randrange(0, 0xff);
+        D = randrange(0, 0xff);
+
+        DP = randrange(0, 0xff);
+        DA = randrange(0, 0xff);
+        TH = randrange(0, 0xff);
+        TL = randrange(0, 0xff);
+        IR = randrange(0, 0xff);
+        OF = randrange(0, 0xff);
+        BR = randrange(0, 0xf);	// 4b register not 8b
+
+        ALU = randrange(0, 0xff);
+        ALU_FLAGS = {
+            randbool(),  // Cf
+            randbool(),  // Zf
+            randbool(),  // Vf
+            randbool(),  // Nf
+            randbool(),  // If
+        };
+
+        PC = randrange(0, 0xffff);
+        SP = randrange(0, 0xffff);
+        X = randrange(0, 0xffff);
+        Y = randrange(0, 0xffff);
+
+        status_flags = {
+            randbool(),  // Cf
+            randbool(),  // Zf
+            randbool(),  // Vf
+            randbool(),  // Nf
+            randbool(),  // If
+            randbool(),  // ext
+            randbool(),  // sup
+            randbool(),  // ubr
+            randbool(),  // nmi
+        };
+
+        bus_flags = {
+            randbool(),  // mem_io
+            randbool(),  // data_code
+        };
+
+        interrupts = {
+            randbool(),  // rst
+            randbool(),  // req
+            randbool(),  // nmi
+            randbool(),  // irq
+        };
+
+        read_ucode();
+        mode = Mode(randrange(0, 3));
+        tstate = randrange(0, 7);
+        state = randrange(0, 0xffff);  // todo this is wrong
+
+        lines = decode_ctrl(state);
+
+        // TODO: these should take their values based on the random control bus values
+        dbus = randrange(0, 0xff);
+        xfer = randrange(0, 0xffff);
+        addr = randrange(0, 0xffff);
+        addr_out = randrange(0, 0xffff);
+    }
+
+    CPU::~CPU() {
+        for (int i = 0; i < 4; i++) {
+            free(ucode[i]);
+        }
+    }
 
     void CPU::rst(bool status) {
         interrupts.rst = status;
@@ -134,18 +207,14 @@ namespace BW8 {
         return IR == 0xFC && status_flags.ext;
     }
 
-    void CPU::rising() {        
-        // First, compute the state input
-        // 18b -> Mode (2), EXT (1), Opcode (8), Flags (4), tstate (3)
-        state = 0;
-        state |= (tstate & 0b111) << 0;
-        state |= ((pack_state_flags() & 0b1111)) << 3;
-        state |= (IR) << 7;
-        state |= ((int)(status_flags.ext)) << 15;
-        state |= (((int)(mode)) & 0b11) << 16;
+    void CPU::rising() {       
+        if (interrupts.rst) {
+            return;
+        }
 
+        state = encode_state(tstate, status_flags, IR, mode);
         lines = decode_ctrl(state);
-
+ 
         bus_flags.data_code = true;
         bus_flags.mem_io = true;
 
@@ -577,10 +646,13 @@ namespace BW8 {
     }
 
     void CPU::falling() {
+        if (interrupts.rst) {
+            return;
+        }
+
         tstate++;
         tstate %= 8;
         clocks++;
-
 
         if (lines.ctrl_group == CtrlGroup::RST_USEQ) {
             tstate = 0;
@@ -746,137 +818,24 @@ namespace BW8 {
         }
     }
 
-    CPU::CPU(Bus* sys_bus) {
-        for (int i = 0; i < 4; i++) {
-            ucode[i] = (uint8_t*)calloc(256 * 1024, sizeof(uint8_t));
+    uint32_t CPU::encode_state(uint8_t tstate, StatusFlags flags, uint8_t ir, Mode mode) {
+        // First, compute the state input
+        // 18b -> Mode (2), EXT (1), Opcode (8), Flags (4), tstate (3)
 
-            if (ucode[i] == NULL) {
-                fprintf(
-                    stderr,
-                    "Error BW8::CPU Constructor: Could not allocate memory for CPU.\n"
-                );
-                exit(-1);
-            }
-        }
+        uint8_t packed = 0;
+        uint32_t state = 0;
 
-        bus = sys_bus;
-        bus->attach(this);
-        clocks = 0;
+        packed |= (((int)(flags.Nf)) & 0b1) << 0;
+        packed |= (((int)(flags.Vf)) & 0b1) << 1;
+        packed |= (((int)(flags.Zf)) & 0b1) << 2;
+        packed |= (((int)(flags.Cf)) & 0b1) << 3;
 
-        srand((unsigned int)time(NULL));
-
-        A = randrange(0, 0xff);
-        B = randrange(0, 0xff);
-        C = randrange(0, 0xff);
-        D = randrange(0, 0xff);
-
-        DP = randrange(0, 0xff);
-        DA = randrange(0, 0xff);
-        TH = randrange(0, 0xff);
-        TL = randrange(0, 0xff);
-        IR = randrange(0, 0xff);
-        OF = randrange(0, 0xff);
-        BR = randrange(0, 0xf);	// 4b register not 8b
-
-        ALU = randrange(0, 0xff);  // TODO: base off of ctrl
-        ALU_FLAGS = {
-            randbool(),
-            randbool(),
-            randbool(),
-            randbool(),
-            randbool(),
-        };  // TODO: base off of ctrl
-
-        PC = randrange(0, 0xffff);
-        SP = randrange(0, 0xffff);
-        X = randrange(0, 0xffff);
-        Y = randrange(0, 0xffff);
-
-        status_flags = {
-            randbool(),
-            randbool(),
-            randbool(),
-            randbool(),
-            randbool(),
-        };
-
-        status_flags = {
-            randbool(),
-            randbool(),
-            randbool(),
-            randbool(),
-            randbool(),
-            randbool(),
-            randbool(),
-            randbool(),
-            randbool(),
-        };
-        bus_flags = {
-            randbool(),
-            randbool(),
-        };
-
-        interrupts = {
-            randbool(),
-            randbool(),
-            randbool(),
-            randbool(),
-        };
-
-        read_ucode();
-        mode = Mode(randrange(0, 3));
-        tstate = randrange(0, 7);
-        state = randrange(0, 0xffff);  // todo this is wrong
-
-        lines = decode_ctrl(state);
-
-        // TODO: these should take their values based on the random control bus values
-        dbus = randrange(0, 0xff);
-        xfer = randrange(0, 0xffff);
-        addr = randrange(0, 0xffff);
-        addr_out = randrange(0, 0xffff);
-    }
-
-    CPU::~CPU() {
-        for (int i = 0; i < 4; i++) {
-            free(ucode[i]);
-        }
-    }
-
-    void CPU::dump(FILE* stream) {
-        fprintf(
-            stream,
-            STATE_FORMAT,
-            clocks,
-            tstate,
-            bool_colored(status_flags.Cf),
-            bool_colored(status_flags.Zf),
-            bool_colored(status_flags.Vf),
-            bool_colored(status_flags.Nf),
-            bool_colored(status_flags.If),
-            bool_colored(status_flags.sup),
-            bool_colored(status_flags.ubr),
-            bool_colored(status_flags.ext),
-            bool_colored(interrupts.rst),
-            bool_colored(interrupts.req),
-            bool_colored(interrupts.nmi),
-            bool_colored(interrupts.irq),
-            mode_repr(mode),
-            dbus, addr, xfer, addr_out,
-            PC, SP, X, Y,
-            A, B, C, D,
-            DP, DA, TH, TL,
-            BR, OF, IR
-        );
-    }
-
-    uint8_t CPU::pack_state_flags() {
-        uint8_t flags = 0;
-        flags |= (((int)(status_flags.Nf)) & 0b1) << 0;
-        flags |= (((int)(status_flags.Vf)) & 0b1) << 1;
-        flags |= (((int)(status_flags.Zf)) & 0b1) << 2;
-        flags |= (((int)(status_flags.Cf)) & 0b1) << 3;
-        return flags;
+        state |= (tstate & 0b111) << 0;
+        state |= ((packed & 0b1111)) << 3;
+        state |= (ir) << 7;
+        state |= ((int)(flags.ext)) << 15;
+        state |= (((int)(mode)) & 0b11) << 16;
+        return state;
     }
 
     CPU::CtrlLines CPU::decode_ctrl(uint32_t state) {
@@ -898,9 +857,7 @@ namespace BW8 {
 
         lines.count 	    = Count((ctrl[3] >> 0) & 0b111);
         lines.dec_sp 	    = (bool)((ctrl[3] >> 3) & 0b1);
-
         lines.offset 	    = (bool)((ctrl[3] >> 4) & 0b1);
-
         lines.ctrl_group    = CtrlGroup((ctrl[3] >> 5) & 0b111);
 
         return lines;
@@ -944,11 +901,6 @@ namespace BW8 {
         }
     }
 
-    void CPU::clock() {
-        rising();
-        falling();
-    }
-
     void CPU::coredump() {
         FILE* fp;
         fp = fopen("CORE_DUMP.BIN", "w");
@@ -963,37 +915,20 @@ namespace BW8 {
 
         uint8_t reg8[] = {
             A,  B,  C,  D,
-            DP, DA, TH, TL,
-            IR, OF, BR,
         };
-        fwrite(reg8, sizeof(uint8_t), 11, fp);
+        fwrite(reg8, sizeof(uint8_t), 4, fp);
+
 
         bool flags[] = {
-            status_flags.Cf, status_flags.Zf, status_flags.Vf, status_flags.Nf, status_flags.If,
-            status_flags.ext, status_flags.nmi, status_flags.sup, status_flags.ubr,
+            status_flags.nmi, status_flags.ubr, status_flags.sup,
+            status_flags.Cf, status_flags.Zf, status_flags.Vf, status_flags.Nf, status_flags.If
         };
-        fwrite(flags, sizeof(bool), 9, fp);
+        fwrite(flags, sizeof(bool), 8, fp);
 
         fwrite(bus->memory, sizeof(uint8_t), ADDR_SPACE_SIZE, fp);
 
         fclose(fp);
+
         exit(0);
-    }
-
-    const char* CPU::mode_repr(Mode mode) {
-        switch (mode) {
-            case Mode::STALL:
-                return "MEMREQ";
-            case Mode::IRQ:
-                return "IRQACK";
-            case Mode::NMI:
-                return "NMIACK";
-            case Mode::FETCH:
-                return "NORMAL";
-        }
-    }
-
-    const char* CPU::bool_colored(bool flag) {
-        return flag ? GREEN_TEXT : RED_TEXT;
     }
 }  // namespace BW8
