@@ -40,7 +40,6 @@ namespace BW8 {
             };
 
         private:
-
             typedef struct AluFlags {
                 bool Cf;    // Carry/Not Borrow
                 bool Zf;    // Zero
@@ -362,5 +361,7 @@ namespace BW8 {
             void calculate_alu();
             void assert_dbus();
             void read_ucode();
+
+            uint8_t pack_flags();
     };  // class cpu
 };  // namespace BW8

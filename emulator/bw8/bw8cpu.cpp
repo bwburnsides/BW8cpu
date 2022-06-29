@@ -622,7 +622,7 @@ namespace BW8 {
                 dbus = TL;
                 break;
             case DbusAssert::SR:
-                // TODO - flag unpacking
+                dbus = pack_flags();
                 break;
             case DbusAssert::MEM:
                 dbus = bus->read(
@@ -750,11 +750,14 @@ namespace BW8 {
         }
 
         if (lines.dbus_load == DbusLoad::SR) {
-            status_flags.Cf = (bool)((dbus >> 4) & 0b11111);
-            status_flags.Zf = (bool)((dbus >> 3) & 0b11111);
-            status_flags.Vf = (bool)((dbus >> 2) & 0b11111);
-            status_flags.Nf = (bool)((dbus >> 1) & 0b11111);
-            status_flags.If = (bool)((dbus >> 0) & 0b11111);
+            status_flags.nmi = (bool)((dbus >> 7) & 1);
+            status_flags.ubr = (bool)((dbus >> 6) & 1);
+            status_flags.sup = (bool)((dbus >> 5) & 1);
+            status_flags.Cf = (bool)((dbus >> 4) & 1);
+            status_flags.Zf = (bool)((dbus >> 3) & 1);
+            status_flags.Vf = (bool)((dbus >> 2) & 1);
+            status_flags.Nf = (bool)((dbus >> 1) & 1);
+            status_flags.If = (bool)((dbus >> 0) & 1);
         } else {
             status_flags.Cf = ALU_FLAGS.Cf;
             status_flags.Zf = ALU_FLAGS.Zf;
@@ -931,4 +934,18 @@ namespace BW8 {
 
         exit(0);
     }
+
+    uint8_t CPU::pack_flags() {
+        uint8_t flags = 0;
+        flags |= ((uint8_t)(status_flags.If) & 1) << 0;
+        flags |= ((uint8_t)(status_flags.Nf) & 1) << 1;
+        flags |= ((uint8_t)(status_flags.Vf) & 1) << 2;
+        flags |= ((uint8_t)(status_flags.Zf) & 1) << 3;
+        flags |= ((uint8_t)(status_flags.Cf) & 1) << 4;
+        flags |= ((uint8_t)(status_flags.sup) & 1) << 5;
+        flags |= ((uint8_t)(status_flags.ubr) & 1) << 6;
+        flags |= ((uint8_t)(status_flags.nmi) & 1) << 7;
+        return flags;
+    }
+
 }  // namespace BW8
