@@ -154,15 +154,13 @@ class Ctrl:
         ADDR_ASSERT = (word >> (5 + 8)) & (0b111)
 
         XFER_ASSERT = (word >> (0 + 16)) & (0b11111)
+
         XFER_LOAD = (word >> (5 + 16)) & (0b111)
 
         COUNT = (word >> (0 + 24)) & (0b111)
-
-        DEC_SP = (word >> (3 + 24)) & (2**1 - 1)
-
-        OFFSET = (word >> (4 + 24)) & (2**1 - 1)
-
-        CTRL = (word >> (5 + 25)) & (2**3 - 1)
+        DEC_SP = (word >> (3 + 24)) & (0b1)
+        OFFSET = (word >> (4 + 24)) & (0b1)
+        CTRL = (word >> (5 + 24)) & (0b111)
 
         return "\n".join(
             [
@@ -188,10 +186,10 @@ class Flags:
     C: bool
 
     def __init__(self, packed_flags: int):
-        self.N = bool((packed_flags >> 3) & 8)
-        self.V = bool((packed_flags >> 2) & 4)
-        self.Z = bool((packed_flags >> 1) & 2)
-        self.C = bool((packed_flags >> 0) & 1)
+        self.N = bool(packed_flags & 0b1000)
+        self.V = bool(packed_flags & 0b0100)
+        self.Z = bool(packed_flags & 0b0010)
+        self.C = bool(packed_flags & 0b0001)
 
     def unconditional(self) -> bool:    return True
     def is_overflow(self) -> bool:  return self.V

@@ -179,7 +179,7 @@ FETCH = (
 )
 BASE = [FETCH, 0, 0, 0, 0, 0, 0, 0]
 
-STALL_OPS = [Ctrl.ADDR_ASSERT_ACK for _ in range(8)]
+STALL_OPS = [Ctrl.ADDR_ASSERT_ACK | Ctrl.CTRL_RST_USEQ for _ in range(8)]
 
 IRQ_ACK = [
     Ctrl.COUNT_DEC_SP,
@@ -919,12 +919,7 @@ def jmp_abs(pred: Callable[[], bool]) -> list[int]:
 def jmp_rel(pred: Callable[[], bool]) -> list[int]:
     uops = BASE.copy()
 
-    uops[1] |= (
-        Ctrl.ADDR_ASSERT_PC
-        | Ctrl.DBUS_ASSERT_MEM
-        | Ctrl.DBUS_LOAD_OFF
-        | Ctrl.COUNT_INC_PC
-    )
+    uops[1] |= Ctrl.ADDR_ASSERT_PC | Ctrl.DBUS_ASSERT_MEM | Ctrl.DBUS_LOAD_OFF | Ctrl.COUNT_INC_PC
 
     if pred():
         uops[2] |= (
@@ -946,19 +941,6 @@ def jmp_ptr(pred: Callable[[], bool], ptr: GPP) -> list[int]:
         uops[1] |= ptr.XFER_ASSERT | Ctrl.XFER_LOAD_PC | Ctrl.CTRL_RST_USEQ
     else:
         uops[1] |= Ctrl.CTRL_RST_USEQ
-    return uops
-
-
-def musteq_imm(gpr: GPR) -> list[int]:
-    uops = BASE.copy()
-    uops[1] |= (
-        Ctrl.ADDR_ASSERT_PC
-        | Ctrl.DBUS_ASSERT_MEM
-        | Ctrl.COUNT_INC_PC
-        | gpr.XFER_ASSERT_TL
-        | Ctrl.DBUS_LOAD_MUSTEQ
-        | Ctrl.CTRL_RST_USEQ
-    )
     return uops
 
 
@@ -2283,14 +2265,8 @@ def get_uops(state: State) -> list[int]:
     elif OP == Op.JG_Y:
         return jmp_ptr(flags.is_greater, GPP.Y)
 
-    elif OP == Op.MUSTEQ_A_IMM:
-        return musteq_imm(GPR.A)
-    elif OP == Op.MUSTEQ_B_IMM:
-        return musteq_imm(GPR.B)
-    elif OP == Op.MUSTEQ_C_IMM:
-        return musteq_imm(GPR.C)
-    elif OP == Op.MUSTEQ_D_IMM:
-        return musteq_imm(GPR.D)
+    elif OP == Op.HALT:
+        uops[1] |= Ctrl.DBUS_LOAD_MUSTEQ | Ctrl.CTRL_RST_USEQ
 
     else:
         return [-1]
@@ -2367,6 +2343,7 @@ def main() -> None:
 
     print(f"Clocks per Instruction estimate: {sum(lens) / len(lens):.2f}")
     print(f"Bytes per Instruction estimate: {sum(sizes) / len(sizes):.2f}")
+    print(f"Max Clocks per Instruction: {max(lens)}")
 
     write_ucode(ucode, "microcode{}.bin")
 
