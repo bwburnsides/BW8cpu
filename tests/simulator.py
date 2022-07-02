@@ -1,22 +1,11 @@
-# Given a string of assembly code,
-# assemble it, convert it to Digital test case style,
-# and put it into a Digital test case.
-# Put the digital test case into a "test_suite.dig"
-# Run this suite against the CPU file
-# The test should run a max number of cycles, or until HALT is asserted
-# when the loop breaks, assert false, causing register dump
-# collect the register values into an data structure that can be used in python
-
-from cgi import test
-from importlib.resources import read_text
 from pathlib import Path
 from typing import Final
-from tempfile import TemporaryFile
 import os
 from contextlib import contextmanager
 import subprocess
-from dataclasses import dataclass
 import textwrap
+
+from .common import CoreDump
 
 
 PROJECT_ROOT = Path("C:/Users/brady/projects/BW8cpu")
@@ -25,17 +14,6 @@ DIGITAL_PATH: Final[Path] = Path("C:/Users/brady/Digital")
 ASSEMBLER_PATH: Final[Path] = PROJECT_ROOT / "assembler"
 TEST_CASE_PATH: Final[Path] = PROJECT_ROOT / "tests/testsuite.dig"
 CPU_SIM_PATH: Final[Path] = PROJECT_ROOT / "simulator/BW8cpu.dig"
-
-@dataclass
-class CoreDump:
-    PC: int
-    SP: int
-    X: int
-    Y: int
-    A: int
-    B: int
-    C: int
-    D: int
 
 @contextmanager
 def working_directory(path: os.PathLike):
@@ -86,8 +64,8 @@ def Simulator(assembly: str) -> CoreDump:
     return parse(test_dump)
 
 def parse(test_dump: str) -> CoreDump:
-    _, _, pc, sp, x, y, a, b, c, d, *_ = test_dump.splitlines()[2:-2][-1].split()
-    regs = [pc, sp, x, y, a, b, c, d]
+    _, _, pc, sp, x, y, a, b, c, d, nmi_f, ubr_f, us_f, c_f, z_f, v_f, n_f, i_f, *_ = test_dump.splitlines()[2:-2][-1].split()
+    regs = [pc, sp, x, y, a, b, c, d, nmi_f, ubr_f, us_f, c_f, z_f, v_f, n_f, i_f]
     int_regs = []
     for reg in regs:
         if reg.startswith("0x"):
@@ -105,17 +83,17 @@ def parse(test_dump: str) -> CoreDump:
 def simulate(machine_code: list[str]) -> str:
     test_case = textwrap.dedent(
         f"""
-        step halt PC SP X Y A B C D assert
+        step halt PC SP X Y A B C D NMIIf UBRf USf Cf Zf Vf Nf If IR assert
 
         program({", ".join(machine_code)})
 
         let i = 0;
         while(!(halt | (i >= 100)))
             let i = i + 1;
-            0 0 x x x x x x x x x
-            1 x x x x x x x x x x
+            0 0 x x x x x x x x x x x x x x x x x x
+            1 x x x x x x x x x x x x x x x x x x x
         end while
-        x x x x x x x x x x 0
+        x x x x x x x x x x x x x x x x x x x 0
         """
     )
 

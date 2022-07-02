@@ -7,36 +7,38 @@
     #fill
 }
 
-#ruledef emulator {
-    halt => opcode(OP_EXT) @ 0xFC
-}
+#noemit on
+CLK_BASE = 0x00
+CLK_MODE = CLK_BASE | 0x0
 
-CLK_MODE = 0x00
-IRQ_SRC = 0x01
-IRQ_MASK = 0x02
-DMA_DST_BR = 0x03
-DMA_DST_HI = 0x04
-DMA_DST_LO = 0x05
-DMA_SRC_BR = 0x06
-DMA_SRC_HI = 0x07
-DMA_SRC_LO = 0x08
-DMA_LEN_HI = 0x09
-DMA_LEN_LO = 0x0A
-UART_RX = 0x0B
-UART_TX = 0x0C
-UART_CTRL = 0x0D
+IRQ_BASE = 0x10
+IRQ_SRC = IRQ_BASE | 0x0
+IRQ_MASK = IRQ_BASE | 0x1
 
-#addr 0
-jmp.abs rst
-#addr 3
-jmp.abs irq
+DMA_BASE = 0x20
+DMA_DST_BR = DMA_BASE | 0x0
+DMA_DST_HI = DMA_BASE | 0x1
+DMA_DST_LO = DMA_BASE | 0x2
+DMA_SRC_BR = DMA_BASE | 0x3
+DMA_SRC_HI = DMA_BASE | 0x4
+DMA_SRC_LO = DMA_BASE | 0x5
+DMA_LEN_HI = DMA_BASE | 0x6
+DMA_LEN_LO = DMA_BASE | 0x7
 
+UART_BASE = 0x30
+UART_RX = UART_BASE | 0x0
+UART_TX = UART_BASE | 0x1
+UART_CTRL = UART_BASE | 0x2
+#noemit off
+; --------------------------------
 
-irq:
+load a, #0
+load b, #1
+cmp a, b
+jle .jump
+.no_jump:
+    out <UART_TX>, #"."
     halt
-
-rst:
-    out <UART_TX>, #69
-    out <UART_TX>, #42
-    out <UART_TX>, #80
-    out <UART_TX>, #08
+.jump:
+    out <UART_TX>, #"#"
+    halt

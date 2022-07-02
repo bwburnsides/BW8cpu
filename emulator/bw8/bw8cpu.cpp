@@ -9,6 +9,11 @@
 #define randrange(a, b) rand() % ((b) + 1 - (a)) + (a)
 #define randbool() (bool)(rand() % 2)
 
+#define UCODE_PATH_0 "C:/Users/brady/projects/BW8cpu/control/bin/microcode0.bin"
+#define UCODE_PATH_1 "C:/Users/brady/projects/BW8cpu/control/bin/microcode1.bin"
+#define UCODE_PATH_2 "C:/Users/brady/projects/BW8cpu/control/bin/microcode2.bin"
+#define UCODE_PATH_3 "C:/Users/brady/projects/BW8cpu/control/bin/microcode3.bin"
+
 namespace BW8 {
     const uint32_t CPU::DIODE_MATRIX[16] = {
             0b1111111111100001100,
@@ -886,10 +891,10 @@ namespace BW8 {
 
     void CPU::read_ucode() {
         const char* fname[4] = {
-            "C:/Users/brady/projects/BW8cpu/control/bin/microcode0.bin",
-            "C:/Users/brady/projects/BW8cpu/control/bin/microcode1.bin",
-            "C:/Users/brady/projects/BW8cpu/control/bin/microcode2.bin",
-            "C:/Users/brady/projects/BW8cpu/control/bin/microcode3.bin",
+            UCODE_PATH_0,
+            UCODE_PATH_1,
+            UCODE_PATH_2,
+            UCODE_PATH_3,
         };
         FILE* fp;
 
@@ -929,9 +934,7 @@ namespace BW8 {
         fwrite(flags, sizeof(bool), 8, fp);
 
         fwrite(bus->memory, sizeof(uint8_t), ADDR_SPACE_SIZE, fp);
-
         fclose(fp);
-
         exit(0);
     }
 

@@ -1,6 +1,6 @@
 # 🔧 BW8 Instruction Set Architecture Specification
 
-The BW8cpu instruction set contains the following instructions. Each instruction has several opcodes that implement various combinations of operands and addressing mode variations on their base behavior. These will be discussed below.
+The BW8cpu instruction set contains the following instructions. Many instructions has several opcodes that implement various combinations of operands and addressing mode variations on their base behavior. These will be discussed below.
 
 Mnemonic                                        | Name                           
 ----------------------------------------------- | ------------------------------
@@ -52,9 +52,9 @@ Mnemonic                                        | Name
 [`JLE`](#jle---jump-if-less-or-equal)           | Jump if Less or Equal          
 [`JG`](#jg---jump-if-greater)                   | Jump if Greater                
 
-The BW8 has an 8-bit Instruction Register, so there is some trickery involved to support up to 512 opcodes, rather than just 256. This is done with the `EXT` instruction. This is a 1 byte, 1 cycle instruction which transitions the CPU from normal "`NRM`" mode to extended "`EXT`" mode, and then fetches the next instruction. This next instruction is interpretted differently due to the system being in `EXT` Mode. At the conclusion of these instructions, they return the CPU to `NRM` Mode. Through this mechanism, the CPU can ascribe two different meanings to each 8-bit opcode value, yielding a total of 512 opcodes.
+The BW8 has an 8-bit Instruction Register, so there is some trickery involved to support up to 512 opcodes, rather than just 256. This is done with the `EXT` instruction. This is a 1 byte, 1 cycle instruction which transitions the CPU from normal "`NRM`" mode to extended "`EXT`" mode, and then fetches the next instruction. This next instruction is interpretted differently due to the system being in `EXT` Mode. At the conclusion of these instructions, they return the CPU to Normal (`NRM`) Mode. Through this mechanism, the CPU can ascribe two different meanings to each 8-bit opcode value, yielding a total of 512 opcodes.
 
-The `NRM` Mode instructions are those which are commonly used, have long cycle counts, or have larger operand counts. The idea is to limit the cycle penalty incurred by `EXT` Mode opcodes to those which already execute quickly, or are not commonly used. In addition, by making sure that large operand count instructions exist in NRM Mode, we limit the maximum instruction size to 3 bytes, thereby keeping the program size penalty down.
+The `NRM` Mode instructions are those which are commonly used, have long cycle counts, or have larger operand counts. The idea is to limit the cycle penalty incurred by `EXT` Mode opcodes to those which already execute quickly, or are not commonly used. In addition, by making sure that large operand count instructions exist in NRM Mode, we can reduce the program size penalty down too.
 
 # Programming Model
 
@@ -68,26 +68,29 @@ The CPU programming model includes four 8-bit General Purpose Registers (`gpr`):
 
 These registers have limited direct instruction support, and are generally interacted with via `MOV`s. The `ab` and `cd` registers provide a mechanism for constructing 16-bit results that can be loaded into the GPPs or the SP. The combination of `gpp` and `sp` is known as the pointers (`ptr`).
 
-Additionally, there is the Status Register (`sr`) which stores the following CPU flags:
+Additionally, there is the Status Register (`sr`) which stores the following CPU flags. `sr` is not user facing, meaning that the user can not explicity load or store values into it. Nonetheless, the value of each bit in the register can be directly or indirectly managed by the program via select instructions in the ISA. The flags that each instruction modify are denoted in the instruction descriptions below.
 
 1. Zero (`Z`)
 2. Carry (`C`)
 3. Negative (`N`)
 4. Overflow (`V`)
 5. Interrupt Enable (`I`)
-6. User Data Source (`U`)
+6. Use User Bank Register (`U`)
+7. ~Supervisor Enable (`~S`)
 
-The first four of these are primarily set by the result of a recent ALU calculation. The Interrupt Enable flag is used to enable or disable maskable interrupt requests (IRQ), and is managed directly by the programmer via `SEI` and `CLI`. Finally, the `U` flag is intended for use within supervisor code, in order to give access to user address space.
+The first four of these are primarily set by the result of a recent ALU calculation. The Interrupt Enable flag is used to enable or disable maskable interrupt requests (IRQ), and is managed directly by the programmer via `SEI` and `CLI`. Finally, the `U` flag is intended for use within supervisor code, in order to give access to user address spaces.
 
-In the subsequent section, the size of an instruction is given as the total number of bytes required to execute the instruction. This includes the optional prefix `EXT` byte, the opcode itself, and any operands following the opcode in the instruction stream.
+In the subsequent section, the size of an instruction is given as the total number of bytes required to execute the instruction. This includes the optional prefix `EXT` byte, the opcode itself, and any operands following the opcode in the instruction stream. For this reason, the `BW8` ISA can be thought of as a variable-length instruction set.
 
 # Addressing Modes
+
+Addressing Modes specify the source and destination of instructions. Many instructions support multiple addressing modes - these are described in the subsequent instruction description section. Below are descriptions of all addressing modes present in the ISA.
 
 - *Implied*: There is no relevant operand source or destination, or they are implied directly by the opcode.
 
 - *Register Direct*: There is no effective address; all operands are in registers which are implied by the opcode.
 
-- *Immediate*: Their is no effective address; the operand is the one or two bytes following the opcode in the instruction stream, depending on the target of the instruction.
+- *Immediate*: There is no effective address; the operand is the one or two bytes following the opcode in the instruction stream, depending on the target of the instruction.
 
 - *Absolute*: The effective address is given as a two-byte absolute address which follows the opcode in Big Endian order.
 
@@ -100,7 +103,6 @@ In the subsequent section, the size of an instruction is given as the total numb
 - *Relative*: The effective address is computed by adding a signed 8-bit offset to the Program Counter. The offset source is the byte following the opcode.
 
 # Instruction Details
-
 ## `NOP` - No Operation
 
 Field  | Value
@@ -226,7 +228,7 @@ Size  | varies
 Cycles | varies
 Mode | varies
 
-Input one byte of data from the specified IO port.
+Input one byte of data from the specified IO port. `in` opcods which follow the first form below are 3 bytes in size. Opcodes which follow the second form are 4 bytes in size.
 
 Assembly:
 
@@ -242,12 +244,12 @@ Size  | varies
 Cycles | varies
 Mode | varies
 
-Output one byte of data to the specified IO port.
+Output one byte of data to the specified IO port. `out` opcodes which follow the first form are 3 bytes in size. Otherwise, they are 4 bytes in size.
 
 Assembly:
 
     out <{port: u8}>, {src: gpr}
-    out <{port: u8}>, [{dp: u8}]
+    out <{port: u8}>, [!{dp: u8}]
     out <{port: u8}>, #{imm: i8}
 
 ## `MOV` - Move Register
@@ -278,8 +280,8 @@ Source: `x`, `y`, `ab`, `cd`
 Destination: `x`, `y`, `ab`, `cd`
 
 Extraneous pairs:
-    `mov x sp`
-    `mov sp x`
+    `mov x, sp`
+    `mov sp, x`
 
 Note:
     `ab` and `cd` being used as a `src`-`dst` (or `dst`-`src`) pair is illegal. The assembler should implement these instructions as pseudo instructions consisting of two 8-bit `MOV`s.
@@ -299,71 +301,11 @@ The `LOAD` instruction has varying specifications for the 8-bit and 16-bit versi
 
     load {dst: gpr}, #{imm: i8}
     load {dst: gpr}, [{abs: u16}]
-    load {dst: gpr}, [{dp: u8}]
-    load {dst: gpr}, [{ptr: gpp | sp}, #{idx: s8}]
-    load {dst: gpr}, [{ptr: gpp | sp}, {idx: gpr}]
-
-Destinations: GPRs
-Addressing Modes:
-
-
-**Immediate**
-
-    load {dst: gpr}, #{imm: i8}
-
-Size: 2
-Cycles: TBD
-
-**Absolute**
-
-Size: 3
-Cycles: TBD
-
-**Direct Page**
-
-Size: 2
-Cycles: TBD
-
-**Indirect**
-
-Indirection Sources: GPPs
-Size: 1
-Cycles: TBD
-
-**Indexed Indirect**
-
-Indirection Sources: GPPs or `sp`
-Index Sources: GPRs (sometimes immediate)
-Size: varies
-Cycles: TBD
-
-The *indexed indirect* 8-bit Load instructions allow for a GPR to be loaded with the value found at an address computed by adding an 8-bit value to a GPP or the SP. In all indirection sources, all 4 GPRs are valid index sources. When the indirection source is the `sp`, then an additional index source is allowed from the instruction stream, as an immediate offset.
+    load {dst: gpr}, [!{dp: u8}]
+    load {dst: gpr}, [{ptr}, #{idx: s8}]
+    load {dst: gpr}, [{ptr}, {idx: gpr}]
 
 ### 16-bit `LOAD`
-
-Destinations: GPPs
-Addressing Modes:
-
-**Immediate**
-
-Size: 3
-Cycles: TBD
-
-**Absolute**
-
-Size: 3
-Cycles: TBD
-
-**Direct Page**
-
-Size: 2
-Cycles: TBD
-
-**Indirect**
-
-Indirection Sources: GPPs or `sp`
-Size: 1
-Cycles: TBD
 
 ## `STORE` - Store Register
 
