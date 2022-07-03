@@ -1,5 +1,7 @@
 from dataclasses import dataclass
-from enum import Enum, IntEnum
+from enum import Enum
+
+from opcodes import Op
 
 
 class Ctrl:
@@ -224,7 +226,6 @@ class Mode(Enum):
 
 @dataclass
 class State:
-    mode: Mode
     flags: Flags
     opcode: int
 
@@ -233,10 +234,8 @@ class State:
         packed_flags = (packed_state >> 0) & 0b1111
         op = (packed_state >> 4) & 0b1111_1111
         ext = (packed_state >> 12) & 0b1
-        mode_int = (packed_state >> 13) & 0b11
 
-        mode = Mode(mode_int)
         flags = Flags(packed_flags)
         opcode = op | (ext << 8)
 
-        return cls(mode, flags, opcode)
+        return cls(flags, Op(opcode))

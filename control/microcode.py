@@ -947,15 +947,14 @@ def jmp_ptr(pred: Callable[[], bool], ptr: GPP) -> list[int]:
 def get_uops(state: State) -> list[int]:
     flags = state.flags
     OP = state.opcode
-    mode = state.mode
 
-    if mode == Mode.STALL:
+    if Op == Op.REQ:
         return STALL_OPS.copy()
 
-    if mode == Mode.IRQ:
+    if Op == Op.IRQ:
         return IRQ_ACK.copy()
 
-    if mode == Mode.NMI:
+    if Op == Op.NMI:
         return NMI_ACK.copy()
 
     uops = BASE.copy()
@@ -2323,19 +2322,21 @@ def write_ucode(ucode: list[int], file_name_format: str) -> None:
 
 
 def main() -> None:
+    NON_FETCH = {Op.REQ, Op.NMI, Op.IRQ, Op.EXT}
+
     ucode, lens, sizes = [], [], []
-    for addr in range(2**15):
+    for addr in range(2**13):
         state = State.from_packed(addr)
         uops = get_uops(state)
 
         if uops[0] == -1:
-            mode, flags, nop = state.mode, state.flags, Op.NOP
-            corrected = get_uops(State(state.mode, state.flags, Op.NOP))
+            flags, nop = state.flags, Op.NOP
+            corrected = get_uops(State(state.flags, Op.NOP))
             if corrected[0] == -1:
-                raise RuntimeError(mode, flags, nop)
+                raise RuntimeError(flags, nop)
         else:
             corrected = make_extended(uops, state.opcode)
-            if state.mode == Mode.FETCH and state.opcode != Op.EXT:
+            if state.opcode not in NON_FETCH:
                 lens.append(get_cycles(corrected))
                 sizes.append(get_size(corrected))
 

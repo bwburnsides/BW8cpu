@@ -1,14 +1,18 @@
 
 NOP*
 EXT*
+REQ*
+NMI*
+IRQ*
+HALT
 
 CLC*
-CLI*
+CLI
 CLV*
 SEC*
-SEI*
+SEI
 
-UBR*
+UBR
 KBR
 
 MOV_A_B*
@@ -594,5 +598,3 @@ JG_ABS*
 JG_REL*
 JG_X
 JG_Y
-
-HALT
