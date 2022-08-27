@@ -7,7 +7,7 @@ from .simulator import Simulator
 from .opcodes import Op
 from .common import under_test
 
-VirtualMachine = Emulator
+VirtualMachine = Simulator
 
 @pytest.mark.parametrize(("src"), "abcd")
 @under_test(
@@ -99,34 +99,27 @@ def test_load8_abs(dst):
     Op.LOAD_D_DP,
 )
 def test_load8_dp(dst):
-    expected = 5
     assembly = f"""
     load a, #0x70
     mov dp, a
 
-    load {dst}, [!3]
-
+    load {dst}, [!0]
     halt
-    #addr 0x7003
-        #d8 {expected}
+
+    #addr 0x7000
+        #d8 5
     """
 
     dst_getter = operator.attrgetter(dst)
     vm = VirtualMachine(assembly)
-    assert dst_getter(vm) == expected
+    assert dst_getter(vm) == 5
 
 
 @pytest.mark.parametrize(
     ("dst", "ptr"),
     (
-        "ax",
-        "bx",
-        "cx",
-        "dx",
-        "ay",
-        "by",
-        "cy",
-        "dy",
+        "ax", "bx", "cx", "dx",
+        "ay", "by", "cy", "dy",
     ),
 )
 @under_test(
@@ -165,13 +158,13 @@ def test_load8_ptr_idx(dst, ptr):
 )
 def test_load8_sp_idx(dst):
     assembly = f"""
-    load x, #0x8000
+    load x, #0x0200
     mov sp, x
 
     load {dst}, [sp, #3]
     halt
 
-    #addr 0x8003
+    #addr 0x0203
         #d8 69
     """
 
@@ -184,22 +177,10 @@ def test_load8_sp_idx(dst):
 @pytest.mark.parametrize(
     ("dst", "gpr"),
     (
-        "aa",
-        "ab",
-        "ac",
-        "ad",
-        "ba",
-        "bb",
-        "bc",
-        "bd",
-        "ca",
-        "cb",
-        "cc",
-        "cd",
-        "da",
-        "db",
-        "dc",
-        "dd",
+        "aa", "ab", "ac", "ad",
+        "ba", "bb", "bc", "bd",
+        "ca", "cb", "cc", "cd",
+        "da", "db", "dc", "dd",
     ),
 )
 @under_test(
@@ -222,7 +203,7 @@ def test_load8_sp_idx(dst):
 )
 def test_load8_sp_gpr(dst, gpr):
     assembly = f"""
-    load x, #0x8000
+    load x, #0x0200
     mov sp, x
 
     load {gpr}, #3
@@ -230,7 +211,7 @@ def test_load8_sp_gpr(dst, gpr):
     load {dst}, [sp, {gpr}]
     halt
 
-    #addr 0x8003
+    #addr 0x0203
         #d8 69
     """
 
@@ -243,38 +224,14 @@ def test_load8_sp_gpr(dst, gpr):
 @pytest.mark.parametrize(
     ("dst", "ptr", "idx"),
     (
-        "axa",
-        "bxa",
-        "cxa",
-        "dxa",
-        "axb",
-        "bxb",
-        "cxb",
-        "dxb",
-        "axc",
-        "bxc",
-        "cxc",
-        "dxc",
-        "axd",
-        "bxd",
-        "cxd",
-        "dxd",
-        "aya",
-        "bya",
-        "cya",
-        "dya",
-        "ayb",
-        "byb",
-        "cyb",
-        "dyb",
-        "ayc",
-        "byc",
-        "cyc",
-        "dyc",
-        "ayd",
-        "byd",
-        "cyd",
-        "dyd",
+        "axa", "bxa", "cxa", "dxa",
+        "axb", "bxb", "cxb", "dxb",
+        "axc", "bxc", "cxc", "dxc",
+        "axd", "bxd", "cxd", "dxd",
+        "aya", "bya", "cya", "dya",
+        "ayb", "byb", "cyb", "dyb",
+        "ayc", "byc", "cyc", "dyc",
+        "ayd", "byd", "cyd", "dyd",
     ),
 )
 @under_test(
@@ -312,7 +269,7 @@ def test_load8_sp_gpr(dst, gpr):
     Op.LOAD_D_Y_D,
 )
 def test_load8_ptr_gpr(dst, ptr, idx):
-    base = 0x8000
+    base = 0x0200
     offset = 3
 
     value = 69
@@ -385,14 +342,8 @@ def test_store8_dp(src):
 @pytest.mark.parametrize(
     ("src", "ptr"),
     (
-        "ax",
-        "bx",
-        "cx",
-        "dx",
-        "ay",
-        "by",
-        "cy",
-        "dy"
+        "ax", "bx", "cx", "dx",
+        "ay", "by", "cy", "dy"
     )
 )
 @under_test(
@@ -421,7 +372,6 @@ def test_store8_ptr_idx(src, ptr):
     vm = VirtualMachine(assembly, memory=True)
     assert vm.memory[0][base + offset] == expected
 
-@pytest.mark.skip("Refactor to not need memory")
 @pytest.mark.parametrize(("src"), "abcd")
 @under_test(
     Op.STORE_A_SP_IDX,
@@ -436,87 +386,57 @@ def test_store8_sp_idx(src):
 
     load {src}, #0xFF
     store [sp, #1], {src}
+    load {src}, #0x00
+    load {src}, [sp, #1]
     halt
     """
 
-    vm = VirtualMachine(assembly, memory=True)
-    assert vm.memory[0][0x8086] == 0xFF
+    vm = VirtualMachine(assembly)
+    src_getter = operator.attrgetter(src)
+    assert src_getter(vm) == 0xFF
 
-@pytest.mark.skip("Refactor to not need memory")
 @pytest.mark.parametrize(
     ("src", "ptr", "idx"),
     (
-        "axa",
-        "axb",
-        "axc",
-        "axd",
-        "bxa",
-        "bxb",
-        "bxc",
-        "bxd",
-        "cxa",
-        "cxb",
-        "cxc",
-        "cxd",
-        "dxa",
-        "dxb",
-        "dxc",
-        "dxd",
-        "aya",
-        "ayb",
-        "ayc",
-        "ayd",
-        "bya",
-        "byb",
-        "byc",
-        "byd",
-        "cya",
-        "cyb",
-        "cyc",
-        "cyd",
-        "dya",
-        "dyb",
-        "dyc",
-        "dyd",
+        "axb", "axc", "axd",
+        "bxa", "bxc", "bxd",
+        "cxa", "cxb", "cxd",
+        "dxa", "dxb", "dxc",
+        "ayb", "ayc", "ayd",
+        "bya", "byc", "byd",
+        "cya", "cyb", "cyd",
+        "dya", "dyb", "dyc",
     )
 )
 @under_test(
-    Op.STORE_A_X_A,
     Op.STORE_A_X_B,
     Op.STORE_A_X_C,
     Op.STORE_A_X_D,
     Op.STORE_B_X_A,
-    Op.STORE_B_X_B,
     Op.STORE_B_X_C,
     Op.STORE_B_X_D,
     Op.STORE_C_X_A,
     Op.STORE_C_X_B,
-    Op.STORE_C_X_C,
     Op.STORE_C_X_D,
     Op.STORE_D_X_A,
     Op.STORE_D_X_B,
     Op.STORE_D_X_C,
-    Op.STORE_D_X_D,
-    Op.STORE_A_Y_A,
     Op.STORE_A_Y_B,
     Op.STORE_A_Y_C,
     Op.STORE_A_Y_D,
     Op.STORE_B_Y_A,
-    Op.STORE_B_Y_B,
     Op.STORE_B_Y_C,
     Op.STORE_B_Y_D,
     Op.STORE_C_Y_A,
     Op.STORE_C_Y_B,
-    Op.STORE_C_Y_C,
     Op.STORE_C_Y_D,
     Op.STORE_D_Y_A,
     Op.STORE_D_Y_B,
     Op.STORE_D_Y_C,
-    Op.STORE_D_Y_D,
 )
 def test_store8_gpr_ptr_gpr(src, ptr, idx):
     expected = 0xDE
-    base = 0x6500
+    base = 0x8000
     offset = 0x02
     assembly = f"""
     load {ptr}, #{base}
@@ -524,10 +444,12 @@ def test_store8_gpr_ptr_gpr(src, ptr, idx):
     load {src}, #{expected}
 
     store [{ptr}, {idx}], {src}
+    load {src}, [{ptr}, {idx}]
     halt
     """
-    vm = VirtualMachine(assembly, memory=True)
-    assert vm.memory[0][0x6502] == expected
+    vm = VirtualMachine(assembly)
+    src_getter = operator.attrgetter(src)
+    assert src_getter(vm) == expected
 
 @pytest.mark.parametrize(("dst", "src"), ("xy", "yx"))
 @under_test(
@@ -625,7 +547,7 @@ def test_mov_sp_x():
     vm = VirtualMachine(assembly)
     assert vm.sp == 0x6502
 
-@pytest.mark.skip("known failure for some reason")
+@pytest.mark.skip("known failure for unknown reason")
 @under_test(Op.MOV_X_SP)
 def test_mov_x_sp():
     assembly = """
@@ -690,18 +612,9 @@ def test_clear_carry():
 @pytest.mark.parametrize(
     ("dst", "src"),
     (
-        "ab",
-        "ac",
-        "ad",
-        "ba",
-        "bc",
-        "bd",
-        "ca",
-        "cb",
-        "cd",
-        "da",
-        "db",
-        "dc",
+        "ab", "ac", "ad", "ba",
+        "bc", "bd", "ca", "cb",
+        "cd", "da", "db", "dc",
     ),
 )
 @under_test(

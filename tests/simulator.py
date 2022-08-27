@@ -73,7 +73,7 @@ def parse(test_dump: str) -> CoreDump:
         elif reg.startswith("0b"):
             int_regs.append(int(reg, 2))
         else:
-            if any(any(char.lower() == hex for hex in "abcdef")for char in reg):
+            if any(any(char.lower() == hex for hex in "abcdef") for char in reg):
                 int_regs.append(int(reg, 16))
             else:
                 int_regs.append(int(reg))
@@ -115,7 +115,6 @@ def simulate(machine_code: list[str]) -> str:
     )
 
     # Copy the test case template into the Digital directory
-    key = "</visualElement>"
     file_text = TEST_CASE_PATH.read_text()
     filled = file_text.replace("__TEST_CASE_ELEMENT__", element)
 

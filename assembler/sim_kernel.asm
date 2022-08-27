@@ -18,7 +18,7 @@ itoa:
     push c
     push x
 
-    load x, #hex_table
+    load x, #.hex_table
 
     mov c, a
     and a, #0xF
@@ -36,3 +36,6 @@ itoa:
     pop x
     pop c
     rts
+
+    .hex_table:
+        #d "0123456789ABCDEF"
